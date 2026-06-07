@@ -57,7 +57,7 @@
   "schema_version": "aigp.ten_hour_block.v0",
   "validation": {
     "command": "./scripts/aigp_local_gate.sh",
-    "pytest_count": 65,
+    "pytest_count": 68,
     "status": "passed"
   }
 }
