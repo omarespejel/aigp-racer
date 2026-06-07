@@ -7,6 +7,7 @@ This file tracks competition-relevant disclosure material for AI Grand Prix work
 - 2026-06-08: Initial strategy issue and repository scaffolding drafted with Codex using user-provided Claude research excerpts and independently verified public sources.
 - 2026-06-08: Qodo and CodeRabbit configuration, review guidelines, CI validation harness, and setup notes drafted with Codex after checking current vendor documentation.
 - 2026-06-08: Research-lab operating model, Codex handoff docs, GitHub issue forms, PR template, hardening policy, no-claims policy, threat model, and local gates drafted with Codex from user-provided `provable-transformer-vm` operating-system notes plus current GitHub/Qodo/CodeRabbit documentation.
+- 2026-06-08: First-runtime bootstrap code, fixtures, and engineering notes drafted with Codex. Public Elodin practice harness cloned locally for inspection only and not vendored into the repo.
 
 ## FLOSS Dependencies
 
@@ -19,6 +20,7 @@ This file tracks competition-relevant disclosure material for AI Grand Prix work
   - `ruff`
 - GitHub issue forms and PR template are repository-native GitHub features; no runtime dependency.
 - `scripts/aigp_local_gate.sh` and `scripts/aigp_profile_gate.py` are local validation scripts.
+- Elodin AI Grand Prix practice harness inspected at commit `13f9f9e3d5a3130f0ce0b65500d9f309cc1e11b2`; Apache-2.0; local clone ignored by git.
 
 Runtime dependencies remain pending. Add every runtime, training, evaluation, and simulation dependency before submission.
 

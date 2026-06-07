@@ -1,0 +1,64 @@
+{
+  "candidate_actions": [
+    {
+      "forward_m_s": 0.0,
+      "id": "hold",
+      "kind": "HOLD"
+    },
+    {
+      "forward_m_s": 0.75,
+      "id": "track_gate",
+      "kind": "BODY_VELOCITY"
+    }
+  ],
+  "episode_id": "fixture-ten-hour-bootstrap-2026-06-08",
+  "goal": {
+    "next_step": "move toward visible gate center without speed claim",
+    "objective": "conservative first valid run"
+  },
+  "measured_or_analytic_outcome": {
+    "regret": null,
+    "source": "analytic fixture"
+  },
+  "non_claims": [
+    "not generated in the live flight hot path",
+    "not a learned-policy evaluation",
+    "not a simulator result"
+  ],
+  "observation": {
+    "gate_confidence": 0.5,
+    "gate_pose_camera_m": {
+      "x_right": 0.0,
+      "y_down": 0.0,
+      "z_forward": 3.0
+    },
+    "state_status": "GATE_WITHOUT_VELOCITY"
+  },
+  "predicted_outcome": {
+    "progress": "approach gate",
+    "risk": "low in fixture"
+  },
+  "reproducibility": {
+    "generator": "worldforge_bridge.schema.build_bootstrap_decision_trace",
+    "issue": "https://github.com/omarespejel/aigp-racer/issues/2"
+  },
+  "schema_version": "decision_trace.v1-draft",
+  "scores": [
+    {
+      "action_id": "hold",
+      "reason": "safe but no progress",
+      "score": 0.1
+    },
+    {
+      "action_id": "track_gate",
+      "reason": "visible centered gate",
+      "score": 0.6
+    }
+  ],
+  "selected_action": {
+    "forward_m_s": 0.75,
+    "id": "track_gate",
+    "kind": "BODY_VELOCITY"
+  },
+  "trace_id": "fixture-control-decision-2026-06-08"
+}

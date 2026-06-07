@@ -1,0 +1,1 @@
+"""Offline WorldForge evidence bridge."""
