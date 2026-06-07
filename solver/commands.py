@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 from enum import StrEnum
 
@@ -40,6 +41,8 @@ class CommandRateLimiter:
         return 1.0 / self.max_rate_hz
 
     def allow(self, monotonic_s: float) -> bool:
+        if not math.isfinite(monotonic_s):
+            return False
         if self.last_emit_monotonic_s is None:
             self.last_emit_monotonic_s = monotonic_s
             return True

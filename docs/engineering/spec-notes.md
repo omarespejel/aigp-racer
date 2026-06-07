@@ -1,6 +1,6 @@
 # AI Grand Prix Spec Notes
 
-Last checked: 2026-06-08T02:06:04+09:00 (Japan Standard Time).
+Last checked: 2026-06-07T17:06:04Z (2026-06-08T02:06:04+09:00 JST).
 
 Primary source:
 

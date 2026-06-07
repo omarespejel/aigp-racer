@@ -30,13 +30,18 @@ Public search found:
 
 Search metadata:
 
-- Checked at: 2026-06-08T02:06:04+09:00 to 2026-06-08T02:15:00+09:00.
+- Checked at: 2026-06-07T17:06:04Z to 2026-06-07T17:15:00Z
+  (2026-06-08T02:06:04+09:00 to 2026-06-08T02:15:00+09:00 JST).
 - Search scope: public web and public GitHub repositories; no authenticated team-portal access.
+- Search engines/sites: general web search, direct official-site pages, direct
+  GitHub repository search, and direct Elodin repository/blog checks.
 - Search terms: `AI Grand Prix 2026 simulator SDK`, `AI Grand Prix VADR-TS-002`,
   `site:theaigrandprix.com AI Grand Prix simulator SDK`,
   `github AI Grand Prix DCL simulator`, `elodin ai grand prix harness`.
 - Filters: no date filter; direct official-site, team-portal, technical-spec, and
   Elodin GitHub checks were included.
+- Machine-readable artifact: `docs/engineering/evidence/ten-hour-block-2026-06-08.json`
+  records the same access inventory and search metadata.
 
 No public DCL simulator/SDK package URL was found through public search. Current
 working assumption: official simulator access is team-portal-gated.
@@ -109,5 +114,5 @@ Local gate:
 Current result:
 
 ```text
-58 passed
+65 passed
 ```

@@ -37,6 +37,14 @@ class ConservativeController:
             )
 
         pose = state.gate_pose_camera
+        if pose.z_forward_m <= 0.0:
+            return ControlCommand(
+                sim_time_ns=state.sim_time_ns,
+                kind=CommandKind.REACQUIRE,
+                source_frame_id=state.source_frame_id,
+                yaw_rate_rad_s=0.2,
+                reason="gate depth non-positive",
+            )
         forward = min(
             self.max_forward_m_s,
             max(self.min_forward_m_s, 0.25 * pose.z_forward_m),
