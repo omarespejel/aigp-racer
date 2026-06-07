@@ -1,0 +1,35 @@
+{
+  "access_inventory": {
+    "elodin_commit": "13f9f9e3d5a3130f0ce0b65500d9f309cc1e11b2",
+    "elodin_path": "external/elodin-ai-grand-prix",
+    "official_simulator_public_url_found": false,
+    "team_portal_url": "https://teams.theaigrandprix.com/login"
+  },
+  "claim_boundary": "bootstrap inventory and deterministic local fixtures only",
+  "github_issue": "https://github.com/omarespejel/aigp-racer/issues/2",
+  "implemented_surfaces": [
+    "vision.reassembler",
+    "mavlink.telemetry",
+    "perception.geometry",
+    "perception.detector",
+    "estimation.sync",
+    "estimation.state",
+    "solver.commands",
+    "solver.baseline",
+    "worldforge_bridge.schema"
+  ],
+  "japan_start_time": "2026-06-08 02:06:04 JST",
+  "non_claims": [
+    "not official simulator compatibility evidence",
+    "not a valid-run result",
+    "not a speedup claim",
+    "not a reliability claim",
+    "not physical-drone transfer evidence"
+  ],
+  "schema_version": "aigp.ten_hour_block.v0",
+  "validation": {
+    "command": "./scripts/aigp_local_gate.sh",
+    "pytest_count": 41,
+    "status": "passed"
+  }
+}

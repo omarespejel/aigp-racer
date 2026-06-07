@@ -1,0 +1,65 @@
+{
+  "claim_boundary": "offline fixture only; no simulator run",
+  "episode_id": "fixture-ten-hour-bootstrap-2026-06-08",
+  "events": [
+    {
+      "event_type": "gate_observation",
+      "payload": {
+        "confidence": 0.5,
+        "corners_px": [
+          [
+            240.0,
+            100.0
+          ],
+          [
+            400.0,
+            100.0
+          ],
+          [
+            400.0,
+            260.0
+          ],
+          [
+            240.0,
+            260.0
+          ]
+        ],
+        "source": "round1_color_bbox"
+      },
+      "sim_time_ns": 44
+    },
+    {
+      "event_type": "state_estimate",
+      "payload": {
+        "gate_pose_camera_m": {
+          "x_right": 0.0,
+          "y_down": 0.0,
+          "z_forward": 3.0
+        },
+        "stale": false,
+        "status": "GATE_WITHOUT_VELOCITY"
+      },
+      "sim_time_ns": 44
+    },
+    {
+      "event_type": "control_command",
+      "payload": {
+        "down_m_s": 0.0,
+        "forward_m_s": 0.75,
+        "kind": "BODY_VELOCITY",
+        "reason": "tracking visible gate",
+        "right_m_s": 0.0
+      },
+      "sim_time_ns": 44
+    }
+  ],
+  "non_claims": [
+    "not official simulator compatibility evidence",
+    "not a valid-run result",
+    "not a speedup claim",
+    "not a reliability claim",
+    "not physical-drone transfer evidence"
+  ],
+  "schema_version": "aigp.race_episode.v0",
+  "source": "deterministic local fixture"
+}

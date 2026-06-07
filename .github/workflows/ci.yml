@@ -34,7 +34,10 @@ jobs:
         run: |
           python scripts/aigp_profile_gate.py \
             --write-json docs/engineering/evidence/aigp-profile-fixture-2026-06-08.json
+          python scripts/aigp_fixture_gate.py
           git diff --exit-code docs/engineering/evidence/aigp-profile-fixture-2026-06-08.json
+          git diff --exit-code docs/engineering/evidence/race-episode-fixture-2026-06-08.json
+          git diff --exit-code docs/engineering/evidence/decision-trace-fixture-2026-06-08.json
 
       - name: Ruff check
         run: python -m ruff check .

@@ -12,6 +12,9 @@ uv run --python 3.14 --with jsonschema --with pyyaml --with ruff --with pytest \
   --write-json docs/engineering/evidence/aigp-profile-fixture-2026-06-08.json
 
 uv run --python 3.14 --with jsonschema --with pyyaml --with ruff --with pytest \
+  python scripts/aigp_fixture_gate.py
+
+uv run --python 3.14 --with jsonschema --with pyyaml --with ruff --with pytest \
   python -m ruff check .
 
 uv run --python 3.14 --with jsonschema --with pyyaml --with ruff --with pytest \
@@ -21,4 +24,3 @@ uv run --python 3.14 --with jsonschema --with pyyaml --with ruff --with pytest \
   python -m pytest
 
 git diff --check
-
