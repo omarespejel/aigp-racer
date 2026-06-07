@@ -22,9 +22,9 @@ class CameraIntrinsics:
             raise ValueError("camera resolution must be positive")
         if self.fx_px <= 0.0 or self.fy_px <= 0.0:
             raise ValueError("camera focal lengths must be positive")
-        if not 0.0 <= self.cx_px <= float(self.width_px):
+        if not 0.0 <= self.cx_px < float(self.width_px):
             raise ValueError("camera cx must be within image width")
-        if not 0.0 <= self.cy_px <= float(self.height_px):
+        if not 0.0 <= self.cy_px < float(self.height_px):
             raise ValueError("camera cy must be within image height")
 
 

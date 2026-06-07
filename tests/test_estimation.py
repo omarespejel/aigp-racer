@@ -121,10 +121,38 @@ def test_estimator_degrades_malformed_gate_observation_to_no_gate() -> None:
     )
 
     assert not estimate.stale
-    assert estimate.status == "NO_GATE"
+    assert estimate.status == "MALFORMED_GATE_OBSERVATION"
     assert estimate.gate_pose_camera is None
     assert estimate.gate_confidence is None
     assert estimate.source_frame_id == 7
+    assert estimate.degraded_reason is not None
+    assert "malformed gate observation" in estimate.degraded_reason
+
+
+def test_estimator_degrades_bad_corner_types_without_crashing() -> None:
+    malformed_gate = GateObservation(
+        corners=((10.0, 10.0), (20.0, 10.0), (20.0, 20.0), (10.0, 20.0)),
+        confidence=0.5,
+        sim_time_ns=10,
+        source_frame_id=7,
+        source="test",
+    )
+
+    estimate = MinimalStateEstimator().estimate(
+        EstimatorInputs(
+            sim_time_ns=10,
+            attitude=attitude(),
+            imu=imu(),
+            velocity=None,
+            gate_observation=malformed_gate,
+            telemetry_age_ns=20_000_000,
+        )
+    )
+
+    assert not estimate.stale
+    assert estimate.status == "MALFORMED_GATE_OBSERVATION"
+    assert estimate.gate_pose_camera is None
+    assert estimate.degraded_reason is not None
 
 
 def test_estimator_ready_when_velocity_exists() -> None:

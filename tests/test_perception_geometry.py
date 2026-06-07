@@ -67,9 +67,9 @@ def test_camera_intrinsics_validate_constructor_invariants() -> None:
     with pytest.raises(ValueError, match="focal"):
         CameraIntrinsics(fx_px=0.0)
     with pytest.raises(ValueError, match="cx"):
-        CameraIntrinsics(cx_px=641.0)
+        CameraIntrinsics(cx_px=640.0)
     with pytest.raises(ValueError, match="cy"):
-        CameraIntrinsics(cy_px=-1.0)
+        CameraIntrinsics(cy_px=360.0)
 
 
 def test_gate_geometry_validates_constructor_invariants() -> None:

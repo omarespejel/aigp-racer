@@ -20,6 +20,7 @@ class StateEstimate:
     gate_confidence: float | None
     stale: bool
     status: str
+    degraded_reason: str | None = None
 
 
 @dataclass(frozen=True)
@@ -47,16 +48,20 @@ class MinimalStateEstimator:
         )
         gate_pose = None
         gate_confidence = None
+        degraded_reason = None
         if inputs.gate_observation is not None:
             try:
                 gate_pose = estimate_frontoparallel_gate_pose(inputs.gate_observation.corners)
                 gate_confidence = inputs.gate_observation.confidence
-            except ValueError:
+            except (AttributeError, TypeError, ValueError) as exc:
                 gate_pose = None
                 gate_confidence = None
+                degraded_reason = f"malformed gate observation: {exc}"
 
         if stale:
             status = "STALE_TELEMETRY"
+        elif degraded_reason is not None:
+            status = "MALFORMED_GATE_OBSERVATION"
         elif gate_pose is None:
             status = "NO_GATE"
         elif inputs.velocity is None:
@@ -78,4 +83,5 @@ class MinimalStateEstimator:
             gate_confidence=gate_confidence,
             stale=stale,
             status=status,
+            degraded_reason=degraded_reason,
         )
