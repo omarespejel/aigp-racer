@@ -1,0 +1,79 @@
+{
+  "adapter": {
+    "default_expected_resolution_px": [
+      640,
+      360
+    ],
+    "input": "Elodin-style RGBA frame sequence",
+    "module": "vision/practice_adapter.py",
+    "output": "DetectorFrame.rgb plus sim_time_ns, source_frame_id, and source tag",
+    "source_tag": "elodin_practice_rgba"
+  },
+  "claim_boundary": "deterministic fixture evidence only; practice-only Elodin RGBA adapter, not official UDP JPEG compatibility",
+  "commands": [
+    "uv run --python 3.14 --with jsonschema --with pyyaml --with ruff --with pytest python -m pytest tests/test_practice_adapter.py tests/test_perception_detector.py",
+    "./scripts/aigp_local_gate.sh"
+  ],
+  "github_issue": "https://github.com/omarespejel/aigp-racer/issues/11",
+  "go_gate_evidence": {
+    "accepts_deterministic_rgba_fixture": true,
+    "feeds_existing_round1_detector": true,
+    "preserves_sim_time_ns": true,
+    "preserves_source_frame_id": true,
+    "requires_elodin_runtime_in_ci": false,
+    "tags_practice_only_source": true
+  },
+  "known_boundaries": [
+    {
+      "boundary": "does not decode UDP chunked JPEG",
+      "surface": "official_vision"
+    },
+    {
+      "boundary": "does not prove official simulator compatibility",
+      "surface": "official_simulator"
+    },
+    {
+      "boundary": "strips alpha only; does not perform camera calibration or color conversion",
+      "surface": "frame_semantics"
+    }
+  ],
+  "non_claims": [
+    "not official simulator compatibility evidence",
+    "not an Elodin fidelity claim",
+    "not a valid-run result",
+    "not a latency, speed, or reliability claim",
+    "not a replacement for the official UDP JPEG receiver"
+  ],
+  "schema_version": "aigp.practice_adapter.v0",
+  "tests": [
+    {
+      "name": "test_elodin_rgba_frame_adapter_feeds_round1_detector",
+      "path": "tests/test_practice_adapter.py",
+      "purpose": "verify practice RGBA frames can enter the existing detector boundary"
+    },
+    {
+      "name": "test_elodin_rgba_frame_adapter_rejects_wrong_dimensions",
+      "path": "tests/test_practice_adapter.py",
+      "purpose": "verify frame dimensions are explicit and validated"
+    },
+    {
+      "name": "test_elodin_rgba_frame_adapter_rejects_malformed_pixels",
+      "path": "tests/test_practice_adapter.py",
+      "purpose": "verify malformed pixels fail before perception"
+    },
+    {
+      "name": "test_elodin_rgba_frame_adapter_validates_expected_dimensions",
+      "path": "tests/test_practice_adapter.py",
+      "purpose": "verify adapter configuration is bounded"
+    },
+    {
+      "name": "test_practice_adapter_evidence_matches_generator",
+      "path": "tests/test_practice_adapter.py",
+      "purpose": "verify evidence artifact stays deterministic"
+    }
+  ],
+  "validation": {
+    "focused_pytest_count": 10,
+    "status": "passed"
+  }
+}

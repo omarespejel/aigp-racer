@@ -11,6 +11,7 @@ This file tracks competition-relevant disclosure material for AI Grand Prix work
 - 2026-06-08: Decoded telemetry probe client, local UDP JSON smoke path, deterministic fixture evidence, and tests drafted with Codex for issue #3.
 - 2026-06-08: Dependency-optional JPEG decode benchmark, synthetic 640 x 360 JPEG fixture, local Pillow measurement artifact, and engineering note drafted with Codex for issue #17.
 - 2026-06-08: Transport-independent command-intent envelope, deterministic evidence, and tests drafted with Codex for issue #14.
+- 2026-06-08: Practice-only Elodin RGBA frame adapter, deterministic fixture tests, and evidence drafted with Codex for issue #11; no Elodin runtime dependency was added.
 
 ## FLOSS Dependencies
 
