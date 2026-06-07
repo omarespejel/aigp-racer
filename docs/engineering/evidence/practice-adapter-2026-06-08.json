@@ -18,10 +18,12 @@
   "go_gate_evidence": {
     "accepts_deterministic_rgba_fixture": true,
     "feeds_existing_round1_detector": true,
+    "normalizes_malformed_input_errors": true,
     "preserves_sim_time_ns": true,
     "preserves_source_frame_id": true,
     "requires_elodin_runtime_in_ci": false,
-    "tags_practice_only_source": true
+    "tags_practice_only_source": true,
+    "validates_frame_metadata_types": true
   },
   "known_boundaries": [
     {
@@ -62,6 +64,16 @@
       "purpose": "verify malformed pixels fail before perception"
     },
     {
+      "name": "test_elodin_rgba_frame_adapter_normalizes_non_sequence_errors",
+      "path": "tests/test_practice_adapter.py",
+      "purpose": "verify malformed frame containers, rows, and pixels fail with PracticeFrameAdapterError"
+    },
+    {
+      "name": "test_elodin_rgba_frame_adapter_validates_frame_metadata_types",
+      "path": "tests/test_practice_adapter.py",
+      "purpose": "verify frame timestamps and source ids stay typed at the boundary"
+    },
+    {
       "name": "test_elodin_rgba_frame_adapter_validates_expected_dimensions",
       "path": "tests/test_practice_adapter.py",
       "purpose": "verify adapter configuration is bounded"
@@ -73,7 +85,7 @@
     }
   ],
   "validation": {
-    "focused_pytest_count": 10,
+    "focused_pytest_count": 12,
     "status": "passed"
   }
 }

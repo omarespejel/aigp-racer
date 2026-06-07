@@ -28,6 +28,8 @@ def build_evidence() -> dict[str, Any]:
             "feeds_existing_round1_detector": True,
             "preserves_sim_time_ns": True,
             "preserves_source_frame_id": True,
+            "normalizes_malformed_input_errors": True,
+            "validates_frame_metadata_types": True,
             "requires_elodin_runtime_in_ci": False,
             "tags_practice_only_source": True,
         },
@@ -65,6 +67,19 @@ def build_evidence() -> dict[str, Any]:
             },
             {
                 "path": "tests/test_practice_adapter.py",
+                "name": "test_elodin_rgba_frame_adapter_normalizes_non_sequence_errors",
+                "purpose": (
+                    "verify malformed frame containers, rows, and pixels fail with "
+                    "PracticeFrameAdapterError"
+                ),
+            },
+            {
+                "path": "tests/test_practice_adapter.py",
+                "name": "test_elodin_rgba_frame_adapter_validates_frame_metadata_types",
+                "purpose": "verify frame timestamps and source ids stay typed at the boundary",
+            },
+            {
+                "path": "tests/test_practice_adapter.py",
                 "name": "test_elodin_rgba_frame_adapter_validates_expected_dimensions",
                 "purpose": "verify adapter configuration is bounded",
             },
@@ -80,7 +95,7 @@ def build_evidence() -> dict[str, Any]:
             "./scripts/aigp_local_gate.sh",
         ],
         "validation": {
-            "focused_pytest_count": 10,
+            "focused_pytest_count": 12,
             "status": "passed",
         },
         "non_claims": [
