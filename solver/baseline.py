@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 
 from estimation.state import StateEstimate
@@ -37,6 +38,16 @@ class ConservativeController:
             )
 
         pose = state.gate_pose_camera
+        if not all(
+            math.isfinite(value) for value in (pose.x_right_m, pose.y_down_m, pose.z_forward_m)
+        ):
+            return ControlCommand(
+                sim_time_ns=state.sim_time_ns,
+                kind=CommandKind.REACQUIRE,
+                source_frame_id=state.source_frame_id,
+                yaw_rate_rad_s=0.2,
+                reason="gate pose non-finite",
+            )
         if pose.z_forward_m <= 0.0:
             return ControlCommand(
                 sim_time_ns=state.sim_time_ns,

@@ -60,6 +60,22 @@ def test_controller_reacquires_on_non_positive_gate_depth() -> None:
     assert command.reason == "gate depth non-positive"
 
 
+@pytest.mark.parametrize(
+    "gate_pose",
+    [
+        CameraPoseEstimate(float("nan"), 0.0, 3.0),
+        CameraPoseEstimate(0.0, float("inf"), 3.0),
+        CameraPoseEstimate(0.0, 0.0, float("nan")),
+    ],
+)
+def test_controller_reacquires_on_non_finite_gate_pose(gate_pose: CameraPoseEstimate) -> None:
+    command = ConservativeController().command(state(stale=False, gate_pose=gate_pose))
+
+    assert command.kind == CommandKind.REACQUIRE
+    assert command.forward_m_s == 0.0
+    assert command.reason == "gate pose non-finite"
+
+
 def test_command_rate_limiter_keeps_below_100hz() -> None:
     limiter = CommandRateLimiter(max_rate_hz=95.0)
 
