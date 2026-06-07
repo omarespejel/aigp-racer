@@ -33,6 +33,11 @@ def test_round1_color_detector_finds_highlighted_gate_bbox() -> None:
     assert observation.corners[2].u_px == 10.0
     assert observation.corners[2].v_px == 8.0
     assert observation.confidence > 0.0
+    assert observation.corner_uncertainty_px is not None
+    assert observation.corner_uncertainty_px == pytest.approx(
+        (5.0 / 3.0, 5.0 / 3.0, 5.0 / 3.0, 5.0 / 3.0),
+        rel=0.0,
+    )
 
 
 def test_round1_color_detector_ignores_dark_frame() -> None:

@@ -34,3 +34,4 @@ git diff --exit-code docs/engineering/evidence/aigp-profile-fixture-2026-06-08.j
 git diff --exit-code docs/engineering/evidence/race-episode-fixture-2026-06-08.json
 git diff --exit-code docs/engineering/evidence/decision-trace-fixture-2026-06-08.json
 git diff --exit-code docs/engineering/evidence/telemetry-probe-fixture-2026-06-08.json
+git diff --exit-code docs/engineering/evidence/pnp-uncertainty-2026-06-08.json
