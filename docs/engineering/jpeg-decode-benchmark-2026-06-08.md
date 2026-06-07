@@ -63,13 +63,13 @@ Measured artifact:
 
 ```text
 docs/engineering/evidence/jpeg-decode-benchmark-2026-06-08.json
-sha256 6c415296bcc60089b7b541b1630805be26f9c6d83e9d83385423e059245fbb86
+sha256 5df775b271b33d75ebf7ecf166a61f14c888647e88ed2a118bbfa6109e9aa0f3
 ```
 
 Measured command:
 
 ```bash
-uv run --python 3.14 --with pillow python scripts/aigp_jpeg_decode_benchmark.py \
+uv run --python 3.14 --with 'pillow==12.2.0' python scripts/aigp_jpeg_decode_benchmark.py \
   --generate-synthetic-fixture \
   --fixture tests/fixtures/frame_640x360_synthetic.jpg \
   --decoders pillow,opencv,pyturbojpeg \
@@ -85,9 +85,9 @@ platform: macOS-26.5.1-arm64-arm-64bit-Mach-O
 python: 3.14.3
 decoder: Pillow 12.2.0
 fixture: 640 x 360 synthetic JPEG, 65050 bytes
-p50: 0.646229 ms
-p95: 0.722306 ms
-p99: 0.815667 ms
+p50: 0.637645 ms
+p95: 0.725919 ms
+p99: 0.806251 ms
 opencv: missing dependency in this local run, source metadata recorded
 pyturbojpeg: missing dependency in this local run, source metadata recorded
 ```

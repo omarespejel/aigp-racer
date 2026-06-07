@@ -45,12 +45,12 @@
       "dependency_source_url": "https://pypi.org/project/Pillow/",
       "iterations": 1000,
       "latency_ms": {
-        "max": "1.005958",
-        "median": "0.646229",
-        "min": "0.623500",
-        "p50": "0.646229",
-        "p95": "0.722306",
-        "p99": "0.815667"
+        "max": "0.936833",
+        "median": "0.637645",
+        "min": "0.622667",
+        "p50": "0.637645",
+        "p95": "0.725919",
+        "p99": "0.806251"
       },
       "name": "pillow",
       "native_dependency": "wheel-managed; no separate native path checked",

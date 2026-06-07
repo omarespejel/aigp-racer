@@ -25,7 +25,7 @@ This file tracks competition-relevant disclosure material for AI Grand Prix work
 - GitHub issue forms and PR template are repository-native GitHub features; no runtime dependency.
 - `scripts/aigp_local_gate.sh` and `scripts/aigp_profile_gate.py` are local validation scripts.
 - Elodin AI Grand Prix practice harness inspected at commit `13f9f9e3d5a3130f0ce0b65500d9f309cc1e11b2`; Apache-2.0; local clone ignored by git.
-- Pillow `12.2.0` was installed ephemerally with `uv --with pillow` to generate the synthetic JPEG fixture and local decode benchmark artifact for issue #17. It is not a mandatory project dependency or runtime decision.
+- Pillow `12.2.0` was installed ephemerally with `uv --with pillow==12.2.0` to generate the synthetic JPEG fixture and local decode benchmark artifact for issue #17. It is not a mandatory project dependency or runtime decision.
 - OpenCV and PyTurboJPEG are recorded as candidate JPEG decode dependencies for issue #17, but were not installed or benchmarked in this local evidence artifact.
 
 Runtime dependencies remain pending. Add every runtime, training, evaluation, and simulation dependency before submission.
