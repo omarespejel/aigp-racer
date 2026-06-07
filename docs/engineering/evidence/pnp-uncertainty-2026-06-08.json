@@ -1,0 +1,58 @@
+{
+  "claim_boundary": "synthetic perspective-skewed planar gate fixture only",
+  "commands": [
+    "uv run --python 3.14 --with pytest python -m pytest tests/test_perception_geometry.py tests/test_perception_detector.py",
+    "./scripts/aigp_local_gate.sh"
+  ],
+  "github_issue": "https://github.com/omarespejel/aigp-racer/issues/5",
+  "non_claims": [
+    "not Round 2 visual robustness evidence",
+    "not physical-camera calibration evidence",
+    "not full VIO evidence",
+    "not OpenCV availability evidence",
+    "not partial-corner ADR-VINS evidence",
+    "not back-facing gate pose evidence",
+    "not unlabeled square-gate in-plane roll disambiguation evidence"
+  ],
+  "pass_criteria": {
+    "center_pose_abs_m": 0.000000001,
+    "mean_reprojection_error_px_max": 0.000000001,
+    "rotation_abs": 0.000000001
+  },
+  "schema_version": "aigp.pnp_uncertainty.v0",
+  "source_files": [
+    "perception/geometry.py",
+    "perception/detector.py",
+    "tests/test_perception_geometry.py",
+    "tests/test_perception_detector.py",
+    "docs/engineering/pnp-uncertainty-2026-06-08.md"
+  ],
+  "status": "passed",
+  "tests": [
+    {
+      "name": "test_planar_pnp_recovers_perspective_skewed_gate_pose",
+      "path": "tests/test_perception_geometry.py",
+      "purpose": "recover synthetic skewed gate pose with absolute fixture tolerances"
+    },
+    {
+      "name": "test_planar_pnp_recovers_rolled_gate_pose",
+      "path": "tests/test_perception_geometry.py",
+      "purpose": "recover physical-labeled rolled gate pose with absolute fixture tolerances"
+    },
+    {
+      "name": "test_planar_pnp_rejects_wrong_corner_winding",
+      "path": "tests/test_perception_geometry.py",
+      "purpose": "reject reversed physical-label winding before solving"
+    },
+    {
+      "name": "test_detect_round1_gates_finds_orange_square",
+      "path": "tests/test_perception_detector.py",
+      "purpose": "verify detector output includes deterministic bbox-derived corner uncertainty"
+    }
+  ],
+  "validation": {
+    "focused_pytest_count": 21,
+    "local_gate_pytest_count": 111,
+    "status": "passed"
+  }
+}

@@ -34,11 +34,21 @@ class GateDetectionStatus(StrEnum):
 
 @dataclass(frozen=True)
 class GateObservation:
+    """Detected gate corners and optional per-corner pixel uncertainty.
+
+    `corner_uncertainty_px` follows the same screen-space top-left, top-right,
+    bottom-right, bottom-left order as `corners`. Values are non-negative
+    pixel-radius bounds for bbox-derived corners, not statistical sigma values.
+    `None` means the producer did not estimate corner uncertainty. Screen-space
+    bbox corners are not physical gate-corner labels for arbitrary in-plane roll.
+    """
+
     corners: tuple[ImagePoint, ImagePoint, ImagePoint, ImagePoint]
     confidence: float
     sim_time_ns: int | None
     source_frame_id: int | None
     source: str
+    corner_uncertainty_px: tuple[float, float, float, float] | None = None
 
 
 @dataclass(frozen=True)
@@ -150,6 +160,11 @@ class Round1ColorGateDetector:
             sim_time_ns=sim_time_ns,
             source_frame_id=source_frame_id,
             source="round1_color_bbox",
+            corner_uncertainty_px=_bbox_corner_uncertainty(
+                mask_pixels=mask_pixels,
+                width_px=width,
+                height_px=height,
+            ),
         )
         return GateDetectionResult(
             status=GateDetectionStatus.DETECTED,
@@ -201,3 +216,14 @@ def _is_gate_highlight(pixel: RGBPixel) -> bool:
     magenta = red >= 180 and blue >= 140 and green <= 130
     white = red >= 220 and green >= 220 and blue >= 220
     return magenta or white
+
+
+def _bbox_corner_uncertainty(
+    *,
+    mask_pixels: int,
+    width_px: int,
+    height_px: int,
+) -> tuple[float, float, float, float]:
+    fill_ratio = mask_pixels / float(width_px * height_px)
+    uncertainty_px = max(1.0, (1.0 - fill_ratio) * max(width_px, height_px) / 2.0)
+    return (uncertainty_px, uncertainty_px, uncertainty_px, uncertainty_px)

@@ -10,19 +10,21 @@ Last updated: 2026-06-08.
 - CI validates review configuration and Python smoke tests.
 - Research-lab operating discipline is checked in: lanes, hypothesis issues, GO/NO-GO gates, no-claims, hardening policy, and local gates.
 - First runtime fixtures are checked in for UDP JPEG reassembly, PnP sanity, estimator sync, conservative solver commands, RaceEpisode, and DecisionTrace.
-- Active branch `codex/aigp-telemetry-probe-2026-06-08` adds a decoded-message telemetry probe for issue #3. It supports deterministic JSON fixtures and local UDP JSON smoke testing only; it does not decode official binary MAVLink 2 packets.
+- PR #7 merged issue #3. The decoded-message telemetry probe supports deterministic JSON fixtures and local UDP JSON smoke testing only; it does not decode official binary MAVLink 2 packets.
+- Issue #4 is blocked on team-portal credentials or an official package link. Public and local search found no unauthenticated simulator/SDK package URL; evidence is recorded in https://github.com/omarespejel/aigp-racer/issues/4#issuecomment-4643872137.
+- Active branch `codex/aigp-pnp-uncertainty-2026-06-08` adds the issue #5 pure-Python planar PnP fixture and detector uncertainty contract.
 
 ## Active Objective
 
-Resolve the first MAVLink telemetry unknown without overclaiming official simulator behavior.
+Resolve full-gate perspective geometry without overclaiming Round 2 or physical-stage robustness.
 
 Immediate next code objectives:
 
-1. Land issue #3 telemetry-probe fixture evidence and tests.
-2. Resolve issue #4 simulator/team-portal access.
+1. Land issue #5 full PnP and detector uncertainty path.
+2. Recheck issue #4 once team-portal credentials or an official package link are available.
 3. Capture real official simulator packet examples once access exists.
 4. Choose and gate a binary MAVLink decoder only after packet evidence exists.
-5. Continue issue #5 full PnP and detector uncertainty path.
+5. Convert detector output to full planar gate pose in the estimator once issue #5 merges.
 
 ## Current Known Unknowns
 
