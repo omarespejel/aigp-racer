@@ -8,6 +8,7 @@ This file tracks competition-relevant disclosure material for AI Grand Prix work
 - 2026-06-08: Qodo and CodeRabbit configuration, review guidelines, CI validation harness, and setup notes drafted with Codex after checking current vendor documentation.
 - 2026-06-08: Research-lab operating model, Codex handoff docs, GitHub issue forms, PR template, hardening policy, no-claims policy, threat model, and local gates drafted with Codex from user-provided `provable-transformer-vm` operating-system notes plus current GitHub/Qodo/CodeRabbit documentation.
 - 2026-06-08: First-runtime bootstrap code, fixtures, and engineering notes drafted with Codex. Public Elodin practice harness cloned locally for inspection only and not vendored into the repo.
+- 2026-06-08: Decoded telemetry probe client, local UDP JSON smoke path, deterministic fixture evidence, and tests drafted with Codex for issue #3.
 
 ## FLOSS Dependencies
 

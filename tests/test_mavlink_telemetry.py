@@ -68,6 +68,22 @@ def test_missing_required_field_raises() -> None:
         parse_attitude({"mavpackettype": "ATTITUDE", "time_boot_ms": 1})
 
 
+def test_non_finite_float_field_raises() -> None:
+    with pytest.raises(TelemetryError, match="xacc must be finite"):
+        parse_highres_imu(
+            {
+                "mavpackettype": "HIGHRES_IMU",
+                "time_usec": 1,
+                "xacc": "nan",
+                "yacc": 0.0,
+                "zacc": -9.8,
+                "xgyro": 0.0,
+                "ygyro": 0.0,
+                "zgyro": 0.0,
+            }
+        )
+
+
 def test_heartbeat_monitor_requires_recent_heartbeat() -> None:
     monitor = HeartbeatMonitor(timeout_s=2.5)
 
@@ -75,6 +91,16 @@ def test_heartbeat_monitor_requires_recent_heartbeat() -> None:
     monitor.observe(10.0)
     assert monitor.is_fresh(12.49)
     assert not monitor.is_fresh(12.51)
+
+
+def test_heartbeat_monitor_rejects_out_of_order_time() -> None:
+    monitor = HeartbeatMonitor(timeout_s=2.5)
+
+    monitor.observe(10.0)
+    monitor.observe(8.0)
+
+    assert monitor.last_heartbeat_s == 10.0
+    assert not monitor.is_fresh(9.0)
 
 
 def test_velocity_probe_reports_not_available_for_spec_messages() -> None:

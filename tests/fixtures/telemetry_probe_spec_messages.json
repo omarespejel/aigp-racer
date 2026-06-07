@@ -1,0 +1,41 @@
+[
+  {
+    "_frame_id": "fixture-000000",
+    "_monotonic_s": 0.0,
+    "mavpackettype": "HEARTBEAT",
+    "mavlink_version": 3,
+    "system_status": 4
+  },
+  {
+    "_frame_id": "fixture-000001",
+    "_monotonic_s": 0.01,
+    "mavpackettype": "ATTITUDE",
+    "pitch": -0.02,
+    "pitchspeed": 0.002,
+    "roll": 0.01,
+    "rollspeed": 0.001,
+    "time_boot_ms": 10,
+    "yaw": 0.03,
+    "yawspeed": 0.003
+  },
+  {
+    "_frame_id": "fixture-000002",
+    "_monotonic_s": 0.02,
+    "fields_updated": 7,
+    "mavpackettype": "HIGHRES_IMU",
+    "time_usec": 20000,
+    "xacc": 0.0,
+    "xgyro": 0.01,
+    "yacc": 0.0,
+    "ygyro": 0.02,
+    "zacc": -9.8,
+    "zgyro": 0.03
+  },
+  {
+    "_frame_id": "fixture-000003",
+    "_monotonic_s": 0.03,
+    "mavpackettype": "TIMESYNC",
+    "tc1": 123,
+    "ts1": 456
+  }
+]

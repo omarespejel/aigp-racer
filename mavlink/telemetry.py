@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, field
 from enum import StrEnum
 from typing import Any
@@ -70,10 +71,14 @@ class HeartbeatMonitor:
     last_heartbeat_s: float | None = None
 
     def observe(self, monotonic_s: float) -> None:
+        if self.last_heartbeat_s is not None and monotonic_s < self.last_heartbeat_s:
+            return
         self.last_heartbeat_s = monotonic_s
 
     def is_fresh(self, monotonic_s: float) -> bool:
         if self.last_heartbeat_s is None:
+            return False
+        if monotonic_s < self.last_heartbeat_s:
             return False
         return monotonic_s - self.last_heartbeat_s <= self.timeout_s
 
@@ -203,7 +208,13 @@ def _required_float(message: Any, field_name: str) -> float:
     value = _get_field(message, field_name)
     if value is None:
         raise TelemetryError(f"missing required MAVLink field {field_name}")
-    return float(value)
+    try:
+        parsed_value = float(value)
+    except (TypeError, ValueError) as exc:
+        raise TelemetryError(f"invalid MAVLink field {field_name}: {exc}") from exc
+    if not math.isfinite(parsed_value):
+        raise TelemetryError(f"MAVLink field {field_name} must be finite")
+    return parsed_value
 
 
 def _required_int(message: Any, field_name: str) -> int:

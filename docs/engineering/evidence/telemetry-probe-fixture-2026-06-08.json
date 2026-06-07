@@ -1,0 +1,77 @@
+{
+  "heartbeat_fresh_at_end": true,
+  "heartbeat_observed": true,
+  "input_contract": "decoded MAVLink-like dictionaries; UDP JSON mode is local smoke only and does not decode binary MAVLink 2 packets",
+  "message_count": 4,
+  "message_refs": [
+    {
+      "canonical_frame_id": "fixture-000000",
+      "canonical_timestamp_s": 0.0,
+      "frame_id_source": "_frame_id",
+      "index": 0,
+      "message_type": "HEARTBEAT",
+      "source_timestamp": 0.0,
+      "timestamp_source": "_monotonic_s"
+    },
+    {
+      "canonical_frame_id": "fixture-000001",
+      "canonical_timestamp_s": 0.01,
+      "frame_id_source": "_frame_id",
+      "index": 1,
+      "message_type": "ATTITUDE",
+      "source_timestamp": 0.01,
+      "timestamp_source": "_monotonic_s"
+    },
+    {
+      "canonical_frame_id": "fixture-000002",
+      "canonical_timestamp_s": 0.02,
+      "frame_id_source": "_frame_id",
+      "index": 2,
+      "message_type": "HIGHRES_IMU",
+      "source_timestamp": 0.02,
+      "timestamp_source": "_monotonic_s"
+    },
+    {
+      "canonical_frame_id": "fixture-000003",
+      "canonical_timestamp_s": 0.03,
+      "frame_id_source": "_frame_id",
+      "index": 3,
+      "message_type": "TIMESYNC",
+      "source_timestamp": 0.03,
+      "timestamp_source": "_monotonic_s"
+    }
+  ],
+  "message_type_histogram": {
+    "ATTITUDE": 1,
+    "HEARTBEAT": 1,
+    "HIGHRES_IMU": 1,
+    "TIMESYNC": 1
+  },
+  "non_claims": [
+    "not official simulator telemetry evidence",
+    "not binary MAVLink decoding evidence",
+    "not a velocity availability claim for the official simulator",
+    "not a latency benchmark"
+  ],
+  "parse_errors": [],
+  "parsed_counts": {
+    "ATTITUDE": 1,
+    "HEARTBEAT": 1,
+    "HIGHRES_IMU": 1,
+    "TIMESYNC": 1
+  },
+  "probe_end_monotonic_s": 0.03,
+  "schema_version": "aigp.telemetry_probe.v0",
+  "source": "fixture:spec_messages",
+  "transport_errors": [],
+  "velocity_report": {
+    "candidates": [],
+    "inspected_message_types": [
+      "ATTITUDE",
+      "HEARTBEAT",
+      "HIGHRES_IMU",
+      "TIMESYNC"
+    ],
+    "status": "NOT_AVAILABLE"
+  }
+}

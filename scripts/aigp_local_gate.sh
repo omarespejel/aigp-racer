@@ -15,6 +15,12 @@ uv run --python 3.14 --with jsonschema --with pyyaml --with ruff --with pytest \
   python scripts/aigp_fixture_gate.py
 
 uv run --python 3.14 --with jsonschema --with pyyaml --with ruff --with pytest \
+  python scripts/aigp_telemetry_probe.py \
+  --fixture-json tests/fixtures/telemetry_probe_spec_messages.json \
+  --source-label fixture:spec_messages \
+  --write-json docs/engineering/evidence/telemetry-probe-fixture-2026-06-08.json
+
+uv run --python 3.14 --with jsonschema --with pyyaml --with ruff --with pytest \
   python -m ruff check .
 
 uv run --python 3.14 --with jsonschema --with pyyaml --with ruff --with pytest \
@@ -27,3 +33,4 @@ git diff --check
 git diff --exit-code docs/engineering/evidence/aigp-profile-fixture-2026-06-08.json
 git diff --exit-code docs/engineering/evidence/race-episode-fixture-2026-06-08.json
 git diff --exit-code docs/engineering/evidence/decision-trace-fixture-2026-06-08.json
+git diff --exit-code docs/engineering/evidence/telemetry-probe-fixture-2026-06-08.json
