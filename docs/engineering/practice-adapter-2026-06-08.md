@@ -36,8 +36,12 @@ Generated artifact:
 
 ```text
 docs/engineering/evidence/practice-adapter-2026-06-08.json
-sha256 631fe81af32ba869a57bb24b83adb4603ce044d9bb75b98f1cc9d24fb503adca
+sha256 7b29a9d51b52ef65b4141a90248f2cf4430a03d3521756cb3a2761dd028c3988
 ```
+
+The JSON fixture records the validation surface. It does not execute tests or
+claim pass/fail status; pass/fail evidence comes from the local/CI commands
+below.
 
 Validation:
 

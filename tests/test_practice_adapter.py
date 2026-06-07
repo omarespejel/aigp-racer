@@ -79,6 +79,9 @@ def test_elodin_rgba_frame_adapter_rejects_malformed_pixels() -> None:
     with pytest.raises(PracticeFrameAdapterError, match="integer"):
         adapter.adapt([[(0, 0, 0, 256)]])
 
+    with pytest.raises(PracticeFrameAdapterError, match="integer"):
+        adapter.adapt([[(True, 0, 0, 255)]])
+
 
 def test_elodin_rgba_frame_adapter_normalizes_non_sequence_errors() -> None:
     adapter = ElodinRgbaFrameAdapter(expected_width_px=1, expected_height_px=1)

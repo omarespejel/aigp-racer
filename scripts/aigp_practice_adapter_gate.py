@@ -9,6 +9,46 @@ from typing import Any
 
 
 def build_evidence() -> dict[str, Any]:
+    test_records = [
+        {
+            "path": "tests/test_practice_adapter.py",
+            "name": "test_elodin_rgba_frame_adapter_feeds_round1_detector",
+            "purpose": "verify practice RGBA frames can enter the existing detector boundary",
+        },
+        {
+            "path": "tests/test_practice_adapter.py",
+            "name": "test_elodin_rgba_frame_adapter_rejects_wrong_dimensions",
+            "purpose": "verify frame dimensions are explicit and validated",
+        },
+        {
+            "path": "tests/test_practice_adapter.py",
+            "name": "test_elodin_rgba_frame_adapter_rejects_malformed_pixels",
+            "purpose": "verify malformed pixels fail before perception",
+        },
+        {
+            "path": "tests/test_practice_adapter.py",
+            "name": "test_elodin_rgba_frame_adapter_normalizes_non_sequence_errors",
+            "purpose": (
+                "verify malformed frame containers, rows, and pixels fail with "
+                "PracticeFrameAdapterError"
+            ),
+        },
+        {
+            "path": "tests/test_practice_adapter.py",
+            "name": "test_elodin_rgba_frame_adapter_validates_frame_metadata_types",
+            "purpose": "verify frame timestamps and source ids stay typed at the boundary",
+        },
+        {
+            "path": "tests/test_practice_adapter.py",
+            "name": "test_elodin_rgba_frame_adapter_validates_expected_dimensions",
+            "purpose": "verify adapter configuration is bounded",
+        },
+        {
+            "path": "tests/test_practice_adapter.py",
+            "name": "test_practice_adapter_evidence_matches_generator",
+            "purpose": "verify evidence artifact stays deterministic",
+        },
+    ]
     return {
         "schema_version": "aigp.practice_adapter.v0",
         "github_issue": "https://github.com/omarespejel/aigp-racer/issues/11",
@@ -49,54 +89,16 @@ def build_evidence() -> dict[str, Any]:
                 ),
             },
         ],
-        "tests": [
-            {
-                "path": "tests/test_practice_adapter.py",
-                "name": "test_elodin_rgba_frame_adapter_feeds_round1_detector",
-                "purpose": "verify practice RGBA frames can enter the existing detector boundary",
-            },
-            {
-                "path": "tests/test_practice_adapter.py",
-                "name": "test_elodin_rgba_frame_adapter_rejects_wrong_dimensions",
-                "purpose": "verify frame dimensions are explicit and validated",
-            },
-            {
-                "path": "tests/test_practice_adapter.py",
-                "name": "test_elodin_rgba_frame_adapter_rejects_malformed_pixels",
-                "purpose": "verify malformed pixels fail before perception",
-            },
-            {
-                "path": "tests/test_practice_adapter.py",
-                "name": "test_elodin_rgba_frame_adapter_normalizes_non_sequence_errors",
-                "purpose": (
-                    "verify malformed frame containers, rows, and pixels fail with "
-                    "PracticeFrameAdapterError"
-                ),
-            },
-            {
-                "path": "tests/test_practice_adapter.py",
-                "name": "test_elodin_rgba_frame_adapter_validates_frame_metadata_types",
-                "purpose": "verify frame timestamps and source ids stay typed at the boundary",
-            },
-            {
-                "path": "tests/test_practice_adapter.py",
-                "name": "test_elodin_rgba_frame_adapter_validates_expected_dimensions",
-                "purpose": "verify adapter configuration is bounded",
-            },
-            {
-                "path": "tests/test_practice_adapter.py",
-                "name": "test_practice_adapter_evidence_matches_generator",
-                "purpose": "verify evidence artifact stays deterministic",
-            },
-        ],
+        "tests": test_records,
         "commands": [
             "uv run --python 3.14 --with jsonschema --with pyyaml --with ruff --with pytest "
             "python -m pytest tests/test_practice_adapter.py tests/test_perception_detector.py",
             "./scripts/aigp_local_gate.sh",
         ],
         "validation": {
-            "focused_pytest_count": 12,
-            "status": "passed",
+            "generator_executes_tests": False,
+            "listed_go_gate_test_count": len(test_records),
+            "status_source": "external local or CI gate; this generator only writes evidence",
         },
         "non_claims": [
             "not official simulator compatibility evidence",
