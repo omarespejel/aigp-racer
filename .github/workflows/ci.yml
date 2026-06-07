@@ -44,12 +44,16 @@ jobs:
           python scripts/aigp_jpeg_decode_benchmark.py \
             --check-json docs/engineering/evidence/jpeg-decode-benchmark-2026-06-08.json \
             --fixture tests/fixtures/frame_640x360_synthetic.jpg
+          python scripts/aigp_practice_adapter_gate.py \
+            --write-json docs/engineering/evidence/practice-adapter-2026-06-08.json
           git diff --exit-code docs/engineering/evidence/aigp-profile-fixture-2026-06-08.json
           git diff --exit-code docs/engineering/evidence/race-episode-fixture-2026-06-08.json
           git diff --exit-code docs/engineering/evidence/decision-trace-fixture-2026-06-08.json
           git diff --exit-code docs/engineering/evidence/telemetry-probe-fixture-2026-06-08.json
           git diff --exit-code docs/engineering/evidence/pnp-uncertainty-2026-06-08.json
           git diff --exit-code docs/engineering/evidence/command-intent-envelope-2026-06-08.json
+          git diff --exit-code docs/engineering/evidence/jpeg-decode-benchmark-2026-06-08.json
+          git diff --exit-code docs/engineering/evidence/practice-adapter-2026-06-08.json
 
       - name: Ruff check
         run: python -m ruff check .
