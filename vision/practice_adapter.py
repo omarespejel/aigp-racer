@@ -58,16 +58,29 @@ class ElodinRgbaFrameAdapter:
     ) -> DetectorFrame:
         """Strip alpha and return a validated detector frame."""
 
-        if len(frame_rgba) != self.expected_height_px:
+        _validate_optional_int("sim_time_ns", sim_time_ns)
+        _validate_optional_int("source_frame_id", source_frame_id)
+
+        frame_height = _safe_len(frame_rgba, "RGBA frame must be a sequence of rows")
+        if frame_height != self.expected_height_px:
             raise PracticeFrameAdapterError("RGBA frame height does not match expected height")
 
         rows: list[tuple[RGBTuple, ...]] = []
         for row_index, row in enumerate(frame_rgba):
-            if len(row) != self.expected_width_px:
+            row_width = _safe_len(
+                row,
+                f"RGBA frame row {row_index} must be a sequence of pixels",
+            )
+            if row_width != self.expected_width_px:
                 raise PracticeFrameAdapterError(
                     f"RGBA frame row {row_index} width does not match expected width"
                 )
-            rows.append(tuple(_rgba_to_rgb(pixel) for pixel in row))
+            try:
+                rows.append(tuple(_rgba_to_rgb(pixel) for pixel in row))
+            except TypeError as exc:
+                raise PracticeFrameAdapterError(
+                    f"RGBA frame row {row_index} must be iterable"
+                ) from exc
 
         return DetectorFrame(
             rgb=tuple(rows),
@@ -87,9 +100,13 @@ def detector_rgb_image(frame: DetectorFrame) -> RGBImage:
 
 
 def _rgba_to_rgb(pixel: Sequence[int]) -> RGBTuple:
-    if len(pixel) != 4:
+    pixel_len = _safe_len(pixel, "Elodin practice frame pixels must be RGBA sequences")
+    if pixel_len != 4:
         raise PracticeFrameAdapterError("Elodin practice frame pixels must be RGBA")
-    red, green, blue, alpha = pixel
+    try:
+        red, green, blue, alpha = pixel
+    except (TypeError, ValueError) as exc:
+        raise PracticeFrameAdapterError("Elodin practice frame pixels must be RGBA") from exc
     for channel_name, channel in (
         ("red", red),
         ("green", green),
@@ -101,3 +118,15 @@ def _rgba_to_rgb(pixel: Sequence[int]) -> RGBTuple:
                 f"RGBA {channel_name} channel must be an integer in [0, 255]"
             )
     return (red, green, blue)
+
+
+def _safe_len(value: object, message: str) -> int:
+    try:
+        return len(value)  # type: ignore[arg-type]
+    except TypeError as exc:
+        raise PracticeFrameAdapterError(message) from exc
+
+
+def _validate_optional_int(name: str, value: int | None) -> None:
+    if value is not None and type(value) is not int:
+        raise PracticeFrameAdapterError(f"{name} must be an integer when provided")

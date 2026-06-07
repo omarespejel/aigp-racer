@@ -26,7 +26,9 @@ DetectorFrame(rgb, sim_time_ns, source_frame_id, source, claim_boundary)
 ```
 
 Default expected dimensions are 640 x 360 to match the AI Grand Prix camera
-resolution. Tests use a smaller fixture to keep CI cheap.
+resolution documented in VADR-TS-002, Issue 00.02, dated 2026-05-08
+(https://www.theaigrandprix.com/wp-content/uploads/2026/05/260508_Technical_Spec_0002.pdf).
+Tests use a smaller fixture to keep CI cheap.
 
 ## Evidence
 
@@ -34,7 +36,7 @@ Generated artifact:
 
 ```text
 docs/engineering/evidence/practice-adapter-2026-06-08.json
-sha256 a6cc957a93c15b63f7d4749883f578bc63da65ded047da89ff1e31372d2160ab
+sha256 631fe81af32ba869a57bb24b83adb4603ce044d9bb75b98f1cc9d24fb503adca
 ```
 
 Validation:
@@ -50,6 +52,8 @@ uv run --python 3.14 --with jsonschema --with pyyaml --with ruff --with pytest \
 - `test_elodin_rgba_frame_adapter_feeds_round1_detector`
 - `test_elodin_rgba_frame_adapter_rejects_wrong_dimensions`
 - `test_elodin_rgba_frame_adapter_rejects_malformed_pixels`
+- `test_elodin_rgba_frame_adapter_normalizes_non_sequence_errors`
+- `test_elodin_rgba_frame_adapter_validates_frame_metadata_types`
 - `test_elodin_rgba_frame_adapter_validates_expected_dimensions`
 - `test_practice_adapter_evidence_matches_generator`
 

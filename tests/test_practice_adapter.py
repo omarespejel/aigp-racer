@@ -80,6 +80,29 @@ def test_elodin_rgba_frame_adapter_rejects_malformed_pixels() -> None:
         adapter.adapt([[(0, 0, 0, 256)]])
 
 
+def test_elodin_rgba_frame_adapter_normalizes_non_sequence_errors() -> None:
+    adapter = ElodinRgbaFrameAdapter(expected_width_px=1, expected_height_px=1)
+
+    with pytest.raises(PracticeFrameAdapterError, match="sequence of rows"):
+        adapter.adapt(object())  # type: ignore[arg-type]
+
+    with pytest.raises(PracticeFrameAdapterError, match="sequence of pixels"):
+        adapter.adapt([object()])  # type: ignore[list-item]
+
+    with pytest.raises(PracticeFrameAdapterError, match="RGBA sequences"):
+        adapter.adapt([[object()]])  # type: ignore[list-item]
+
+
+def test_elodin_rgba_frame_adapter_validates_frame_metadata_types() -> None:
+    adapter = ElodinRgbaFrameAdapter(expected_width_px=1, expected_height_px=1)
+
+    with pytest.raises(PracticeFrameAdapterError, match="sim_time_ns"):
+        adapter.adapt([[(0, 0, 0, 255)]], sim_time_ns="1")  # type: ignore[arg-type]
+
+    with pytest.raises(PracticeFrameAdapterError, match="source_frame_id"):
+        adapter.adapt([[(0, 0, 0, 255)]], source_frame_id=True)
+
+
 def test_elodin_rgba_frame_adapter_validates_expected_dimensions() -> None:
     with pytest.raises(ValueError, match="expected_width_px"):
         ElodinRgbaFrameAdapter(expected_width_px=0)
