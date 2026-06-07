@@ -136,6 +136,12 @@ def _emit_diagnostic_event(diagnostic: EstimatorDiagnosticEvent) -> None:
     )
 
 
+def _require_non_negative_int(name: str, value: int) -> int:
+    if type(value) is not int or value < 0:
+        raise ValueError(f"{name} must be a non-negative int")
+    return value
+
+
 def gate_measurement_from_observation(
     observation: GateObservation,
 ) -> GatePoseMeasurement:
@@ -215,10 +221,14 @@ class MinimalStateEstimator:
         max_telemetry_age_ns: int = 100_000_000,
         diagnostic_log_interval_ns: int = 250_000_000,
     ) -> None:
-        if diagnostic_log_interval_ns < 0:
-            raise ValueError("diagnostic_log_interval_ns must be non-negative")
-        self.max_telemetry_age_ns = max_telemetry_age_ns
-        self.diagnostic_log_interval_ns = diagnostic_log_interval_ns
+        self.max_telemetry_age_ns = _require_non_negative_int(
+            "max_telemetry_age_ns",
+            max_telemetry_age_ns,
+        )
+        self.diagnostic_log_interval_ns = _require_non_negative_int(
+            "diagnostic_log_interval_ns",
+            diagnostic_log_interval_ns,
+        )
         self._last_diagnostic_log_key: tuple[str, str] | None = None
         self._last_diagnostic_log_time_ns: int | None = None
 
