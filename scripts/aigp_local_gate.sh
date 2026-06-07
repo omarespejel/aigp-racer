@@ -21,6 +21,11 @@ uv run --python 3.14 --with jsonschema --with pyyaml --with ruff --with pytest \
   --write-json docs/engineering/evidence/telemetry-probe-fixture-2026-06-08.json
 
 uv run --python 3.14 --with jsonschema --with pyyaml --with ruff --with pytest \
+  python scripts/aigp_jpeg_decode_benchmark.py \
+  --check-json docs/engineering/evidence/jpeg-decode-benchmark-2026-06-08.json \
+  --fixture tests/fixtures/frame_640x360_synthetic.jpg
+
+uv run --python 3.14 --with jsonschema --with pyyaml --with ruff --with pytest \
   python -m ruff check .
 
 uv run --python 3.14 --with jsonschema --with pyyaml --with ruff --with pytest \

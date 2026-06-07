@@ -39,6 +39,9 @@ jobs:
             --fixture-json tests/fixtures/telemetry_probe_spec_messages.json \
             --source-label fixture:spec_messages \
             --write-json docs/engineering/evidence/telemetry-probe-fixture-2026-06-08.json
+          python scripts/aigp_jpeg_decode_benchmark.py \
+            --check-json docs/engineering/evidence/jpeg-decode-benchmark-2026-06-08.json \
+            --fixture tests/fixtures/frame_640x360_synthetic.jpg
           git diff --exit-code docs/engineering/evidence/aigp-profile-fixture-2026-06-08.json
           git diff --exit-code docs/engineering/evidence/race-episode-fixture-2026-06-08.json
           git diff --exit-code docs/engineering/evidence/decision-trace-fixture-2026-06-08.json
