@@ -50,8 +50,19 @@ IMU integration + gate-relative drift correction
 ## Current Local Fixture Command
 
 ```bash
-uv run --python 3.14 --with pytest python -m pytest tests/test_mavlink_telemetry.py
+uv run --python 3.14 --with jsonschema --with pyyaml --with ruff --with pytest \
+  python scripts/aigp_telemetry_probe.py \
+  --fixture-json tests/fixtures/telemetry_probe_spec_messages.json \
+  --source-label fixture:spec_messages \
+  --write-json docs/engineering/evidence/telemetry-probe-fixture-2026-06-08.json
 ```
 
-Non-claim: this fixture does not prove official simulator behavior.
+The current implementation also has a local UDP JSON smoke path. That path is
+only for decoded-message transport tests; it does not decode binary MAVLink 2.
 
+Non-claims:
+
+- this fixture does not prove official simulator behavior;
+- this fixture does not prove binary MAVLink decoding;
+- this fixture is not a latency benchmark;
+- this fixture does not prove whether official velocity telemetry is available.
