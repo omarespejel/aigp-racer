@@ -99,6 +99,12 @@ def build_evidence() -> dict[str, Any]:
                 "with a structured telemetry log",
             },
             {
+                "name": "test_estimator_throttles_repeated_malformed_gate_logs",
+                "path": "tests/test_estimation.py",
+                "purpose": "verify repeated malformed gate frames keep diagnostics "
+                "but throttle logs",
+            },
+            {
                 "name": "test_gate_pose_measurement_rejects_contradictory_modes",
                 "path": "tests/test_estimation.py",
                 "purpose": "verify measurement mode invariants are enforced at construction",
@@ -121,8 +127,8 @@ def build_evidence() -> dict[str, Any]:
             },
         ],
         "validation": {
-            "focused_pytest_count": 39,
-            "local_gate_pytest_count": 155,
+            "focused_pytest_count": 40,
+            "local_gate_pytest_count": 156,
             "status": "passed",
         },
     }
