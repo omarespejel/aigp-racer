@@ -3,10 +3,164 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from enum import StrEnum
+from math import isfinite
+from numbers import Real
 
 from mavlink.telemetry import Attitude, HighresImu, LinearVelocity
 from perception.detector import GateObservation
-from perception.geometry import CameraPoseEstimate, estimate_frontoparallel_gate_pose
+from perception.geometry import (
+    CameraPoseEstimate,
+    LabeledGateImageCorners,
+    PlanarGatePoseEstimate,
+    estimate_frontoparallel_gate_pose,
+    estimate_planar_gate_pose,
+)
+
+
+class GatePoseMeasurementMode(StrEnum):
+    SCREEN_SPACE_CENTER_DEPTH = "SCREEN_SPACE_CENTER_DEPTH"
+    LABELED_PLANAR_PNP = "LABELED_PLANAR_PNP"
+
+
+@dataclass(frozen=True)
+class GatePoseMeasurement:
+    """Gate pose measurement with an explicit observation contract.
+
+    Screen-space detector corners only support center/depth measurement. Full
+    planar pose is reserved for image points labeled by physical gate-local
+    corner identity.
+    """
+
+    mode: GatePoseMeasurementMode
+    center_camera: CameraPoseEstimate
+    confidence: float | None
+    sim_time_ns: int | None
+    source_frame_id: int | None
+    source: str
+    corner_uncertainty_px: tuple[float, float, float, float] | None = None
+    planar_pose: PlanarGatePoseEstimate | None = None
+
+    def __post_init__(self) -> None:
+        try:
+            mode = (
+                self.mode
+                if isinstance(self.mode, GatePoseMeasurementMode)
+                else GatePoseMeasurementMode(self.mode)
+            )
+        except (TypeError, ValueError) as exc:
+            raise ValueError(
+                "GatePoseMeasurement mode must be a GatePoseMeasurementMode value"
+            ) from exc
+        object.__setattr__(self, "mode", mode)
+
+        if self.corner_uncertainty_px is not None:
+            try:
+                uncertainty = tuple(self.corner_uncertainty_px)
+            except TypeError as exc:
+                raise ValueError(
+                    "GatePoseMeasurement corner_uncertainty_px must be four non-negative values"
+                ) from exc
+            object.__setattr__(self, "corner_uncertainty_px", uncertainty)
+            if len(uncertainty) != 4 or any(
+                not isinstance(value, Real) or not isfinite(float(value)) or value < 0.0
+                for value in uncertainty
+            ):
+                raise ValueError(
+                    "GatePoseMeasurement corner_uncertainty_px must be four non-negative values"
+                )
+
+        if (
+            mode == GatePoseMeasurementMode.SCREEN_SPACE_CENTER_DEPTH
+            and self.planar_pose is not None
+        ):
+            raise ValueError(
+                "GatePoseMeasurement SCREEN_SPACE_CENTER_DEPTH cannot carry planar_pose"
+            )
+        if (
+            mode == GatePoseMeasurementMode.SCREEN_SPACE_CENTER_DEPTH
+            and self.corner_uncertainty_px is None
+        ):
+            raise ValueError(
+                "GatePoseMeasurement SCREEN_SPACE_CENTER_DEPTH requires corner_uncertainty_px"
+            )
+        if mode == GatePoseMeasurementMode.LABELED_PLANAR_PNP and self.planar_pose is None:
+            raise ValueError("GatePoseMeasurement LABELED_PLANAR_PNP requires planar_pose")
+        if (
+            mode == GatePoseMeasurementMode.LABELED_PLANAR_PNP
+            and self.center_camera != self.planar_pose.center
+        ):
+            raise ValueError(
+                "GatePoseMeasurement LABELED_PLANAR_PNP center_camera must match planar_pose.center"
+            )
+        if (
+            mode == GatePoseMeasurementMode.LABELED_PLANAR_PNP
+            and self.corner_uncertainty_px is not None
+        ):
+            raise ValueError(
+                "GatePoseMeasurement LABELED_PLANAR_PNP cannot carry corner_uncertainty_px"
+            )
+
+    @property
+    def has_full_planar_pose(self) -> bool:
+        return self.planar_pose is not None
+
+
+@dataclass(frozen=True)
+class EstimatorDiagnosticEvent:
+    """Structured estimator event for observability and replay traces."""
+
+    event_type: str
+    status: str
+    reason: str
+    sim_time_ns: int
+    source_frame_id: int | None
+    source: str | None
+
+
+def gate_measurement_from_observation(
+    observation: GateObservation,
+) -> GatePoseMeasurement:
+    """Convert detector output to a bounded center/depth measurement only."""
+
+    corner_uncertainty_px = observation.corner_uncertainty_px
+    if corner_uncertainty_px is None:
+        raise ValueError("GateObservation SCREEN_SPACE_CENTER_DEPTH requires corner_uncertainty_px")
+
+    center_pose = estimate_frontoparallel_gate_pose(observation.corners)
+    return GatePoseMeasurement(
+        mode=GatePoseMeasurementMode.SCREEN_SPACE_CENTER_DEPTH,
+        center_camera=center_pose,
+        confidence=observation.confidence,
+        sim_time_ns=observation.sim_time_ns,
+        source_frame_id=observation.source_frame_id,
+        source=observation.source,
+        corner_uncertainty_px=corner_uncertainty_px,
+        planar_pose=None,
+    )
+
+
+def gate_measurement_from_labeled_corners(
+    corners: LabeledGateImageCorners,
+    *,
+    confidence: float | None = None,
+    sim_time_ns: int | None = None,
+    source_frame_id: int | None = None,
+    source: str = "labeled_planar_pnp_fixture",
+) -> GatePoseMeasurement:
+    """Convert physical-labeled corners to a full planar pose measurement."""
+
+    planar_pose = estimate_planar_gate_pose(corners)
+    return GatePoseMeasurement(
+        mode=GatePoseMeasurementMode.LABELED_PLANAR_PNP,
+        center_camera=planar_pose.center,
+        confidence=confidence,
+        sim_time_ns=sim_time_ns,
+        source_frame_id=source_frame_id,
+        source=source,
+        corner_uncertainty_px=None,
+        planar_pose=planar_pose,
+    )
 
 
 @dataclass(frozen=True)
@@ -21,6 +175,8 @@ class StateEstimate:
     stale: bool
     status: str
     degraded_reason: str | None = None
+    gate_measurement: GatePoseMeasurement | None = None
+    diagnostics: tuple[EstimatorDiagnosticEvent, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -48,15 +204,32 @@ class MinimalStateEstimator:
         )
         gate_pose = None
         gate_confidence = None
+        gate_measurement = None
+        diagnostics: tuple[EstimatorDiagnosticEvent, ...] = ()
         degraded_reason = None
+        gate_source_frame_id = None
+        gate_source = None
         if inputs.gate_observation is not None:
+            gate_source_frame_id = getattr(inputs.gate_observation, "source_frame_id", None)
+            gate_source = getattr(inputs.gate_observation, "source", None)
             try:
-                gate_pose = estimate_frontoparallel_gate_pose(inputs.gate_observation.corners)
-                gate_confidence = inputs.gate_observation.confidence
+                gate_measurement = gate_measurement_from_observation(inputs.gate_observation)
+                gate_pose = gate_measurement.center_camera
+                gate_confidence = gate_measurement.confidence
             except (AttributeError, TypeError, ValueError) as exc:
                 gate_pose = None
                 gate_confidence = None
+                gate_measurement = None
                 degraded_reason = f"malformed gate observation: {exc}"
+                diagnostic = EstimatorDiagnosticEvent(
+                    event_type="estimator_degraded",
+                    status="MALFORMED_GATE_OBSERVATION",
+                    reason=degraded_reason,
+                    sim_time_ns=inputs.sim_time_ns,
+                    source_frame_id=gate_source_frame_id,
+                    source=gate_source,
+                )
+                diagnostics = (diagnostic,)
 
         if stale:
             status = "STALE_TELEMETRY"
@@ -71,17 +244,15 @@ class MinimalStateEstimator:
 
         return StateEstimate(
             sim_time_ns=inputs.sim_time_ns,
-            source_frame_id=(
-                inputs.gate_observation.source_frame_id
-                if inputs.gate_observation is not None
-                else None
-            ),
+            source_frame_id=gate_source_frame_id,
             attitude=inputs.attitude,
             imu=inputs.imu,
             velocity=inputs.velocity,
+            gate_measurement=gate_measurement,
             gate_pose_camera=gate_pose,
             gate_confidence=gate_confidence,
             stale=stale,
             status=status,
             degraded_reason=degraded_reason,
+            diagnostics=diagnostics,
         )
