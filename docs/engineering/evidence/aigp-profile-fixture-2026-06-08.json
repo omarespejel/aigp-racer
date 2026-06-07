@@ -1,0 +1,62 @@
+{
+  "claim_boundary": "deterministic fixture only; no simulator run, no latency measurement, no speedup claim",
+  "non_claims": [
+    "not official simulator compatibility evidence",
+    "not a latency benchmark",
+    "not a reliability result",
+    "not a speedup claim",
+    "not physical-drone transfer evidence"
+  ],
+  "profile": {
+    "control_command_emission": {
+      "event_count": 0,
+      "p50_ms": null,
+      "p95_ms": null,
+      "p99_ms": null
+    },
+    "gate_detection": {
+      "event_count": 0,
+      "p50_ms": null,
+      "p95_ms": null,
+      "p99_ms": null
+    },
+    "offline_evidence_conversion": {
+      "event_count": 0,
+      "p50_ms": null,
+      "p95_ms": null,
+      "p99_ms": null
+    },
+    "planning": {
+      "event_count": 0,
+      "p50_ms": null,
+      "p95_ms": null,
+      "p99_ms": null
+    },
+    "pnp_pose": {
+      "event_count": 0,
+      "p50_ms": null,
+      "p95_ms": null,
+      "p99_ms": null
+    },
+    "state_estimation": {
+      "event_count": 0,
+      "p50_ms": null,
+      "p95_ms": null,
+      "p99_ms": null
+    },
+    "telemetry_parse": {
+      "event_count": 0,
+      "p50_ms": null,
+      "p95_ms": null,
+      "p99_ms": null
+    },
+    "udp_jpeg_reassembly": {
+      "event_count": 0,
+      "p50_ms": null,
+      "p95_ms": null,
+      "p99_ms": null
+    }
+  },
+  "schema_version": "aigp.profile.v0",
+  "source": "scripts/aigp_profile_gate.py fixture mode"
+}

@@ -9,6 +9,9 @@ This repository builds an autonomous drone-racing stack for AI Grand Prix.
 - Treat WorldForge as offline replay, evaluation, regression, DecisionTrace, and AutoRaceEvolve infrastructure.
 - Prefer a conservative valid run before optimizing lap time.
 - A policy promotion is not valid without logs, metrics, hashes, evaluator configuration, and a regression result.
+- Treat issues as hypotheses with GO gates, NO-GO gates, artifacts, exact commands, and non-claims.
+- Keep default, experimental, claim, and hardening lanes separate.
+- Failed experiments should be recorded as `NO_GO`, `NARROW_CLAIM`, `FOLLOWUP_ISSUE`, or `KILL`, not rewritten as progress.
 
 ## Runtime Priorities
 
@@ -23,4 +26,4 @@ This repository builds an autonomous drone-racing stack for AI Grand Prix.
 - Update `DISCLOSURE_LEDGER.md` when adding dependencies, generated-AI code, model weights, datasets, simulator sources, or competition-relevant external sources.
 - Source docs claims about rules, specs, schedules, papers, and competition decisions.
 - Keep generated artifacts, logs, datasets, videos, checkpoints, and model weights out of git unless deliberately reviewed.
-
+- Do not make speed, reliability, official-compatibility, physical-transfer, or state-of-the-art claims without a claim issue and checked-in evidence.

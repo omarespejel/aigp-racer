@@ -1,0 +1,50 @@
+name: Claim Promotion
+description: Promote a bounded claim into docs, paper, benchmark table, public update, or sponsor-facing language.
+title: "[claim]: "
+labels:
+  - docs
+  - compliance
+body:
+  - type: textarea
+    id: claim
+    attributes:
+      label: Claim
+      description: One bounded sentence.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence paths
+      description: Docs, JSON, TSV, scripts, tests, run logs, exact commands, or hashes.
+    validations:
+      required: true
+  - type: textarea
+    id: boundary
+    attributes:
+      label: Claim boundary
+      description: Simulator, fixture, backend, timing policy, artifact layer, or environment.
+    validations:
+      required: true
+  - type: textarea
+    id: non_claims
+    attributes:
+      label: Non-claims
+      description: What readers must not infer.
+    validations:
+      required: true
+  - type: textarea
+    id: competitor_context
+    attributes:
+      label: Competition or paper context
+      description: Official docs, paper-reported, locally reproduced, unavailable, or not applicable.
+    validations:
+      required: true
+  - type: textarea
+    id: promotion_gate
+    attributes:
+      label: Promotion gate
+      description: What must pass before this enters public docs or benchmark tables?
+    validations:
+      required: true
+

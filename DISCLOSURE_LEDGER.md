@@ -6,6 +6,7 @@ This file tracks competition-relevant disclosure material for AI Grand Prix work
 
 - 2026-06-08: Initial strategy issue and repository scaffolding drafted with Codex using user-provided Claude research excerpts and independently verified public sources.
 - 2026-06-08: Qodo and CodeRabbit configuration, review guidelines, CI validation harness, and setup notes drafted with Codex after checking current vendor documentation.
+- 2026-06-08: Research-lab operating model, Codex handoff docs, GitHub issue forms, PR template, hardening policy, no-claims policy, threat model, and local gates drafted with Codex from user-provided `provable-transformer-vm` operating-system notes plus current GitHub/Qodo/CodeRabbit documentation.
 
 ## FLOSS Dependencies
 
@@ -16,6 +17,8 @@ This file tracks competition-relevant disclosure material for AI Grand Prix work
   - `pytest`
   - `pyyaml`
   - `ruff`
+- GitHub issue forms and PR template are repository-native GitHub features; no runtime dependency.
+- `scripts/aigp_local_gate.sh` and `scripts/aigp_profile_gate.py` are local validation scripts.
 
 Runtime dependencies remain pending. Add every runtime, training, evaluation, and simulation dependency before submission.
 
@@ -36,3 +39,5 @@ Pending. Record source, license, checkpoint hash, training data, and whether the
 - Qodo v2 code review overview: https://docs.qodo.ai/code-review
 - Qodo `.pr_agent.toml` configuration: https://docs.qodo.ai/install-and-configure/configuration-overview/configuration-file
 - Qodo configuration and command reference: https://docs.qodo.ai/install-and-configure/configuration-overview/configuration-and-command-reference
+- GitHub issue forms syntax: https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/syntax-for-issue-forms
+- GitHub PR template docs: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/creating-a-pull-request-template-for-your-repository

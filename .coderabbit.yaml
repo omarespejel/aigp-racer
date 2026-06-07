@@ -9,9 +9,10 @@ reviews:
   high_level_summary: true
   high_level_summary_in_walkthrough: true
   high_level_summary_instructions: >
-    Summarize the autonomy impact first: runtime latency, simulator contract,
-    estimator/control behavior, competition compliance, and evidence artifacts.
-    Avoid marketing language.
+    Summarize the research-lane impact first: default, experimental, claim, or
+    hardening. Then cover runtime latency, simulator contract, estimator/control
+    behavior, competition compliance, evidence artifacts, GO/NO-GO implications,
+    and non-claims. Avoid marketing language.
   review_status: true
   review_details: true
   commit_status: true
@@ -50,6 +51,9 @@ reviews:
     - "!*.onnx"
     - "!*.pt"
     - "!*.pth"
+    - "!**/__pycache__/**"
+    - "!.pytest_cache/**"
+    - "!.ruff_cache/**"
 
   path_instructions:
     - path: "solver/**"
@@ -101,8 +105,28 @@ reviews:
     - path: "docs/**"
       instructions: >
         Verify factual claims are sourced and dated when they concern competition
-        rules, SDK contracts, technical spec values, papers, or schedules. Flag
-        stale or unsourced claims.
+        rules, SDK contracts, technical spec values, papers, schedules, AGIBOT,
+        Go2, or external tools. Flag stale or unsourced claims, missing
+        reproduction commands, and missing non-claims.
+    - path: ".codex/**"
+      instructions: >
+        Review operating-model changes for lane drift, missing GO/NO-GO gates,
+        missing allowed outcomes, contradiction with AGENTS.md, or instructions
+        that would let experiments silently become default behavior.
+    - path: ".github/ISSUE_TEMPLATE/**"
+      instructions: >
+        Check that issue forms preserve the hypothesis model: thesis or risk,
+        why it matters, smallest falsifier or fix, GO gate, NO-GO gate, required
+        artifacts, non-claims, and exact local validation.
+    - path: ".github/pull_request_template.md"
+      instructions: >
+        Check that the PR template keeps validation, lane selection, trusted-core
+        review, non-claims, and bot quiet-window requirements explicit.
+    - path: "docs/engineering/evidence/**"
+      instructions: >
+        Treat evidence as claim-sensitive. Check determinism, sorted JSON, stable
+        schema version, exact generation commands, and no host-specific or
+        wall-clock fields unless explicitly part of the measured object.
     - path: "DISCLOSURE_LEDGER.md"
       instructions: >
         Check that new dependencies, model weights, generated-AI use, datasets,
@@ -136,6 +160,12 @@ reviews:
       instructions: "Changes licensing, disclosure, rules, generated-AI use, data provenance, or submission packaging."
     - label: docs
       instructions: "Documentation-only or research-summary change."
+    - label: research-frontier
+      instructions: "Falsifiable experimental work with thesis, GO/NO-GO, artifacts, and non-claims."
+    - label: hardening
+      instructions: "Runtime safety, integrity, path safety, compliance, or regression-risk work."
+    - label: claim
+      instructions: "Public, paper, benchmark, or sponsor-facing claim promotion."
 
   pre_merge_checks:
     title:
@@ -158,6 +188,12 @@ reviews:
           Pass only if non-trivial runtime, policy, evaluator, or competition
           research changes include a test, log fixture, metric, source citation,
           or explicit blocker explaining why evidence is unavailable.
+      - name: Hypothesis discipline
+        mode: warning
+        instructions: >
+          Pass only if experimental or claim-lane PRs link to an issue with a
+          thesis or observed risk, GO gate, NO-GO gate, required artifacts,
+          non-claims, and exact local validation commands.
 
   tools:
     ruff:
@@ -200,6 +236,12 @@ reviews:
           For runtime, perception, estimation, planning, policy, or evaluator
           changes, propose a small regression fixture or test that would catch
           the most likely failure introduced by the PR.
+      - name: open hardening follow-up
+        enabled: true
+        instructions: >
+          If a valid safety, artifact, path-safety, compliance, or test-gap risk
+          is outside the PR scope, draft a hardening follow-up issue using the
+          repository issue template fields.
 
 chat:
   auto_reply: true
@@ -213,7 +255,10 @@ knowledge_base:
     filePatterns:
       - AGENTS.md
       - .github/copilot-instructions.md
+      - .github/instructions/trusted-core.instructions.md
       - docs/review-guidelines.md
+      - AIGP_RACER_LAB.md
+      - .codex/research/operating_model.yml
   learnings:
     scope: local
     approval_delay: 7
@@ -235,6 +280,9 @@ issue_enrichment:
         - estimation
         - offline-eval
         - compliance
+        - research-frontier
+        - hardening
+        - claim
   labeling:
     auto_apply_labels: false
     labeling_instructions:
@@ -248,4 +296,9 @@ issue_enrichment:
         instructions: "WorldForge, DecisionTrace, evaluator, replay, metrics, or AutoRaceEvolve."
       - label: compliance
         instructions: "Competition rules, licensing, disclosure, data, model, or generated-AI provenance."
-
+      - label: research-frontier
+        instructions: "Falsifiable experimental work with GO and NO-GO gates."
+      - label: hardening
+        instructions: "Runtime safety, artifact integrity, compliance, or regression-risk follow-up."
+      - label: claim
+        instructions: "Public, paper, benchmark, or sponsor-facing claim promotion."

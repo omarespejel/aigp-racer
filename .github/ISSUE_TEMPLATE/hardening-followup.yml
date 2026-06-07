@@ -1,0 +1,53 @@
+name: Hardening Follow-Up
+description: Capture runtime safety, integrity, path safety, compliance, or regression risks that should not widen the current PR.
+title: "[hardening]: "
+labels:
+  - compliance
+body:
+  - type: textarea
+    id: risk
+    attributes:
+      label: Observed risk
+      description: Concrete risk.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence or location
+      description: File, line, command, artifact, bot comment, run log, or source.
+    validations:
+      required: true
+  - type: textarea
+    id: why_not_current
+    attributes:
+      label: Why not current PR
+      description: Why would fixing this now widen or destabilize the current PR?
+    validations:
+      required: true
+  - type: textarea
+    id: smallest_fix
+    attributes:
+      label: Smallest fix or test
+      description: Minimal closure path.
+    validations:
+      required: true
+  - type: textarea
+    id: gate
+    attributes:
+      label: GO or NO-GO
+      description: When should we fix now versus park?
+    validations:
+      required: true
+  - type: textarea
+    id: validation
+    attributes:
+      label: Local validation plan
+      value: |
+        ```bash
+        git diff --check
+        ./scripts/aigp_local_gate.sh
+        ```
+    validations:
+      required: true
+

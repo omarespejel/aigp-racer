@@ -1,0 +1,9 @@
+blank_issues_enabled: false
+contact_links:
+  - name: AI Grand Prix official site
+    url: https://www.theaigrandprix.com/
+    about: Verify current rules, FAQs, and official competition announcements.
+  - name: AI Grand Prix issue 1 strategy
+    url: https://github.com/omarespejel/aigp-racer/issues/1
+    about: Read the current strategy and verified research handoff.
+

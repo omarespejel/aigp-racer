@@ -27,8 +27,14 @@ jobs:
       - name: Install dev dependencies
         run: python -m pip install -e ".[dev]"
 
-      - name: Validate Qodo and CodeRabbit configs
+      - name: Validate review and research-lab configs
         run: python scripts/validate_review_configs.py
+
+      - name: Regenerate deterministic profile fixture
+        run: |
+          python scripts/aigp_profile_gate.py \
+            --write-json docs/engineering/evidence/aigp-profile-fixture-2026-06-08.json
+          git diff --exit-code docs/engineering/evidence/aigp-profile-fixture-2026-06-08.json
 
       - name: Ruff check
         run: python -m ruff check .
@@ -38,4 +44,3 @@ jobs:
 
       - name: Pytest
         run: python -m pytest
-

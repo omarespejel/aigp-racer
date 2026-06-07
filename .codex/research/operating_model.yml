@@ -1,0 +1,105 @@
+version: 1
+updated: "2026-06-08"
+
+work_allocation:
+  exploration_share: 0.67
+  execution_share: 0.33
+  note: >
+    Exploration is allowed, but only through falsifiable issues with explicit
+    GO/NO-GO gates and artifacts.
+
+unit_of_work:
+  type: issue_as_hypothesis
+  required_fields:
+    - thesis
+    - why_it_matters_for_ai_grand_prix
+    - smallest_falsifying_experiment
+    - go_gate
+    - no_go_gate
+    - required_artifacts
+    - non_claims
+    - local_validation_plan
+  allowed_outcomes:
+    - GO
+    - NO_GO
+    - NARROW_CLAIM
+    - FOLLOWUP_ISSUE
+    - KILL
+
+lanes:
+  default:
+    description: Conservative official-interface-compatible behavior.
+    promotion_requires:
+      - local_gate
+      - targeted_tests
+      - no_experimental_claims
+  experimental:
+    description: Frontier autonomy, estimator, planner, policy, and AutoRaceEvolve work.
+    promotion_requires:
+      - explicit_experimental_label
+      - required_artifacts
+      - no_claim_promotion_without_claim_issue
+  claim:
+    description: Any public or paper-facing claim.
+    promotion_requires:
+      - paper_claim_issue
+      - evidence_paths
+      - exact_commands
+      - non_claims
+      - source_citations
+  hardening:
+    description: Runtime safety, artifact integrity, compliance, and path safety.
+    promotion_requires:
+      - regression_or_negative_test
+      - local_gate
+
+validation_policy:
+  default_mode: local_first_github_ci_never_normal_loop
+  baseline_gate: ./scripts/aigp_local_gate.sh
+  github_actions_role: safety_net_not_primary_research_loop
+  required_before_pr:
+    - git diff --check
+    - ./scripts/aigp_local_gate.sh
+
+review_bot_policy:
+  reviewers:
+    - qodo
+    - coderabbit
+  required_quiet_window_minutes: 5
+  finding_classes:
+    must_fix: Real runtime, correctness, safety, artifact, path-safety, compliance, or test-gap issue.
+    evidence_needed: Plausible finding that requires local reproduction.
+    stale_or_false_positive: Bot misunderstanding or stale review; respond with evidence.
+    followup_issue: Valid but outside current PR scope.
+    ignore: Style-only with no correctness, safety, compliance, or research impact.
+
+merge_policy:
+  merge_method: rebase
+  no_merge_commits: true
+  no_auto_merge_initially: true
+  normal_prs_not_drafts_for_bot_review: true
+  quiet_window_restart_events:
+    - new_push
+    - qodo_feedback
+    - coderabbit_feedback
+    - human_review
+    - actionable_bot_update
+
+evidence_policy:
+  deterministic_generation:
+    sorted_json_keys: true
+    fixed_float_formatting: true
+    no_wall_clock_timestamps_by_default: true
+    no_host_specific_paths_by_default: true
+  required_for_frontier_claim:
+    - human_note
+    - machine_readable_json
+    - exact_commands
+    - non_claims
+  required_for_policy_promotion:
+    - model_or_policy_hash
+    - evaluator_config_hash
+    - held_out_reliability_metrics
+    - crash_regression_result
+    - disclosure_ledger_update
+

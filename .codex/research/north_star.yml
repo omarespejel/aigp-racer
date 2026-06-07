@@ -1,0 +1,88 @@
+version: 1
+updated: "2026-06-08"
+project: aigp-racer
+
+north_star:
+  thesis: >
+    A disciplined low-latency autonomy stack, paired with an offline WorldForge
+    evidence and AutoRaceEvolve loop, can improve autonomous drone-racing
+    reliability and speed without putting large AI systems in the live control path.
+  first_useful_success: >
+    Identify, reproduce, and review where autonomous racing failures occur inside
+    the simulator using deterministic artifacts, before making speed or reliability claims.
+  current_stage: bootstrap
+
+runtime_boundary:
+  live_hot_path:
+    - camera_packet_reassembly
+    - telemetry_parsing
+    - gate_detection
+    - state_estimation
+    - planning
+    - control_command_emission
+  offline_lab:
+    - race_episode_replay
+    - decision_trace_generation
+    - eval_report_generation
+    - autoraceevolve_candidate_selection
+    - worldforge_bridge
+  forbidden_in_hot_path:
+    - llm_reasoning
+    - large_video_models
+    - learned_world_model_rollouts
+    - decision_trace_generation
+    - worldforge_evaluation
+    - offline_optimizer_search
+
+lanes:
+  default:
+    description: Conservative official-interface-compatible baseline.
+    may_claim:
+      - local_validation_passed
+      - fixture_behavior
+    must_not_claim:
+      - speedup
+      - reliability_rate
+      - official_submission_ready
+  experimental:
+    description: Frontier racing experiments that cannot silently become default.
+    examples:
+      - autoraceevolve
+      - learned_ctbr_policy
+      - estimator_variants
+      - racing_line_search
+      - elodin_vs_official_sim_comparison
+  claim:
+    description: Paper, blog, benchmark, sponsor, or public-facing language.
+    requires:
+      - checked_in_evidence
+      - exact_commands
+      - non_claims
+      - source_citations
+      - artifact_hashes_when_applicable
+  hardening:
+    description: Runtime safety, integrity, path safety, and compliance.
+    examples:
+      - command_rate_limit
+      - stale_telemetry_rejection
+      - udp_chunk_integrity
+      - path_traversal_rejection
+      - disclosure_ledger_completeness
+
+success_metrics:
+  bootstrap:
+    - local_gate_passes
+    - issue_templates_force_go_no_go
+    - first_profile_fixture_is_deterministic
+  first_runtime:
+    - simulator_connects
+    - heartbeat_stable
+    - jpeg_reassembler_tested
+    - telemetry_probe_answers_velocity_ambiguity
+    - pnp_fixture_passes
+  first_valid_run:
+    - course_completed
+    - race_episode_emitted
+    - decision_trace_emitted_offline
+    - no_hot_path_boundary_violation
+

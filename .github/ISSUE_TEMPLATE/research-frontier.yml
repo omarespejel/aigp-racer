@@ -1,0 +1,72 @@
+name: Research Frontier
+description: Falsifiable experimental work for autonomy, perception, estimation, planning, policies, or AutoRaceEvolve.
+title: "[research-frontier]: "
+labels:
+  - offline-eval
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this for experimental work. Issues are hypotheses, not task buckets.
+  - type: textarea
+    id: thesis
+    attributes:
+      label: Thesis
+      description: What might be true?
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why it matters for AI Grand Prix
+      description: Why would this matter for the race, runtime, offline optimizer, or evidence system?
+    validations:
+      required: true
+  - type: textarea
+    id: falsifier
+    attributes:
+      label: Smallest falsifying experiment
+      description: What is the cheapest thing that can kill or narrow this idea?
+    validations:
+      required: true
+  - type: textarea
+    id: go_gate
+    attributes:
+      label: GO gate
+      description: Exact evidence that makes this worth continuing.
+    validations:
+      required: true
+  - type: textarea
+    id: no_go_gate
+    attributes:
+      label: NO-GO gate
+      description: Exact evidence that kills or narrows this direction.
+    validations:
+      required: true
+  - type: textarea
+    id: artifacts
+    attributes:
+      label: Required artifacts
+      description: Docs, JSON, TSV, logs, fixtures, scripts, figures, commands, or hashes.
+    validations:
+      required: true
+  - type: textarea
+    id: non_claims
+    attributes:
+      label: Non-claims
+      description: What must not be inferred from this experiment?
+    validations:
+      required: true
+  - type: textarea
+    id: validation
+    attributes:
+      label: Local validation plan
+      description: Exact local commands. GitHub CI is not the normal research loop.
+      value: |
+        ```bash
+        git diff --check
+        ./scripts/aigp_local_gate.sh
+        ```
+    validations:
+      required: true
+

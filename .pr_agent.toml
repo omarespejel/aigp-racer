@@ -20,6 +20,8 @@ issues_user_guidelines = """
 Review this as a low-latency autonomous drone-racing repository.
 
 Prioritize:
+- whether the PR declares the correct lane: default, experimental, claim, or hardening;
+- whether experimental work is tied to an issue with thesis, GO gate, NO-GO gate, required artifacts, and non-claims;
 - hard real-time regressions;
 - command-rate violations against the AI Grand Prix <100 Hz ceiling;
 - stale telemetry, timestamp drift, or unsafe recovery behavior;
@@ -27,6 +29,7 @@ Prioritize:
 - estimator assumptions around the unresolved velocity-telemetry ambiguity;
 - UDP frame reassembly failure modes;
 - missing tests or fixtures for runtime, perception, estimation, planning, and evaluator changes;
+- unsupported speed, reliability, simulator-compatibility, physical-transfer, or state-of-the-art claims;
 - any LLM, large video model, learned world-model rollout, or DecisionTrace generation that enters the live flight path.
 
 Avoid low-value style comments unless they affect correctness, latency, determinism, or maintainability.
@@ -37,6 +40,8 @@ Enforce the repo's competition and evidence rules:
 - keep source-backed claims in docs when discussing AI Grand Prix rules, SDK contracts, technical spec values, papers, timelines, or external competitions;
 - preserve the boundary that WorldForge is offline replay/evaluation/DecisionTrace infrastructure, not the live pilot;
 - require artifact hashes, evaluator settings, and held-out reliability metrics before promoting a learned policy or AutoRaceEvolve candidate.
+- require a hardening follow-up issue for valid runtime safety, artifact-integrity, path-safety, compliance, or regression risks that are outside the current PR scope.
+- treat failures as valid outcomes when the PR records NO_GO, NARROW_CLAIM, FOLLOWUP_ISSUE, or KILL with evidence.
 """
 
 [review_agent_ux]
@@ -74,4 +79,3 @@ ignore_pr_labels = [
 ignore_languages_frameworks = [
   "protobuf",
 ]
-
