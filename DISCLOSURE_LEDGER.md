@@ -18,6 +18,8 @@ This file tracks competition-relevant disclosure material for AI Grand Prix work
   - `pytest`
   - `pyyaml`
   - `ruff`
+- Python build-time dependency:
+  - `setuptools==82.0.1`
 - GitHub issue forms and PR template are repository-native GitHub features; no runtime dependency.
 - `scripts/aigp_local_gate.sh` and `scripts/aigp_profile_gate.py` are local validation scripts.
 - Elodin AI Grand Prix practice harness inspected at commit `13f9f9e3d5a3130f0ce0b65500d9f309cc1e11b2`; Apache-2.0; local clone ignored by git.
