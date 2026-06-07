@@ -7,7 +7,9 @@ import pytest
 from perception.geometry import (
     AIGP_CAMERA,
     AIGP_GATE,
+    CameraIntrinsics,
     CameraPoseEstimate,
+    GateGeometry,
     ImagePoint,
     camera_ray_to_body_ned,
     estimate_frontoparallel_gate_pose,
@@ -57,3 +59,25 @@ def test_center_pixel_ray_tilts_up_in_body_ned() -> None:
     assert body_ray[0] == pytest.approx(math.cos(math.radians(20.0)))
     assert body_ray[1] == pytest.approx(0.0)
     assert body_ray[2] == pytest.approx(-math.sin(math.radians(20.0)))
+
+
+def test_camera_intrinsics_validate_constructor_invariants() -> None:
+    with pytest.raises(ValueError, match="resolution"):
+        CameraIntrinsics(width_px=0)
+    with pytest.raises(ValueError, match="focal"):
+        CameraIntrinsics(fx_px=0.0)
+    with pytest.raises(ValueError, match="cx"):
+        CameraIntrinsics(cx_px=641.0)
+    with pytest.raises(ValueError, match="cy"):
+        CameraIntrinsics(cy_px=-1.0)
+
+
+def test_gate_geometry_validates_constructor_invariants() -> None:
+    with pytest.raises(ValueError, match="inner"):
+        GateGeometry(inner_width_m=0.0)
+    with pytest.raises(ValueError, match="outer gate width"):
+        GateGeometry(outer_width_m=1.0)
+    with pytest.raises(ValueError, match="outer gate height"):
+        GateGeometry(outer_height_m=1.0)
+    with pytest.raises(ValueError, match="depth"):
+        GateGeometry(depth_m=0.0)

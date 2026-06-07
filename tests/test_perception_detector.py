@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pytest
+
 from perception.detector import GateDetectionStatus, Round1ColorGateDetector
 
 
@@ -65,3 +67,12 @@ def test_round1_color_detector_reports_low_confidence_candidate() -> None:
     assert result.status == GateDetectionStatus.LOW_CONFIDENCE
     assert result.confidence is not None
     assert result.confidence < 0.2
+
+
+def test_round1_color_detector_validates_thresholds() -> None:
+    with pytest.raises(ValueError, match="min_pixels"):
+        Round1ColorGateDetector(min_pixels=0)
+    with pytest.raises(ValueError, match="min_confidence"):
+        Round1ColorGateDetector(min_confidence=-0.1)
+    with pytest.raises(ValueError, match="min_confidence"):
+        Round1ColorGateDetector(min_confidence=1.1)

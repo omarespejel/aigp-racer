@@ -43,6 +43,8 @@ class CommandRateLimiter:
         if self.last_emit_monotonic_s is None:
             self.last_emit_monotonic_s = monotonic_s
             return True
+        if monotonic_s < self.last_emit_monotonic_s:
+            return False
         if monotonic_s - self.last_emit_monotonic_s < self.min_interval_s:
             return False
         self.last_emit_monotonic_s = monotonic_s

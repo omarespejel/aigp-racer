@@ -28,6 +28,16 @@ Public search found:
 - Official technical spec PDF: https://www.theaigrandprix.com/wp-content/uploads/2026/05/260508_Technical_Spec_0002.pdf
 - Elodin harness: https://github.com/elodin-sys/ai-grand-prix
 
+Search metadata:
+
+- Checked at: 2026-06-08T02:06:04+09:00 to 2026-06-08T02:15:00+09:00.
+- Search scope: public web and public GitHub repositories; no authenticated team-portal access.
+- Search terms: `AI Grand Prix 2026 simulator SDK`, `AI Grand Prix VADR-TS-002`,
+  `site:theaigrandprix.com AI Grand Prix simulator SDK`,
+  `github AI Grand Prix DCL simulator`, `elodin ai grand prix harness`.
+- Filters: no date filter; direct official-site, team-portal, technical-spec, and
+  Elodin GitHub checks were included.
+
 No public DCL simulator/SDK package URL was found through public search. Current
 working assumption: official simulator access is team-portal-gated.
 
@@ -99,5 +109,5 @@ Local gate:
 Current result:
 
 ```text
-51 passed
+57 passed
 ```

@@ -4,7 +4,7 @@ from estimation.state import EstimatorInputs, MinimalStateEstimator
 from estimation.sync import TimestampBuffer
 from mavlink.telemetry import Attitude, HighresImu, LinearVelocity
 from perception.detector import GateObservation
-from perception.geometry import CameraPoseEstimate, project_frontoparallel_gate
+from perception.geometry import CameraPoseEstimate, ImagePoint, project_frontoparallel_gate
 
 
 def attitude() -> Attitude:
@@ -93,6 +93,38 @@ def test_estimator_reports_gate_without_velocity() -> None:
     assert estimate.source_frame_id == 7
     assert estimate.gate_pose_camera is not None
     assert estimate.gate_pose_camera.z_forward_m == 3.0
+
+
+def test_estimator_degrades_malformed_gate_observation_to_no_gate() -> None:
+    malformed_gate = GateObservation(
+        corners=(
+            ImagePoint(10.0, 10.0),
+            ImagePoint(10.0, 10.0),
+            ImagePoint(10.0, 10.0),
+            ImagePoint(10.0, 10.0),
+        ),
+        confidence=0.5,
+        sim_time_ns=10,
+        source_frame_id=7,
+        source="test",
+    )
+
+    estimate = MinimalStateEstimator().estimate(
+        EstimatorInputs(
+            sim_time_ns=10,
+            attitude=attitude(),
+            imu=imu(),
+            velocity=None,
+            gate_observation=malformed_gate,
+            telemetry_age_ns=20_000_000,
+        )
+    )
+
+    assert not estimate.stale
+    assert estimate.status == "NO_GATE"
+    assert estimate.gate_pose_camera is None
+    assert estimate.gate_confidence is None
+    assert estimate.source_frame_id == 7
 
 
 def test_estimator_ready_when_velocity_exists() -> None:

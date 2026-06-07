@@ -48,8 +48,12 @@ class MinimalStateEstimator:
         gate_pose = None
         gate_confidence = None
         if inputs.gate_observation is not None:
-            gate_pose = estimate_frontoparallel_gate_pose(inputs.gate_observation.corners)
-            gate_confidence = inputs.gate_observation.confidence
+            try:
+                gate_pose = estimate_frontoparallel_gate_pose(inputs.gate_observation.corners)
+                gate_confidence = inputs.gate_observation.confidence
+            except ValueError:
+                gate_pose = None
+                gate_confidence = None
 
         if stale:
             status = "STALE_TELEMETRY"
