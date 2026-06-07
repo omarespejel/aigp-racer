@@ -128,7 +128,7 @@ def build_evidence() -> dict[str, Any]:
         ],
         "validation": {
             "focused_pytest_count": 40,
-            "local_gate_pytest_count": 156,
+            "local_gate_pytest_count": 159,
             "status": "passed",
         },
     }
