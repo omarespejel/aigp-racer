@@ -48,6 +48,8 @@ jobs:
             --fixture tests/fixtures/frame_640x360_synthetic.jpg
           python scripts/aigp_practice_adapter_gate.py \
             --write-json docs/engineering/evidence/practice-adapter-2026-06-08.json
+          python scripts/aigp_gate_measurement_boundary_gate.py \
+            --write-json docs/engineering/evidence/gate-measurement-boundary-2026-06-08.json
           git diff --exit-code docs/engineering/evidence/aigp-profile-fixture-2026-06-08.json
           git diff --exit-code docs/engineering/evidence/race-episode-fixture-2026-06-08.json
           git diff --exit-code docs/engineering/evidence/decision-trace-fixture-2026-06-08.json
@@ -57,6 +59,7 @@ jobs:
           git diff --exit-code docs/engineering/evidence/command-intent-envelope-2026-06-08.json
           git diff --exit-code docs/engineering/evidence/jpeg-decode-benchmark-2026-06-08.json
           git diff --exit-code docs/engineering/evidence/practice-adapter-2026-06-08.json
+          git diff --exit-code docs/engineering/evidence/gate-measurement-boundary-2026-06-08.json
 
       - name: Ruff check
         run: python -m ruff check .
