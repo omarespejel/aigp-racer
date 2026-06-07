@@ -34,8 +34,10 @@ Tests:
 - `test_estimator_degrades_missing_gate_metadata_without_crashing`
 - `test_gate_pose_measurement_rejects_contradictory_modes`
 - `test_gate_pose_measurement_rejects_missing_screen_space_uncertainty`
+- `test_gate_pose_measurement_rejects_bool_uncertainty`
 - `test_gate_pose_measurement_coerces_mode_and_preserves_invariants`
 - `test_gate_pose_measurement_rejects_planar_center_mismatch`
+- `test_gate_pose_measurement_rejects_wrong_planar_pose_type`
 
 Validation:
 
@@ -48,7 +50,7 @@ Machine-readable evidence:
 
 ```text
 docs/engineering/evidence/gate-measurement-boundary-2026-06-08.json
-sha256 c6a0b4b089d84fa0e61b179f776834bc1d7808b0e94f6e6e78fa7a902d47590a
+sha256 13d0f037acea9849940ebfcb45268e06e622536f8a9b80097d1772f82f42d8b6
 ```
 
 ## Non-Claims
