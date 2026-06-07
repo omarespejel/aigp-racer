@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.venv/
+venv/
+
+# Runtime and research artifacts
+runs/
+artifacts/
+logs/
+data/
+datasets/
+models/
+checkpoints/
+videos/
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.onnx
+*.pt
+*.pth
+*.tar
+*.tar.gz
+*.zip
+
+# Local simulator and SDK drops
+official_sdk/
+official_sim/
+elodin-ai-grand-prix/
+

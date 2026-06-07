@@ -1,0 +1,251 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+language: en-US
+early_access: false
+tone_instructions: "Direct, concise, engineering-focused. Prioritize actionable findings with concrete risk and file references."
+
+reviews:
+  profile: assertive
+  request_changes_workflow: false
+  high_level_summary: true
+  high_level_summary_in_walkthrough: true
+  high_level_summary_instructions: >
+    Summarize the autonomy impact first: runtime latency, simulator contract,
+    estimator/control behavior, competition compliance, and evidence artifacts.
+    Avoid marketing language.
+  review_status: true
+  review_details: true
+  commit_status: true
+  fail_commit_status: true
+  collapse_walkthrough: true
+  changed_files_summary: true
+  sequence_diagrams: false
+  estimate_code_review_effort: true
+  assess_linked_issues: true
+  related_issues: true
+  related_prs: true
+  suggested_labels: true
+  auto_apply_labels: false
+  suggested_reviewers: false
+  in_progress_fortune: false
+  poem: false
+  enable_prompt_for_ai_agents: true
+
+  path_filters:
+    - "**"
+    - "!runs/**"
+    - "!artifacts/**"
+    - "!logs/**"
+    - "!data/**"
+    - "!datasets/**"
+    - "!models/**"
+    - "!checkpoints/**"
+    - "!videos/**"
+    - "!*.mp4"
+    - "!*.mov"
+    - "!*.avi"
+    - "!*.mkv"
+    - "!*.tar"
+    - "!*.tar.gz"
+    - "!*.zip"
+    - "!*.onnx"
+    - "!*.pt"
+    - "!*.pth"
+
+  path_instructions:
+    - path: "solver/**"
+      instructions: >
+        Review as flight-critical runtime code. Prioritize command-rate limits,
+        deterministic behavior, fail-safe state transitions, telemetry freshness,
+        and recovery behavior. Flag any logic that can exceed the AI Grand Prix
+        <100 Hz command ceiling, silently continue on stale telemetry, or hide
+        loss of gate confidence.
+    - path: "mavlink/**"
+      instructions: >
+        Check MAVLink message types, NED/body-frame conventions, timestamp
+        handling, heartbeat behavior, and strict separation between telemetry
+        parsing and command emission. Flag ambiguous frame transforms.
+    - path: "vision/**"
+      instructions: >
+        Review UDP JPEG reassembly for missing, duplicate, stale, and out-of-order
+        chunks. Require sim_time_ns preservation and bounded memory usage.
+    - path: "perception/**"
+      instructions: >
+        Prioritize camera intrinsics, +20 degree camera tilt, gate-corner
+        uncertainty, PnP geometry, and partial-corner handling. Flag any detector
+        that reports only boxes without uncertainty when it feeds estimation.
+    - path: "estimation/**"
+      instructions: >
+        Review estimator changes for time alignment, attitude/IMU assumptions,
+        velocity-telemetry ambiguity, covariance/noise handling, gate-relative
+        drift correction, and graceful degradation when gates are lost.
+    - path: "planning/**"
+      instructions: >
+        Review racing-line and speed-schedule code for reliability gates,
+        recovery behavior, conservative fallback, and no raw-lap-time-only
+        objective promotion.
+    - path: "policies/**"
+      instructions: >
+        Treat learned policy code as safety-sensitive. Require artifact hashes,
+        training/evaluation config capture, held-out reliability metrics, and
+        explicit distinction between offline training and live runtime inference.
+    - path: "evolve/**"
+      instructions: >
+        Review AutoRaceEvolve changes for evaluator immutability, hidden holdout
+        seeds, anti-reward-hacking controls, reproducible candidate artifacts,
+        and GenAI disclosure ledger updates for generated code or rewards.
+    - path: "worldforge_bridge/**"
+      instructions: >
+        Check that WorldForge remains offline evidence/replay/evaluation only.
+        Flag any dependency that places WorldForge, DecisionTrace generation, LLMs,
+        or learned world-model rollouts in the live flight hot path.
+    - path: "docs/**"
+      instructions: >
+        Verify factual claims are sourced and dated when they concern competition
+        rules, SDK contracts, technical spec values, papers, or schedules. Flag
+        stale or unsourced claims.
+    - path: "DISCLOSURE_LEDGER.md"
+      instructions: >
+        Check that new dependencies, model weights, generated-AI use, datasets,
+        and competition-relevant sources are recorded before they become runtime
+        or submission inputs.
+    - path: ".github/workflows/**"
+      instructions: >
+        Review CI changes for deterministic validation, secret exposure,
+        dependency pinning where practical, and whether failing checks provide
+        useful feedback to Qodo/CodeRabbit.
+
+  auto_review:
+    enabled: true
+    auto_incremental_review: true
+    auto_pause_after_reviewed_commits: 5
+    drafts: false
+    ignore_title_keywords:
+      - "wip"
+      - "draft"
+
+  labeling_instructions:
+    - label: runtime
+      instructions: "Changes the live flight path, MAVLink, solver, timing, or controller behavior."
+    - label: perception
+      instructions: "Changes camera, UDP frames, gate detection, PnP, or visual robustness."
+    - label: estimation
+      instructions: "Changes telemetry fusion, IMU handling, state estimation, or drift correction."
+    - label: offline-eval
+      instructions: "Changes WorldForge bridge, DecisionTrace, RaceEpisode, replay, metrics, or evaluator logic."
+    - label: compliance
+      instructions: "Changes licensing, disclosure, rules, generated-AI use, data provenance, or submission packaging."
+    - label: docs
+      instructions: "Documentation-only or research-summary change."
+
+  pre_merge_checks:
+    title:
+      mode: warning
+      requirements: "Use a concise imperative title that names the changed subsystem."
+    description:
+      mode: warning
+    issue_assessment:
+      mode: warning
+    custom_checks:
+      - name: Hot path boundary
+        mode: warning
+        instructions: >
+          Pass only if the PR keeps LLMs, large video models, learned world-model
+          rollouts, DecisionTrace generation, and offline optimizer code out of
+          the live flight hot path.
+      - name: Evidence artifact
+        mode: warning
+        instructions: >
+          Pass only if non-trivial runtime, policy, evaluator, or competition
+          research changes include a test, log fixture, metric, source citation,
+          or explicit blocker explaining why evidence is unavailable.
+
+  tools:
+    ruff:
+      enabled: true
+    shellcheck:
+      enabled: true
+    markdownlint:
+      enabled: true
+    yamllint:
+      enabled: true
+    actionlint:
+      enabled: true
+    zizmor:
+      enabled: true
+    gitleaks:
+      enabled: true
+    trufflehog:
+      enabled: true
+    github-checks:
+      enabled: true
+      timeout_ms: 300000
+
+  finishing_touches:
+    docstrings:
+      enabled: false
+    unit_tests:
+      enabled: true
+    simplify:
+      enabled: false
+    custom:
+      - name: update disclosure ledger
+        enabled: true
+        instructions: >
+          Check whether this PR adds or changes dependencies, model weights,
+          generated-AI usage, datasets, simulator sources, or competition
+          references. If yes, propose the minimal DISCLOSURE_LEDGER.md update.
+      - name: add regression fixture
+        enabled: true
+        instructions: >
+          For runtime, perception, estimation, planning, policy, or evaluator
+          changes, propose a small regression fixture or test that would catch
+          the most likely failure introduced by the PR.
+
+chat:
+  auto_reply: true
+
+knowledge_base:
+  opt_out: false
+  web_search:
+    enabled: true
+  code_guidelines:
+    enabled: true
+    filePatterns:
+      - AGENTS.md
+      - .github/copilot-instructions.md
+      - docs/review-guidelines.md
+  learnings:
+    scope: local
+    approval_delay: 7
+  issues:
+    scope: local
+  pull_requests:
+    scope: local
+
+issue_enrichment:
+  auto_enrich:
+    enabled: true
+  planning:
+    enabled: true
+    auto_planning:
+      enabled: true
+      labels:
+        - runtime
+        - perception
+        - estimation
+        - offline-eval
+        - compliance
+  labeling:
+    auto_apply_labels: false
+    labeling_instructions:
+      - label: runtime
+        instructions: "Live solver, controller, MAVLink, timing, or command path."
+      - label: perception
+        instructions: "Camera, UDP JPEG, gate detection, PnP, or visual robustness."
+      - label: estimation
+        instructions: "Telemetry, IMU, state estimation, sync, or drift correction."
+      - label: offline-eval
+        instructions: "WorldForge, DecisionTrace, evaluator, replay, metrics, or AutoRaceEvolve."
+      - label: compliance
+        instructions: "Competition rules, licensing, disclosure, data, model, or generated-AI provenance."
+
