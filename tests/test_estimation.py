@@ -318,6 +318,17 @@ def test_estimator_throttles_repeated_malformed_gate_logs(
     assert [record.aigp_sim_time_ns for record in caplog.records] == [10, 110]
 
 
+def test_estimator_rejects_bool_and_non_int_intervals() -> None:
+    with pytest.raises(ValueError, match="max_telemetry_age_ns"):
+        MinimalStateEstimator(max_telemetry_age_ns=True)  # type: ignore[arg-type]
+
+    with pytest.raises(ValueError, match="diagnostic_log_interval_ns"):
+        MinimalStateEstimator(diagnostic_log_interval_ns=False)  # type: ignore[arg-type]
+
+    with pytest.raises(ValueError, match="diagnostic_log_interval_ns"):
+        MinimalStateEstimator(diagnostic_log_interval_ns=1.5)  # type: ignore[arg-type]
+
+
 def test_estimator_ready_when_velocity_exists() -> None:
     estimate = MinimalStateEstimator().estimate(
         EstimatorInputs(

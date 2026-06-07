@@ -105,6 +105,11 @@ def build_evidence() -> dict[str, Any]:
                 "but throttle logs",
             },
             {
+                "name": "test_estimator_rejects_bool_and_non_int_intervals",
+                "path": "tests/test_estimation.py",
+                "purpose": "verify estimator timing config rejects bool-as-int values",
+            },
+            {
                 "name": "test_gate_pose_measurement_rejects_contradictory_modes",
                 "path": "tests/test_estimation.py",
                 "purpose": "verify measurement mode invariants are enforced at construction",
@@ -127,8 +132,8 @@ def build_evidence() -> dict[str, Any]:
             },
         ],
         "validation": {
-            "focused_pytest_count": 40,
-            "local_gate_pytest_count": 159,
+            "focused_pytest_count": 41,
+            "local_gate_pytest_count": 160,
             "status": "passed",
         },
     }
