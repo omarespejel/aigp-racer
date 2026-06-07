@@ -73,6 +73,12 @@ class Round1ColorGateDetector:
     min_pixels: int = 12
     min_confidence: float = 0.05
 
+    def __post_init__(self) -> None:
+        if self.min_pixels <= 0:
+            raise ValueError("min_pixels must be positive")
+        if not 0.0 <= self.min_confidence <= 1.0:
+            raise ValueError("min_confidence must be in [0.0, 1.0]")
+
     def analyze(
         self,
         image: RGBImage,

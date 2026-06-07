@@ -191,3 +191,16 @@ def test_drops_oldest_partial_frame_when_capacity_exceeded() -> None:
 
     assert reassembler.partial_frame_count == 1
     assert reassembler.dropped_partial_frames == 1
+
+
+def test_drop_older_than_removes_partial_frames_and_counts_drops() -> None:
+    reassembler = JpegFrameReassembler()
+    first = chunk_datagram(frame_id=1, chunk_id=0, total_chunks=2, jpeg_size=4, payload=b"aa")
+    second = chunk_datagram(frame_id=2, chunk_id=0, total_chunks=2, jpeg_size=4, payload=b"bb")
+
+    assert reassembler.add_datagram(first) is None
+    assert reassembler.add_datagram(second) is None
+
+    assert reassembler.drop_older_than(2) == 1
+    assert reassembler.partial_frame_count == 1
+    assert reassembler.dropped_partial_frames == 1

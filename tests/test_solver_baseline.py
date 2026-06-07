@@ -70,3 +70,12 @@ def test_command_rate_limiter_catches_late_rate_mutation() -> None:
 
     with pytest.raises(ValueError, match="less than 100"):
         _ = limiter.min_interval_s
+
+
+def test_command_rate_limiter_rejects_backward_time_without_rewind() -> None:
+    limiter = CommandRateLimiter(max_rate_hz=95.0)
+
+    assert limiter.allow(10.0)
+    assert not limiter.allow(9.0)
+    assert limiter.last_emit_monotonic_s == 10.0
+    assert limiter.allow(10.011)

@@ -24,3 +24,6 @@ uv run --python 3.14 --with jsonschema --with pyyaml --with ruff --with pytest \
   python -m pytest
 
 git diff --check
+git diff --exit-code docs/engineering/evidence/aigp-profile-fixture-2026-06-08.json
+git diff --exit-code docs/engineering/evidence/race-episode-fixture-2026-06-08.json
+git diff --exit-code docs/engineering/evidence/decision-trace-fixture-2026-06-08.json

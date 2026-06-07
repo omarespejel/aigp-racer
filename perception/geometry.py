@@ -17,6 +17,16 @@ class CameraIntrinsics:
     cy_px: float = 180.0
     tilt_up_deg: float = 20.0
 
+    def __post_init__(self) -> None:
+        if self.width_px <= 0 or self.height_px <= 0:
+            raise ValueError("camera resolution must be positive")
+        if self.fx_px <= 0.0 or self.fy_px <= 0.0:
+            raise ValueError("camera focal lengths must be positive")
+        if not 0.0 <= self.cx_px <= float(self.width_px):
+            raise ValueError("camera cx must be within image width")
+        if not 0.0 <= self.cy_px <= float(self.height_px):
+            raise ValueError("camera cy must be within image height")
+
 
 @dataclass(frozen=True)
 class GateGeometry:
@@ -25,6 +35,18 @@ class GateGeometry:
     outer_width_m: float = 2.7
     outer_height_m: float = 2.7
     depth_m: float = 0.26
+
+    def __post_init__(self) -> None:
+        if self.inner_width_m <= 0.0 or self.inner_height_m <= 0.0:
+            raise ValueError("inner gate dimensions must be positive")
+        if self.outer_width_m <= 0.0 or self.outer_height_m <= 0.0:
+            raise ValueError("outer gate dimensions must be positive")
+        if self.outer_width_m < self.inner_width_m:
+            raise ValueError("outer gate width must be at least inner gate width")
+        if self.outer_height_m < self.inner_height_m:
+            raise ValueError("outer gate height must be at least inner gate height")
+        if self.depth_m <= 0.0:
+            raise ValueError("gate depth must be positive")
 
 
 @dataclass(frozen=True)
