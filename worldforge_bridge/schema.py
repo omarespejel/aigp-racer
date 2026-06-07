@@ -13,6 +13,7 @@ class EpisodeEvent:
     event_type: str
     sim_time_ns: int
     payload: dict[str, Any]
+    source_frame_id: int | None = None
 
 
 @dataclass(frozen=True)
@@ -59,6 +60,7 @@ def build_bootstrap_episode() -> RaceEpisode:
             EpisodeEvent(
                 event_type="gate_observation",
                 sim_time_ns=44,
+                source_frame_id=7,
                 payload={
                     "confidence": 0.5,
                     "source": "round1_color_bbox",
@@ -68,6 +70,7 @@ def build_bootstrap_episode() -> RaceEpisode:
             EpisodeEvent(
                 event_type="state_estimate",
                 sim_time_ns=44,
+                source_frame_id=7,
                 payload={
                     "status": "GATE_WITHOUT_VELOCITY",
                     "stale": False,
@@ -81,6 +84,7 @@ def build_bootstrap_episode() -> RaceEpisode:
             EpisodeEvent(
                 event_type="control_command",
                 sim_time_ns=44,
+                source_frame_id=7,
                 payload={
                     "kind": "BODY_VELOCITY",
                     "forward_m_s": 0.75,
@@ -105,6 +109,7 @@ def build_bootstrap_decision_trace() -> DecisionTrace:
         episode_id="fixture-ten-hour-bootstrap-2026-06-08",
         observation={
             "state_status": "GATE_WITHOUT_VELOCITY",
+            "source_frame_id": 7,
             "gate_confidence": 0.5,
             "gate_pose_camera_m": {
                 "x_right": 0.0,

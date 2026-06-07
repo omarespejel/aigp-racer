@@ -26,7 +26,8 @@
         ],
         "source": "round1_color_bbox"
       },
-      "sim_time_ns": 44
+      "sim_time_ns": 44,
+      "source_frame_id": 7
     },
     {
       "event_type": "state_estimate",
@@ -39,7 +40,8 @@
         "stale": false,
         "status": "GATE_WITHOUT_VELOCITY"
       },
-      "sim_time_ns": 44
+      "sim_time_ns": 44,
+      "source_frame_id": 7
     },
     {
       "event_type": "control_command",
@@ -50,7 +52,8 @@
         "reason": "tracking visible gate",
         "right_m_s": 0.0
       },
-      "sim_time_ns": 44
+      "sim_time_ns": 44,
+      "source_frame_id": 7
     }
   ],
   "non_claims": [

@@ -3,6 +3,8 @@ from __future__ import annotations
 import pytest
 
 from vision.reassembler import (
+    DEFAULT_MAX_JPEG_SIZE_BYTES,
+    DEFAULT_MAX_TOTAL_CHUNKS,
     HEADER_SIZE,
     JpegFrameReassembler,
     VisionChunkHeader,
@@ -144,6 +146,39 @@ def test_rejects_chunk_index_out_of_range() -> None:
 
     with pytest.raises(VisionPacketError, match="chunk_id"):
         parse_datagram(datagram)
+
+
+def test_rejects_declared_chunk_count_above_limit() -> None:
+    datagram = chunk_datagram(
+        frame_id=1,
+        chunk_id=0,
+        total_chunks=DEFAULT_MAX_TOTAL_CHUNKS + 1,
+        jpeg_size=4,
+        payload=b"ab",
+    )
+
+    with pytest.raises(VisionPacketError, match="total_chunks exceeds"):
+        parse_datagram(datagram)
+
+
+def test_rejects_declared_jpeg_size_above_limit() -> None:
+    datagram = chunk_datagram(
+        frame_id=1,
+        chunk_id=0,
+        total_chunks=1,
+        jpeg_size=DEFAULT_MAX_JPEG_SIZE_BYTES + 1,
+        payload=b"ab",
+    )
+
+    with pytest.raises(VisionPacketError, match="jpeg_size exceeds"):
+        parse_datagram(datagram)
+
+
+def test_reassembler_allows_custom_resource_bounds() -> None:
+    reassembler = JpegFrameReassembler(max_total_chunks=1, max_jpeg_size_bytes=4)
+    datagram = chunk_datagram(frame_id=1, chunk_id=0, total_chunks=1, jpeg_size=4, payload=b"abcd")
+
+    assert reassembler.add_datagram(datagram) is not None
 
 
 def test_drops_oldest_partial_frame_when_capacity_exceeded() -> None:

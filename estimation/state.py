@@ -12,6 +12,7 @@ from perception.geometry import CameraPoseEstimate, estimate_frontoparallel_gate
 @dataclass(frozen=True)
 class StateEstimate:
     sim_time_ns: int
+    source_frame_id: int | None
     attitude: Attitude | None
     imu: HighresImu | None
     velocity: LinearVelocity | None
@@ -61,6 +62,11 @@ class MinimalStateEstimator:
 
         return StateEstimate(
             sim_time_ns=inputs.sim_time_ns,
+            source_frame_id=(
+                inputs.gate_observation.source_frame_id
+                if inputs.gate_observation is not None
+                else None
+            ),
             attitude=inputs.attitude,
             imu=inputs.imu,
             velocity=inputs.velocity,

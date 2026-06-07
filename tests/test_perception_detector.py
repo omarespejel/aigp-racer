@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from perception.detector import Round1ColorGateDetector
+from perception.detector import GateDetectionStatus, Round1ColorGateDetector
 
 
 def black_image(width: int = 16, height: int = 12) -> list[list[tuple[int, int, int]]]:
@@ -16,10 +16,15 @@ def test_round1_color_detector_finds_highlighted_gate_bbox() -> None:
         image[3][u] = (255, 0, 255)
         image[8][u] = (255, 0, 255)
 
-    observation = Round1ColorGateDetector(min_pixels=10).detect(image, sim_time_ns=44)
+    observation = Round1ColorGateDetector(min_pixels=10).detect(
+        image,
+        sim_time_ns=44,
+        source_frame_id=7,
+    )
 
     assert observation is not None
     assert observation.sim_time_ns == 44
+    assert observation.source_frame_id == 7
     assert observation.source == "round1_color_bbox"
     assert observation.corners[0].u_px == 4.0
     assert observation.corners[0].v_px == 3.0
@@ -30,10 +35,33 @@ def test_round1_color_detector_finds_highlighted_gate_bbox() -> None:
 
 def test_round1_color_detector_ignores_dark_frame() -> None:
     assert Round1ColorGateDetector().detect(black_image()) is None
+    result = Round1ColorGateDetector().analyze(black_image(), sim_time_ns=44, source_frame_id=7)
+
+    assert result.status == GateDetectionStatus.NO_HIGHLIGHT
+    assert result.degraded
+    assert result.sim_time_ns == 44
+    assert result.source_frame_id == 7
 
 
 def test_round1_color_detector_rejects_tiny_highlight() -> None:
     image = black_image()
     image[4][4] = (255, 0, 255)
 
-    assert Round1ColorGateDetector(min_pixels=2).detect(image) is None
+    result = Round1ColorGateDetector(min_pixels=2).analyze(image)
+
+    assert result.status == GateDetectionStatus.TOO_FEW_PIXELS
+    assert result.observation is None
+
+
+def test_round1_color_detector_reports_low_confidence_candidate() -> None:
+    image = black_image()
+    image[2][2] = (255, 0, 255)
+    image[2][10] = (255, 0, 255)
+    image[9][2] = (255, 0, 255)
+    image[9][10] = (255, 0, 255)
+
+    result = Round1ColorGateDetector(min_pixels=4, min_confidence=0.2).analyze(image)
+
+    assert result.status == GateDetectionStatus.LOW_CONFIDENCE
+    assert result.confidence is not None
+    assert result.confidence < 0.2

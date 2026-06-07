@@ -9,6 +9,8 @@ from dataclasses import dataclass, field
 HEADER_STRUCT = struct.Struct("<IHHIIQ")
 HEADER_SIZE = HEADER_STRUCT.size
 DEFAULT_MAX_PARTIAL_FRAMES = 8
+DEFAULT_MAX_TOTAL_CHUNKS = 256
+DEFAULT_MAX_JPEG_SIZE_BYTES = 2 * 1024 * 1024
 
 
 class VisionPacketError(ValueError):
@@ -102,8 +104,16 @@ def pack_header(header: VisionChunkHeader) -> bytes:
     )
 
 
-def parse_datagram(datagram: bytes) -> VisionChunk:
+def parse_datagram(
+    datagram: bytes,
+    *,
+    max_total_chunks: int = DEFAULT_MAX_TOTAL_CHUNKS,
+    max_jpeg_size_bytes: int = DEFAULT_MAX_JPEG_SIZE_BYTES,
+) -> VisionChunk:
     """Parse one UDP datagram into a typed vision chunk."""
+
+    _validate_positive_limit(max_total_chunks, "max_total_chunks")
+    _validate_positive_limit(max_jpeg_size_bytes, "max_jpeg_size_bytes")
 
     if len(datagram) < HEADER_SIZE:
         raise VisionPacketError("vision datagram shorter than 24-byte header")
@@ -114,10 +124,14 @@ def parse_datagram(datagram: bytes) -> VisionChunk:
 
     if header.total_chunks <= 0:
         raise VisionPacketError("total_chunks must be positive")
+    if header.total_chunks > max_total_chunks:
+        raise VisionPacketError("total_chunks exceeds configured maximum")
     if header.chunk_id >= header.total_chunks:
         raise VisionPacketError("chunk_id must be within total_chunks")
     if header.jpeg_size <= 0:
         raise VisionPacketError("jpeg_size must be positive")
+    if header.jpeg_size > max_jpeg_size_bytes:
+        raise VisionPacketError("jpeg_size exceeds configured maximum")
     if header.payload_size != len(payload):
         raise VisionPacketError("payload_size does not match datagram payload")
     if header.payload_size > header.jpeg_size:
@@ -129,10 +143,20 @@ def parse_datagram(datagram: bytes) -> VisionChunk:
 class JpegFrameReassembler:
     """Bounded reassembler for the official chunked JPEG UDP stream."""
 
-    def __init__(self, max_partial_frames: int = DEFAULT_MAX_PARTIAL_FRAMES) -> None:
+    def __init__(
+        self,
+        max_partial_frames: int = DEFAULT_MAX_PARTIAL_FRAMES,
+        *,
+        max_total_chunks: int = DEFAULT_MAX_TOTAL_CHUNKS,
+        max_jpeg_size_bytes: int = DEFAULT_MAX_JPEG_SIZE_BYTES,
+    ) -> None:
         if max_partial_frames <= 0:
             raise ValueError("max_partial_frames must be positive")
+        _validate_positive_limit(max_total_chunks, "max_total_chunks")
+        _validate_positive_limit(max_jpeg_size_bytes, "max_jpeg_size_bytes")
         self.max_partial_frames = max_partial_frames
+        self.max_total_chunks = max_total_chunks
+        self.max_jpeg_size_bytes = max_jpeg_size_bytes
         self._partials: OrderedDict[int, _PartialFrame] = OrderedDict()
         self.dropped_partial_frames = 0
 
@@ -141,7 +165,11 @@ class JpegFrameReassembler:
         return len(self._partials)
 
     def add_datagram(self, datagram: bytes) -> ReassembledFrame | None:
-        chunk = parse_datagram(datagram)
+        chunk = parse_datagram(
+            datagram,
+            max_total_chunks=self.max_total_chunks,
+            max_jpeg_size_bytes=self.max_jpeg_size_bytes,
+        )
         header = chunk.header
         partial = self._partials.get(header.frame_id)
         if partial is None:
@@ -177,3 +205,8 @@ class JpegFrameReassembler:
         while len(self._partials) > self.max_partial_frames:
             self._partials.popitem(last=False)
             self.dropped_partial_frames += 1
+
+
+def _validate_positive_limit(value: int, name: str) -> None:
+    if value <= 0:
+        raise ValueError(f"{name} must be positive")

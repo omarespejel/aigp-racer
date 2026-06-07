@@ -96,7 +96,15 @@ class TelemetryProbe:
         unique_candidates = tuple(_dedupe_velocity_candidates(self.velocity_candidates))
         if not unique_candidates:
             status = VelocityProbeStatus.NOT_AVAILABLE
-        elif len({candidate.source_fields for candidate in unique_candidates}) == 1:
+        elif (
+            len(
+                {
+                    (candidate.source_message, candidate.source_fields)
+                    for candidate in unique_candidates
+                }
+            )
+            == 1
+        ):
             status = VelocityProbeStatus.AVAILABLE
         else:
             status = VelocityProbeStatus.AMBIGUOUS

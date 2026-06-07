@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pytest
+
 from estimation.state import StateEstimate
 from mavlink.telemetry import Attitude, HighresImu
 from perception.geometry import CameraPoseEstimate
@@ -10,6 +12,7 @@ from solver.commands import CommandKind, CommandRateLimiter
 def state(*, stale: bool, gate_pose: CameraPoseEstimate | None) -> StateEstimate:
     return StateEstimate(
         sim_time_ns=100,
+        source_frame_id=7,
         attitude=Attitude(1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
         imu=HighresImu(1, (0.0, 0.0, -9.8), (0.0, 0.0, 0.0)),
         velocity=None,
@@ -25,6 +28,7 @@ def test_controller_holds_on_stale_state() -> None:
 
     assert command.kind == CommandKind.HOLD
     assert command.forward_m_s == 0.0
+    assert command.source_frame_id == 7
 
 
 def test_controller_reacquires_when_gate_missing() -> None:
@@ -40,6 +44,7 @@ def test_controller_tracks_visible_gate_conservatively() -> None:
     )
 
     assert command.kind == CommandKind.BODY_VELOCITY
+    assert command.source_frame_id == 7
     assert command.forward_m_s == 1.0
     assert command.right_m_s == 0.2
     assert command.down_m_s == -0.1
@@ -51,3 +56,17 @@ def test_command_rate_limiter_keeps_below_100hz() -> None:
     assert limiter.allow(0.0)
     assert not limiter.allow(0.005)
     assert limiter.allow(0.011)
+
+
+@pytest.mark.parametrize("max_rate_hz", [0.0, -1.0, 100.0, 120.0])
+def test_command_rate_limiter_rejects_invalid_rates(max_rate_hz: float) -> None:
+    with pytest.raises(ValueError, match="less than 100"):
+        CommandRateLimiter(max_rate_hz=max_rate_hz)
+
+
+def test_command_rate_limiter_catches_late_rate_mutation() -> None:
+    limiter = CommandRateLimiter(max_rate_hz=95.0)
+    limiter.max_rate_hz = 100.0
+
+    with pytest.raises(ValueError, match="less than 100"):
+        _ = limiter.min_interval_s
