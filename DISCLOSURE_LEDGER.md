@@ -10,6 +10,7 @@ This file tracks competition-relevant disclosure material for AI Grand Prix work
 - 2026-06-08: First-runtime bootstrap code, fixtures, and engineering notes drafted with Codex. Public Elodin practice harness cloned locally for inspection only and not vendored into the repo.
 - 2026-06-08: Decoded telemetry probe client, local UDP JSON smoke path, deterministic fixture evidence, and tests drafted with Codex for issue #3.
 - 2026-06-08: Dependency-optional JPEG decode benchmark, synthetic 640 x 360 JPEG fixture, local Pillow measurement artifact, and engineering note drafted with Codex for issue #17.
+- 2026-06-08: Transport-independent command-intent envelope, deterministic evidence, and tests drafted with Codex for issue #14.
 
 ## FLOSS Dependencies
 
