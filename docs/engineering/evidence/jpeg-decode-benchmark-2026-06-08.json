@@ -1,0 +1,56 @@
+{
+  "claim_boundary": "local JPEG decode benchmark only; not official simulator frame, full vision pipeline, or Windows packaging evidence",
+  "config": {
+    "decoder_names": [
+      "pillow"
+    ],
+    "iterations": 300,
+    "vision_p99_budget_ms": 25.0,
+    "warmup": 25
+  },
+  "environment": {
+    "machine": "arm64",
+    "platform": "macOS-26.5.1-arm64-arm-64bit-Mach-O",
+    "processor": "arm",
+    "python_version": "3.14.3"
+  },
+  "fixture": {
+    "path": "tests/fixtures/frame_640x360_synthetic.jpg",
+    "sha256": "300317f992c7d4c90396af410c46832d58cc6efed480d229ffaff4b4239b9401",
+    "size_bytes": 65050
+  },
+  "github_issue": "https://github.com/omarespejel/aigp-racer/issues/17",
+  "non_claims": [
+    "not a runtime dependency decision",
+    "not official simulator frame evidence",
+    "not detector latency evidence",
+    "not full vision-pipeline p99 evidence",
+    "not Windows packaging proof until run on the official Windows host"
+  ],
+  "promotion_rule": "A decoder is eligible for runtime consideration only if it is available, fits the p99 budget on representative frames, and has a documented Windows/Python 3.14 packaging path.",
+  "results": [
+    {
+      "available": true,
+      "decoded_shape_hwc": [
+        360,
+        640,
+        3
+      ],
+      "dependency_note": "Pillow fallback decoder; simple packaging path, not assumed speed winner",
+      "iterations": 300,
+      "latency_ms": {
+        "max": 0.852875,
+        "median": 0.645792,
+        "min": 0.627917,
+        "p50": 0.645792,
+        "p95": 0.71325,
+        "p99": 0.83174
+      },
+      "name": "pillow",
+      "passes_vision_p99_budget": true,
+      "version": "12.2.0",
+      "warmup": 25
+    }
+  ],
+  "schema_version": "aigp.jpeg_decode_benchmark.v0"
+}
