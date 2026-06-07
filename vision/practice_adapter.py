@@ -113,7 +113,7 @@ def _rgba_to_rgb(pixel: Sequence[int]) -> RGBTuple:
         ("blue", blue),
         ("alpha", alpha),
     ):
-        if not isinstance(channel, int) or channel < 0 or channel > 255:
+        if type(channel) is not int or channel < 0 or channel > 255:
             raise PracticeFrameAdapterError(
                 f"RGBA {channel_name} channel must be an integer in [0, 255]"
             )
