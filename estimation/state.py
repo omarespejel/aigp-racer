@@ -210,8 +210,33 @@ class EstimatorInputs:
 class MinimalStateEstimator:
     """First-pass estimator: attitude/IMU plus optional velocity and gate pose."""
 
-    def __init__(self, max_telemetry_age_ns: int = 100_000_000) -> None:
+    def __init__(
+        self,
+        max_telemetry_age_ns: int = 100_000_000,
+        diagnostic_log_interval_ns: int = 250_000_000,
+    ) -> None:
+        if diagnostic_log_interval_ns < 0:
+            raise ValueError("diagnostic_log_interval_ns must be non-negative")
         self.max_telemetry_age_ns = max_telemetry_age_ns
+        self.diagnostic_log_interval_ns = diagnostic_log_interval_ns
+        self._last_diagnostic_log_key: tuple[str, str] | None = None
+        self._last_diagnostic_log_time_ns: int | None = None
+
+    def _maybe_emit_diagnostic_event(self, diagnostic: EstimatorDiagnosticEvent) -> None:
+        diagnostic_key = (diagnostic.status, diagnostic.reason)
+        should_emit = (
+            self._last_diagnostic_log_key != diagnostic_key
+            or self._last_diagnostic_log_time_ns is None
+            or diagnostic.sim_time_ns < self._last_diagnostic_log_time_ns
+            or diagnostic.sim_time_ns - self._last_diagnostic_log_time_ns
+            >= self.diagnostic_log_interval_ns
+        )
+        if not should_emit:
+            return
+
+        _emit_diagnostic_event(diagnostic)
+        self._last_diagnostic_log_key = diagnostic_key
+        self._last_diagnostic_log_time_ns = diagnostic.sim_time_ns
 
     def estimate(self, inputs: EstimatorInputs) -> StateEstimate:
         stale = (
@@ -248,7 +273,7 @@ class MinimalStateEstimator:
                     source=gate_source,
                 )
                 diagnostics = (diagnostic,)
-                _emit_diagnostic_event(diagnostic)
+                self._maybe_emit_diagnostic_event(diagnostic)
 
         if stale:
             status = "STALE_TELEMETRY"

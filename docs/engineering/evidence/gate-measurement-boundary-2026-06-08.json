@@ -82,6 +82,11 @@
       "purpose": "verify malformed observations missing metadata still degrade safely with a structured telemetry log"
     },
     {
+      "name": "test_estimator_throttles_repeated_malformed_gate_logs",
+      "path": "tests/test_estimation.py",
+      "purpose": "verify repeated malformed gate frames keep diagnostics but throttle logs"
+    },
+    {
       "name": "test_gate_pose_measurement_rejects_contradictory_modes",
       "path": "tests/test_estimation.py",
       "purpose": "verify measurement mode invariants are enforced at construction"
@@ -103,8 +108,8 @@
     }
   ],
   "validation": {
-    "focused_pytest_count": 39,
-    "local_gate_pytest_count": 155,
+    "focused_pytest_count": 40,
+    "local_gate_pytest_count": 156,
     "status": "passed"
   }
 }

@@ -261,6 +261,63 @@ def test_estimator_degrades_missing_gate_metadata_without_crashing(
     assert caplog.records[0].aigp_source is None
 
 
+def test_estimator_throttles_repeated_malformed_gate_logs(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    malformed_gate = GateObservation(
+        corners=(
+            ImagePoint(10.0, 10.0),
+            ImagePoint(10.0, 10.0),
+            ImagePoint(10.0, 10.0),
+            ImagePoint(10.0, 10.0),
+        ),
+        confidence=0.5,
+        sim_time_ns=10,
+        source_frame_id=7,
+        source="test",
+        corner_uncertainty_px=(2.0, 2.0, 2.0, 2.0),
+    )
+    estimator = MinimalStateEstimator(diagnostic_log_interval_ns=100)
+
+    with caplog.at_level(logging.WARNING, logger="estimation.state"):
+        first = estimator.estimate(
+            EstimatorInputs(
+                sim_time_ns=10,
+                attitude=attitude(),
+                imu=imu(),
+                velocity=None,
+                gate_observation=malformed_gate,
+                telemetry_age_ns=20_000_000,
+            )
+        )
+        second = estimator.estimate(
+            EstimatorInputs(
+                sim_time_ns=20,
+                attitude=attitude(),
+                imu=imu(),
+                velocity=None,
+                gate_observation=malformed_gate,
+                telemetry_age_ns=20_000_000,
+            )
+        )
+        third = estimator.estimate(
+            EstimatorInputs(
+                sim_time_ns=110,
+                attitude=attitude(),
+                imu=imu(),
+                velocity=None,
+                gate_observation=malformed_gate,
+                telemetry_age_ns=20_000_000,
+            )
+        )
+
+    assert first.diagnostics
+    assert second.diagnostics
+    assert third.diagnostics
+    assert len(caplog.records) == 2
+    assert [record.aigp_sim_time_ns for record in caplog.records] == [10, 110]
+
+
 def test_estimator_ready_when_velocity_exists() -> None:
     estimate = MinimalStateEstimator().estimate(
         EstimatorInputs(
