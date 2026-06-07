@@ -145,7 +145,12 @@ def test_estimator_degrades_malformed_gate_observation_to_no_gate(
             )
         )
 
-    assert caplog.records == []
+    assert len(caplog.records) == 1
+    assert caplog.records[0].getMessage() == ("estimator degraded: MALFORMED_GATE_OBSERVATION")
+    assert caplog.records[0].aigp_event_type == "estimator_degraded"
+    assert caplog.records[0].aigp_status == "MALFORMED_GATE_OBSERVATION"
+    assert caplog.records[0].aigp_source_frame_id == 7
+    assert caplog.records[0].aigp_source == "test"
     assert estimate.diagnostics == (
         EstimatorDiagnosticEvent(
             event_type="estimator_degraded",
@@ -250,7 +255,10 @@ def test_estimator_degrades_missing_gate_metadata_without_crashing(
     assert estimate.source_frame_id is None
     assert estimate.diagnostics[0].source_frame_id is None
     assert estimate.diagnostics[0].source is None
-    assert caplog.records == []
+    assert len(caplog.records) == 1
+    assert caplog.records[0].aigp_status == "MALFORMED_GATE_OBSERVATION"
+    assert caplog.records[0].aigp_source_frame_id is None
+    assert caplog.records[0].aigp_source is None
 
 
 def test_estimator_ready_when_velocity_exists() -> None:
