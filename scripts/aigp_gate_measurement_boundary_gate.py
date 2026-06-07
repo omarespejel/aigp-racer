@@ -83,7 +83,8 @@ def build_evidence() -> dict[str, Any]:
             {
                 "name": "test_estimator_degrades_malformed_gate_observation_to_no_gate",
                 "path": "tests/test_estimation.py",
-                "purpose": "verify malformed observations return a structured diagnostic event",
+                "purpose": "verify malformed observations return a structured diagnostic event "
+                "and emit a telemetry log",
             },
             {
                 "name": "test_estimator_degrades_missing_corner_uncertainty_without_pose",
@@ -94,7 +95,8 @@ def build_evidence() -> dict[str, Any]:
             {
                 "name": "test_estimator_degrades_missing_gate_metadata_without_crashing",
                 "path": "tests/test_estimation.py",
-                "purpose": "verify malformed observations missing metadata still degrade safely",
+                "purpose": "verify malformed observations missing metadata still degrade safely "
+                "with a structured telemetry log",
             },
             {
                 "name": "test_gate_pose_measurement_rejects_contradictory_modes",
@@ -120,7 +122,7 @@ def build_evidence() -> dict[str, Any]:
         ],
         "validation": {
             "focused_pytest_count": 39,
-            "local_gate_pytest_count": 121,
+            "local_gate_pytest_count": 155,
             "status": "passed",
         },
     }

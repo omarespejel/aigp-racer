@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
 from enum import StrEnum
 from math import isfinite
@@ -16,6 +17,8 @@ from perception.geometry import (
     estimate_frontoparallel_gate_pose,
     estimate_planar_gate_pose,
 )
+
+LOGGER = logging.getLogger(__name__)
 
 
 class GatePoseMeasurementMode(StrEnum):
@@ -116,6 +119,21 @@ class EstimatorDiagnosticEvent:
     sim_time_ns: int
     source_frame_id: int | None
     source: str | None
+
+
+def _emit_diagnostic_event(diagnostic: EstimatorDiagnosticEvent) -> None:
+    LOGGER.warning(
+        "estimator degraded: %s",
+        diagnostic.status,
+        extra={
+            "aigp_event_type": diagnostic.event_type,
+            "aigp_status": diagnostic.status,
+            "aigp_reason": diagnostic.reason,
+            "aigp_sim_time_ns": diagnostic.sim_time_ns,
+            "aigp_source_frame_id": diagnostic.source_frame_id,
+            "aigp_source": diagnostic.source,
+        },
+    )
 
 
 def gate_measurement_from_observation(
@@ -230,6 +248,7 @@ class MinimalStateEstimator:
                     source=gate_source,
                 )
                 diagnostics = (diagnostic,)
+                _emit_diagnostic_event(diagnostic)
 
         if stale:
             status = "STALE_TELEMETRY"
