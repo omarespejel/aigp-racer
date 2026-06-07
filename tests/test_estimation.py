@@ -523,6 +523,19 @@ def test_gate_pose_measurement_coerces_mode_and_preserves_invariants() -> None:
         )
 
 
+def test_gate_pose_measurement_rejects_bool_uncertainty() -> None:
+    with pytest.raises(ValueError, match="four non-negative"):
+        GatePoseMeasurement(
+            mode=GatePoseMeasurementMode.SCREEN_SPACE_CENTER_DEPTH,
+            center_camera=CameraPoseEstimate(x_right_m=0.0, y_down_m=0.0, z_forward_m=3.0),
+            confidence=None,
+            sim_time_ns=None,
+            source_frame_id=None,
+            source="bad_fixture",
+            corner_uncertainty_px=(True, 1.0, 1.0, 1.0),  # type: ignore[arg-type]
+        )
+
+
 def test_gate_pose_measurement_rejects_planar_center_mismatch() -> None:
     pose = CameraPoseEstimate(x_right_m=0.0, y_down_m=0.0, z_forward_m=3.0)
     planar = gate_measurement_from_labeled_corners(
@@ -549,6 +562,19 @@ def test_gate_pose_measurement_rejects_planar_center_mismatch() -> None:
             source_frame_id=None,
             source="bad_planar_fixture",
             planar_pose=planar,
+        )
+
+
+def test_gate_pose_measurement_rejects_wrong_planar_pose_type() -> None:
+    with pytest.raises(ValueError, match="PlanarGatePoseEstimate"):
+        GatePoseMeasurement(
+            mode=GatePoseMeasurementMode.LABELED_PLANAR_PNP,
+            center_camera=CameraPoseEstimate(x_right_m=0.0, y_down_m=0.0, z_forward_m=3.0),
+            confidence=None,
+            sim_time_ns=None,
+            source_frame_id=None,
+            source="bad_planar_fixture",
+            planar_pose={"center": (0.0, 0.0, 3.0)},  # type: ignore[arg-type]
         )
 
 

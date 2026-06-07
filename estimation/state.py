@@ -64,14 +64,17 @@ class GatePoseMeasurement:
                 raise ValueError(
                     "GatePoseMeasurement corner_uncertainty_px must be four non-negative values"
                 ) from exc
-            object.__setattr__(self, "corner_uncertainty_px", uncertainty)
             if len(uncertainty) != 4 or any(
-                not isinstance(value, Real) or not isfinite(float(value)) or value < 0.0
-                for value in uncertainty
+                not _is_non_negative_finite_real(value) for value in uncertainty
             ):
                 raise ValueError(
                     "GatePoseMeasurement corner_uncertainty_px must be four non-negative values"
                 )
+            object.__setattr__(
+                self,
+                "corner_uncertainty_px",
+                tuple(float(value) for value in uncertainty),
+            )
 
         if (
             mode == GatePoseMeasurementMode.SCREEN_SPACE_CENTER_DEPTH
@@ -89,6 +92,13 @@ class GatePoseMeasurement:
             )
         if mode == GatePoseMeasurementMode.LABELED_PLANAR_PNP and self.planar_pose is None:
             raise ValueError("GatePoseMeasurement LABELED_PLANAR_PNP requires planar_pose")
+        if mode == GatePoseMeasurementMode.LABELED_PLANAR_PNP and not isinstance(
+            self.planar_pose, PlanarGatePoseEstimate
+        ):
+            raise ValueError(
+                "GatePoseMeasurement LABELED_PLANAR_PNP planar_pose must be "
+                "a PlanarGatePoseEstimate"
+            )
         if (
             mode == GatePoseMeasurementMode.LABELED_PLANAR_PNP
             and self.center_camera != self.planar_pose.center
@@ -140,6 +150,15 @@ def _require_non_negative_int(name: str, value: int) -> int:
     if type(value) is not int or value < 0:
         raise ValueError(f"{name} must be a non-negative int")
     return value
+
+
+def _is_non_negative_finite_real(value: object) -> bool:
+    return (
+        not isinstance(value, bool)
+        and isinstance(value, Real)
+        and isfinite(float(value))
+        and float(value) >= 0.0
+    )
 
 
 def gate_measurement_from_observation(

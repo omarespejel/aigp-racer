@@ -120,6 +120,11 @@ def build_evidence() -> dict[str, Any]:
                 "purpose": "verify screen-space measurements require explicit uncertainty bounds",
             },
             {
+                "name": "test_gate_pose_measurement_rejects_bool_uncertainty",
+                "path": "tests/test_estimation.py",
+                "purpose": "verify explicit uncertainty bounds reject bool-as-number values",
+            },
+            {
                 "name": "test_gate_pose_measurement_coerces_mode_and_preserves_invariants",
                 "path": "tests/test_estimation.py",
                 "purpose": "verify raw string modes cannot bypass measurement invariants",
@@ -130,10 +135,15 @@ def build_evidence() -> dict[str, Any]:
                 "purpose": "verify labeled planar measurements cannot publish "
                 "a center that disagrees with planar_pose.center",
             },
+            {
+                "name": "test_gate_pose_measurement_rejects_wrong_planar_pose_type",
+                "path": "tests/test_estimation.py",
+                "purpose": "verify untyped planar_pose values fail with a controlled ValueError",
+            },
         ],
         "validation": {
-            "focused_pytest_count": 41,
-            "local_gate_pytest_count": 160,
+            "focused_pytest_count": 43,
+            "local_gate_pytest_count": 162,
             "status": "passed",
         },
     }
