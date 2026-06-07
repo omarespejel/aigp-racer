@@ -50,6 +50,16 @@ def test_controller_tracks_visible_gate_conservatively() -> None:
     assert command.down_m_s == -0.1
 
 
+def test_controller_reacquires_on_non_positive_gate_depth() -> None:
+    command = ConservativeController().command(
+        state(stale=False, gate_pose=CameraPoseEstimate(0.0, 0.0, 0.0))
+    )
+
+    assert command.kind == CommandKind.REACQUIRE
+    assert command.forward_m_s == 0.0
+    assert command.reason == "gate depth non-positive"
+
+
 def test_command_rate_limiter_keeps_below_100hz() -> None:
     limiter = CommandRateLimiter(max_rate_hz=95.0)
 
@@ -79,3 +89,20 @@ def test_command_rate_limiter_rejects_backward_time_without_rewind() -> None:
     assert not limiter.allow(9.0)
     assert limiter.last_emit_monotonic_s == 10.0
     assert limiter.allow(10.011)
+
+
+@pytest.mark.parametrize("monotonic_s", [float("nan"), float("inf"), float("-inf")])
+def test_command_rate_limiter_rejects_non_finite_first_timestamp(monotonic_s: float) -> None:
+    limiter = CommandRateLimiter(max_rate_hz=95.0)
+
+    assert not limiter.allow(monotonic_s)
+    assert limiter.last_emit_monotonic_s is None
+
+
+@pytest.mark.parametrize("monotonic_s", [float("nan"), float("inf"), float("-inf")])
+def test_command_rate_limiter_rejects_non_finite_later_timestamp(monotonic_s: float) -> None:
+    limiter = CommandRateLimiter(max_rate_hz=95.0)
+
+    assert limiter.allow(10.0)
+    assert not limiter.allow(monotonic_s)
+    assert limiter.last_emit_monotonic_s == 10.0
