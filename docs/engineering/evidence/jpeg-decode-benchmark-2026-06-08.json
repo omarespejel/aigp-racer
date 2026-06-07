@@ -2,10 +2,12 @@
   "claim_boundary": "local JPEG decode benchmark only; not official simulator frame, full vision pipeline, or Windows packaging evidence",
   "config": {
     "decoder_names": [
-      "pillow"
+      "pillow",
+      "opencv",
+      "pyturbojpeg"
     ],
-    "iterations": 300,
-    "vision_p99_budget_ms": 25.0,
+    "iterations": 1000,
+    "vision_p99_budget_ms": "25.000000",
     "warmup": 25
   },
   "environment": {
@@ -30,27 +32,62 @@
   "promotion_rule": "A decoder is eligible for runtime consideration only if it is available, fits the p99 budget on representative frames, and has a documented Windows/Python 3.14 packaging path.",
   "results": [
     {
+      "availability": "available",
       "available": true,
+      "benchmark_ok": true,
       "decoded_shape_hwc": [
         360,
         640,
         3
       ],
+      "dependency_docs_url": "https://pillow.readthedocs.io/_/downloads/en/stable/pdf/",
       "dependency_note": "Pillow fallback decoder; simple packaging path, not assumed speed winner",
-      "iterations": 300,
+      "dependency_source_url": "https://pypi.org/project/Pillow/",
+      "iterations": 1000,
       "latency_ms": {
-        "max": 0.852875,
-        "median": 0.645792,
-        "min": 0.627917,
-        "p50": 0.645792,
-        "p95": 0.71325,
-        "p99": 0.83174
+        "max": "1.005958",
+        "median": "0.646229",
+        "min": "0.623500",
+        "p50": "0.646229",
+        "p95": "0.722306",
+        "p99": "0.815667"
       },
       "name": "pillow",
+      "native_dependency": "wheel-managed; no separate native path checked",
+      "package_name": "Pillow",
       "passes_vision_p99_budget": true,
+      "python_314_installability": "verified locally with uv on Python 3.14.3",
       "version": "12.2.0",
       "warmup": 25
+    },
+    {
+      "availability": "missing_dependency",
+      "available": false,
+      "benchmark_ok": false,
+      "dependency_docs_url": "https://deps.dev/pypi/opencv-python/3.4.14.51/versions",
+      "dependency_note": "candidate could not be imported or initialized in this run",
+      "dependency_source_url": "https://pypi.org/project/opencv-python/",
+      "name": "opencv",
+      "native_dependency": "wheel-managed native package; Windows packaging must be verified",
+      "package_name": "opencv-python",
+      "python_314_installability": "not verified in this run",
+      "reason": "No module named 'cv2'",
+      "version": "not_installed"
+    },
+    {
+      "availability": "missing_dependency",
+      "available": false,
+      "benchmark_ok": false,
+      "dependency_docs_url": "https://libjpeg-turbo.org/Documentation/OfficialBinaries",
+      "dependency_note": "candidate could not be imported or initialized in this run",
+      "dependency_source_url": "https://pypi.org/project/PyTurboJPEG/",
+      "name": "pyturbojpeg",
+      "native_dependency": "requires separately installed libjpeg-turbo native library path",
+      "package_name": "PyTurboJPEG",
+      "python_314_installability": "not verified in this run",
+      "reason": "No module named 'turbojpeg'",
+      "version": "not_installed"
     }
   ],
-  "schema_version": "aigp.jpeg_decode_benchmark.v0"
+  "schema_version": "aigp.jpeg_decode_benchmark.v1"
 }
