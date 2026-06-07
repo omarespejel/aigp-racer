@@ -125,6 +125,17 @@ def test_velocity_probe_reports_ambiguous_for_multiple_field_sets() -> None:
     assert probe.report().status == VelocityProbeStatus.AMBIGUOUS
 
 
+def test_velocity_probe_reports_ambiguous_for_same_fields_from_multiple_messages() -> None:
+    probe = TelemetryProbe()
+    probe.observe({"mavpackettype": "LOCAL_POSITION_NED", "vx": 1.0, "vy": 2.0, "vz": 3.0})
+    probe.observe({"mavpackettype": "ODOMETRY", "vx": 1.0, "vy": 2.0, "vz": 3.0})
+
+    report = probe.report()
+
+    assert report.status == VelocityProbeStatus.AMBIGUOUS
+    assert len(report.candidates) == 2
+
+
 def test_extract_linear_velocity_supports_object_messages() -> None:
     class LocalPosition:
         vx = 1.0

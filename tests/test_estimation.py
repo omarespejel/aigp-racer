@@ -35,6 +35,7 @@ def gate_observation() -> GateObservation:
         corners=corners,
         confidence=0.5,
         sim_time_ns=10,
+        source_frame_id=7,
         source="test",
     )
 
@@ -89,6 +90,7 @@ def test_estimator_reports_gate_without_velocity() -> None:
 
     assert not estimate.stale
     assert estimate.status == "GATE_WITHOUT_VELOCITY"
+    assert estimate.source_frame_id == 7
     assert estimate.gate_pose_camera is not None
     assert estimate.gate_pose_camera.z_forward_m == 3.0
 

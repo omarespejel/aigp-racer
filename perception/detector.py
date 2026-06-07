@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from dataclasses import dataclass
+from enum import StrEnum
 from typing import Protocol
 
 from perception.geometry import ImagePoint
@@ -13,8 +14,22 @@ RGBImage = Sequence[Sequence[RGBPixel]]
 
 
 class GateDetector(Protocol):
-    def detect(self, image: RGBImage, *, sim_time_ns: int | None = None) -> GateObservation | None:
+    def detect(
+        self,
+        image: RGBImage,
+        *,
+        sim_time_ns: int | None = None,
+        source_frame_id: int | None = None,
+    ) -> GateObservation | None:
         """Detect a gate candidate in an RGB image."""
+
+
+class GateDetectionStatus(StrEnum):
+    DETECTED = "DETECTED"
+    NO_HIGHLIGHT = "NO_HIGHLIGHT"
+    TOO_FEW_PIXELS = "TOO_FEW_PIXELS"
+    DEGENERATE_BBOX = "DEGENERATE_BBOX"
+    LOW_CONFIDENCE = "LOW_CONFIDENCE"
 
 
 @dataclass(frozen=True)
@@ -22,7 +37,29 @@ class GateObservation:
     corners: tuple[ImagePoint, ImagePoint, ImagePoint, ImagePoint]
     confidence: float
     sim_time_ns: int | None
+    source_frame_id: int | None
     source: str
+
+
+@dataclass(frozen=True)
+class GateDetectionResult:
+    """Structured detector outcome for telemetry and offline audit traces."""
+
+    status: GateDetectionStatus
+    observation: GateObservation | None
+    sim_time_ns: int | None
+    source_frame_id: int | None
+    source: str
+    mask_pixels: int
+    confidence: float | None = None
+
+    @property
+    def detected(self) -> bool:
+        return self.observation is not None
+
+    @property
+    def degraded(self) -> bool:
+        return self.status != GateDetectionStatus.DETECTED
 
 
 @dataclass(frozen=True)
@@ -36,7 +73,15 @@ class Round1ColorGateDetector:
     min_pixels: int = 12
     min_confidence: float = 0.05
 
-    def detect(self, image: RGBImage, *, sim_time_ns: int | None = None) -> GateObservation | None:
+    def analyze(
+        self,
+        image: RGBImage,
+        *,
+        sim_time_ns: int | None = None,
+        source_frame_id: int | None = None,
+    ) -> GateDetectionResult:
+        """Return a structured outcome, including degraded/drop reasons."""
+
         min_u: int | None = None
         min_v: int | None = None
         max_u: int | None = None
@@ -54,20 +99,41 @@ class Round1ColorGateDetector:
                 max_v = v if max_v is None else max(max_v, v)
 
         if min_u is None or min_v is None or max_u is None or max_v is None:
-            return None
+            return self._result(
+                GateDetectionStatus.NO_HIGHLIGHT,
+                sim_time_ns=sim_time_ns,
+                source_frame_id=source_frame_id,
+                mask_pixels=mask_pixels,
+            )
         if mask_pixels < self.min_pixels:
-            return None
+            return self._result(
+                GateDetectionStatus.TOO_FEW_PIXELS,
+                sim_time_ns=sim_time_ns,
+                source_frame_id=source_frame_id,
+                mask_pixels=mask_pixels,
+            )
 
         width = max_u - min_u + 1
         height = max_v - min_v + 1
         if width <= 1 or height <= 1:
-            return None
+            return self._result(
+                GateDetectionStatus.DEGENERATE_BBOX,
+                sim_time_ns=sim_time_ns,
+                source_frame_id=source_frame_id,
+                mask_pixels=mask_pixels,
+            )
 
         confidence = mask_pixels / float(width * height)
         if confidence < self.min_confidence:
-            return None
+            return self._result(
+                GateDetectionStatus.LOW_CONFIDENCE,
+                sim_time_ns=sim_time_ns,
+                source_frame_id=source_frame_id,
+                mask_pixels=mask_pixels,
+                confidence=confidence,
+            )
 
-        return GateObservation(
+        observation = GateObservation(
             corners=(
                 ImagePoint(float(min_u), float(min_v)),
                 ImagePoint(float(max_u), float(min_v)),
@@ -76,7 +142,49 @@ class Round1ColorGateDetector:
             ),
             confidence=confidence,
             sim_time_ns=sim_time_ns,
+            source_frame_id=source_frame_id,
             source="round1_color_bbox",
+        )
+        return GateDetectionResult(
+            status=GateDetectionStatus.DETECTED,
+            observation=observation,
+            sim_time_ns=sim_time_ns,
+            source_frame_id=source_frame_id,
+            source="round1_color_bbox",
+            mask_pixels=mask_pixels,
+            confidence=confidence,
+        )
+
+    def detect(
+        self,
+        image: RGBImage,
+        *,
+        sim_time_ns: int | None = None,
+        source_frame_id: int | None = None,
+    ) -> GateObservation | None:
+        return self.analyze(
+            image,
+            sim_time_ns=sim_time_ns,
+            source_frame_id=source_frame_id,
+        ).observation
+
+    @staticmethod
+    def _result(
+        status: GateDetectionStatus,
+        *,
+        sim_time_ns: int | None,
+        source_frame_id: int | None,
+        mask_pixels: int,
+        confidence: float | None = None,
+    ) -> GateDetectionResult:
+        return GateDetectionResult(
+            status=status,
+            observation=None,
+            sim_time_ns=sim_time_ns,
+            source_frame_id=source_frame_id,
+            source="round1_color_bbox",
+            mask_pixels=mask_pixels,
+            confidence=confidence,
         )
 
 

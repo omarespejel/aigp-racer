@@ -32,6 +32,7 @@
       "y_down": 0.0,
       "z_forward": 3.0
     },
+    "source_frame_id": 7,
     "state_status": "GATE_WITHOUT_VELOCITY"
   },
   "predicted_outcome": {

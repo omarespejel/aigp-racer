@@ -41,6 +41,9 @@ Primary source:
 - Gate depth: 0.26 m.
 - Official simulator host OS: Windows 11.
 - Python 3.14.2 is known-good per spec.
+- Implementation guardrail, not a spec claim: the current UDP JPEG reassembler
+  rejects frames above 256 chunks or 2 MiB declared JPEG size to bound per-frame
+  memory and CPU exposure.
 
 ## Current Ambiguity
 
@@ -75,4 +78,3 @@ Elodin is useful for practice, but it is not the official simulator contract:
 - in-process solver callback instead of MAVLink 2;
 - ENU solver state instead of official NED MAVLink boundary;
 - Betaflight RC/FDM/PWM bridge instead of official stabilized-controller messages.
-

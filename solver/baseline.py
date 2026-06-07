@@ -24,12 +24,14 @@ class ConservativeController:
             return ControlCommand(
                 sim_time_ns=state.sim_time_ns,
                 kind=CommandKind.HOLD,
+                source_frame_id=state.source_frame_id,
                 reason="stale telemetry",
             )
         if state.gate_pose_camera is None:
             return ControlCommand(
                 sim_time_ns=state.sim_time_ns,
                 kind=CommandKind.REACQUIRE,
+                source_frame_id=state.source_frame_id,
                 yaw_rate_rad_s=0.2,
                 reason="no gate observation",
             )
@@ -52,6 +54,7 @@ class ConservativeController:
         return ControlCommand(
             sim_time_ns=state.sim_time_ns,
             kind=CommandKind.BODY_VELOCITY,
+            source_frame_id=state.source_frame_id,
             forward_m_s=forward,
             right_m_s=right,
             down_m_s=down,
