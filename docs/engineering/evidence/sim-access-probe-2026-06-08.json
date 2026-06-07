@@ -1,0 +1,151 @@
+{
+  "claim_boundary": "deterministic public-source and repo-state fixture only; no team-portal login and no official simulator run",
+  "github_issue": "https://github.com/omarespejel/aigp-racer/issues/4",
+  "known_practice_vs_official_differences": [
+    {
+      "elodin": "in-process raw RGBA frame on SensorUpdate",
+      "official": "UDP chunked JPEG on port 5600",
+      "repo_action": "build adapter that feeds both sources into the same detector API",
+      "surface": "vision_transport"
+    },
+    {
+      "elodin": "Betaflight SITL FDM/RC/PWM bridge",
+      "official": "MAVLink 2 SET_ATTITUDE_TARGET or SET_POSITION_TARGET_LOCAL_NED",
+      "repo_action": "keep command intent separate from transport-specific emission",
+      "surface": "control_transport"
+    },
+    {
+      "elodin": "ENU practice solver state",
+      "official": "NED at MAVLink boundary",
+      "repo_action": "add explicit frame tags to any practice adapter output",
+      "surface": "world_frame"
+    },
+    {
+      "elodin": "body-frame IMU, world pose, baro, mag, optional frame",
+      "official": "ATTITUDE, HIGHRES_IMU, TIMESYNC; velocity text remains ambiguous",
+      "repo_action": "run velocity probe only against official or captured decoded messages",
+      "surface": "telemetry"
+    }
+  ],
+  "next_actions": [
+    {
+      "action": "log into team portal and record official simulator or SDK package version",
+      "gate": "official package/version path exists and is recorded outside git if large",
+      "priority": 1
+    },
+    {
+      "action": "run day-one telemetry probe against official decoded telemetry or a captured fixture",
+      "gate": "velocity probe returns AVAILABLE, NOT_AVAILABLE, or AMBIGUOUS with message evidence",
+      "priority": 2
+    },
+    {
+      "action": "add practice-only Elodin frame adapter if official access remains blocked",
+      "gate": "raw RGBA practice frames enter the same detector boundary without official-compatibility claims",
+      "priority": 3
+    },
+    {
+      "action": "add JPEG decode timing only after official or synthetic JPEG fixtures exist",
+      "gate": "p50/p95/p99 decode metrics are fixture-scoped and non-claiming",
+      "priority": 4
+    }
+  ],
+  "non_claims": [
+    "not official simulator access evidence",
+    "not official SDK compatibility evidence",
+    "not a successful simulator run",
+    "not binary MAVLink decoding evidence",
+    "not a velocity availability claim",
+    "not an Elodin fidelity claim",
+    "not a speed, reliability, or latency claim"
+  ],
+  "official_access_status": {
+    "current_outcome": "NO_GO_PUBLIC_UNAUTHENTICATED_ACCESS",
+    "official_sdk_or_simulator_package_recorded": false,
+    "public_unauthenticated_package_url_found": false,
+    "team_portal_credentials_required": true,
+    "team_portal_url": "https://teams.theaigrandprix.com/login"
+  },
+  "official_interface_targets": {
+    "mavlink": {
+      "command_rate_hz": "<100",
+      "expected_client_to_sim": [
+        "SET_ATTITUDE_TARGET",
+        "SET_POSITION_TARGET_LOCAL_NED"
+      ],
+      "expected_sim_to_client": [
+        "HEARTBEAT",
+        "ATTITUDE",
+        "HIGHRES_IMU",
+        "TIMESYNC"
+      ],
+      "min_heartbeat_hz": 2,
+      "protocol": "MAVLink 2",
+      "transport": "UDP"
+    },
+    "vision": {
+      "encoding": "chunked JPEG",
+      "frame_rate_hz": 30,
+      "header_bytes": 24,
+      "port": 5600,
+      "resolution_px": [
+        640,
+        360
+      ],
+      "transport": "UDP"
+    }
+  },
+  "practice_harness_status": {
+    "local_clone_path": "external/elodin-ai-grand-prix",
+    "local_clone_policy": "ignored local simulator drop; not required for deterministic repo gate",
+    "name": "Elodin AI Grand Prix practice harness",
+    "pinned_clone_commit_from_spec_notes": "13f9f9e3d5a3130f0ce0b65500d9f309cc1e11b2",
+    "repo": "https://github.com/elodin-sys/ai-grand-prix",
+    "use_now": "practice-only smoke and adapter development while official access is blocked"
+  },
+  "repo_readiness": {
+    "binary_mavlink_decoder": "not_implemented",
+    "conservative_controller": "implemented_fixture_only",
+    "decoded_message_telemetry_probe": "implemented_fixture_only",
+    "official_jpeg_fixture": "not_available",
+    "official_simulator_run": "not_available",
+    "vision_udp_reassembler": "implemented_and_tested",
+    "worldforge_race_episode_fixture": "implemented_fixture_only"
+  },
+  "schema_version": "aigp.sim_access_probe.v0",
+  "snapshot_date": "2026-06-08",
+  "sources_checked": [
+    {
+      "kind": "official_technical_spec",
+      "label": "AI Grand Prix Technical Specification VADR-TS-002 Issue 00.02",
+      "url": "https://www.theaigrandprix.com/wp-content/uploads/2026/05/260508_Technical_Spec_0002.pdf",
+      "used_for": [
+        "official MAVLink-over-UDP and vision-stream contract",
+        "camera, timing, gate, and runtime constraints"
+      ]
+    },
+    {
+      "kind": "official_site",
+      "label": "AI Grand Prix public site",
+      "url": "https://www.theaigrandprix.com/",
+      "used_for": [
+        "public competition context and team-portal direction"
+      ]
+    },
+    {
+      "kind": "practice_harness_blog",
+      "label": "Elodin AI Grand Prix race sim harness announcement",
+      "url": "https://www.elodin.systems/post/elodin-ai-grand-prix-race-sim-harness",
+      "used_for": [
+        "practice-harness scope and official-contract caveats"
+      ]
+    },
+    {
+      "kind": "practice_harness_repo",
+      "label": "elodin-sys/ai-grand-prix",
+      "url": "https://github.com/elodin-sys/ai-grand-prix",
+      "used_for": [
+        "practice-harness setup and solver contract"
+      ]
+    }
+  ]
+}
