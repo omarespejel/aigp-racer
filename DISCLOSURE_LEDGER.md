@@ -20,6 +20,7 @@ This file tracks competition-relevant disclosure material for AI Grand Prix work
 - 2026-06-08: OpenCV/NumPy compiled-vectorized vision latency benchmark, local timing evidence, tests, and engineering note drafted with Codex for issue #28.
 - 2026-06-08: OpenCV/NumPy packaging probe, local import/decode evidence, tests, and engineering note drafted with Codex for issue #31.
 - 2026-06-08: Official simulator package probe, official-template race/track payload parsers, deterministic evidence, and engineering notes drafted with Codex for issue #4. The large simulator archive was not committed.
+- 2026-06-08: Official simulator UDP packet-capture scaffold, deterministic fixture evidence, tests, and engineering note drafted with Codex for issue #35. The scaffold records bounded summaries only and no raw simulator payloads.
 
 ## FLOSS Dependencies
 
