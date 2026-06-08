@@ -22,7 +22,8 @@ Last updated: 2026-06-08.
 - PR #30 merged issue #28. The OpenCV/NumPy compiled-vectorized path is a local fixture latency GO with a measured combined decode+detect p99 of 2.020049 ms, but it remains a non-claim for Windows packaging and official simulator compatibility.
 - PR #32 merged issue #31. OpenCV/NumPy import/decode packaging evidence is local macOS only; Windows 11 simulator-host packaging remains open.
 - Official simulator package `AI-GP Simulator v1.0.3364.zip` is now locally present outside git. Evidence is recorded in `docs/engineering/evidence/official-sim-package-probe-2026-06-08.json`.
-- The official package probe confirms the outer archive contains `AIGP_3364.zip`, `PyAIPilotExample.zip`, and `README.md`; it does not extract or run the Windows simulator.
+- The official package probe confirms the outer archive contains `AIGP_3364.zip`, `PyAIPilotExample.zip`, and `README.md`; the nested simulator tree is extracted locally but the Windows executable has not been run.
+- Extracted simulator tree facts: `FlightSim.exe`, `FlightSim/Binaries/Win64/DCGame-Win64-Shipping.exe`, `FlightSim/Content/Paks/FlightSim-WindowsNoEditor.pak`, 64 files, 4,755,012,758 bytes.
 - The official Python template adds useful protocol evidence beyond the PDF: MAVLink UDP port 14550, vision UDP port 5600, `LOCAL_POSITION_NED`, `ODOMETRY`, `ACTUATOR_OUTPUT_STATUS`, `COLLISION`, race status, track-info chunks, reset command `31000`, and a sample raw actuator command path at `CONTROL_HZ = 250`.
 
 ## Active Objective

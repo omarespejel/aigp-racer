@@ -2,21 +2,20 @@
   "claim_boundary": "local package-manifest and official-template source inspection only; not a simulator run, not official login evidence, and not Windows-host execution evidence",
   "execution_status": {
     "blocked_by": [
-      "full Windows simulator extraction deferred until enough disk headroom exists",
       "FlightSim.exe requires a Windows 10/11 host",
       "virtual qualifier requires official simulator account credentials"
     ],
-    "current_outcome": "PARTIAL_GO_PACKAGE_PRESENT_RUN_BLOCKED",
+    "current_outcome": "PARTIAL_GO_PACKAGE_AND_TREE_PRESENT_RUN_BLOCKED",
     "flight_sim_executable_run_by_probe": false,
     "nested_windows_simulator_archive_present": true,
-    "nested_windows_simulator_extracted_by_probe": false,
+    "nested_windows_simulator_extracted_by_probe": true,
     "official_package_present_locally": true,
     "simulator_account_login_verified": false
   },
   "github_issue": "https://github.com/omarespejel/aigp-racer/issues/4",
   "next_actions": [
     {
-      "action": "extract AIGP_3364.zip on a Windows 10/11 host with adequate free disk",
+      "action": "copy or expose the extracted AIGP_3364 tree to a Windows 10/11 host",
       "gate": "FlightSim.exe launches and reaches login without modifying repo state",
       "priority": 1
     },
@@ -156,6 +155,41 @@
     "windows_simulator_archive_described": true
   },
   "schema_version": "aigp.official_package_probe.v0",
+  "simulator_tree": {
+    "content_pak": {
+      "path": "FlightSim/Content/Paks/FlightSim-WindowsNoEditor.pak",
+      "present": true,
+      "size_bytes": 4366047225
+    },
+    "entrypoints": [
+      {
+        "path": "FlightSim.exe",
+        "platform": "windows-pe-x86-64",
+        "present": true,
+        "size_bytes": 167424
+      },
+      {
+        "path": "FlightSim/Binaries/Win64/DCGame-Win64-Shipping.exe",
+        "platform": "windows-pe-x86-64",
+        "present": true,
+        "size_bytes": 91971584
+      }
+    ],
+    "file_count": 64,
+    "manifest_files": [
+      "Manifest_DebugFiles_Win64.txt",
+      "Manifest_NonUFSFiles_Win64.txt"
+    ],
+    "path_policy": "local extracted simulator path is intentionally not recorded",
+    "pgos_config": {
+      "http_base_url": "https://{lc}.client.pgos.intlgame.{com}",
+      "path": "FlightSim/Binaries/pgos_res/pgos_config.ini",
+      "socket_base_url": "wss://{lc}.ws.pgos.intlgame.{com}",
+      "title_id_empty": true
+    },
+    "present": true,
+    "total_file_size_bytes": 4755012758
+  },
   "snapshot_date": "2026-06-08",
   "source_zip": {
     "basename": "AI-GP Simulator v1.0.3364.zip",

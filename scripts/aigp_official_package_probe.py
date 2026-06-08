@@ -48,7 +48,7 @@ class SourceFile:
     text: str
 
 
-def build_report_from_zip(source_zip: Path) -> dict[str, Any]:
+def build_report_from_zip(source_zip: Path, *, sim_tree: Path | None = None) -> dict[str, Any]:
     source_bytes = source_zip.read_bytes()
     with zipfile.ZipFile(io.BytesIO(source_bytes)) as outer_zip:
         outer_entries = [_zip_entry_info(info) for info in outer_zip.infolist()]
@@ -61,6 +61,10 @@ def build_report_from_zip(source_zip: Path) -> dict[str, Any]:
             name: SourceFile(name=name, text=py_example_zip.read(name).decode("utf-8"))
             for name in EXPECTED_EXAMPLE_FILES
         }
+    sim_tree_report = (
+        _sim_tree_report(sim_tree) if sim_tree is not None else _sim_tree_not_inspected()
+    )
+    tree_extracted = bool(sim_tree_report["present"])
 
     return {
         "schema_version": SCHEMA_VERSION,
@@ -78,23 +82,20 @@ def build_report_from_zip(source_zip: Path) -> dict[str, Any]:
         "readme_facts": _readme_facts(readme_text),
         "template_dependencies": _requirements(source_files["requirements.txt"].text),
         "protocol_observations": _protocol_observations(source_files),
+        "simulator_tree": sim_tree_report,
         "execution_status": {
             "official_package_present_locally": True,
             "nested_windows_simulator_archive_present": True,
-            "nested_windows_simulator_extracted_by_probe": False,
+            "nested_windows_simulator_extracted_by_probe": tree_extracted,
             "flight_sim_executable_run_by_probe": False,
             "simulator_account_login_verified": False,
-            "current_outcome": "PARTIAL_GO_PACKAGE_PRESENT_RUN_BLOCKED",
-            "blocked_by": [
-                "full Windows simulator extraction deferred until enough disk headroom exists",
-                "FlightSim.exe requires a Windows 10/11 host",
-                "virtual qualifier requires official simulator account credentials",
-            ],
+            "current_outcome": _current_outcome(tree_extracted=tree_extracted),
+            "blocked_by": _blocked_by(tree_extracted=tree_extracted),
         },
         "next_actions": [
             {
                 "priority": 1,
-                "action": "extract AIGP_3364.zip on a Windows 10/11 host with adequate free disk",
+                "action": "copy or expose the extracted AIGP_3364 tree to a Windows 10/11 host",
                 "gate": "FlightSim.exe launches and reaches login without modifying repo state",
             },
             {
@@ -172,9 +173,15 @@ def validate_report(report: object) -> None:
         _expect(protocol.get(flag) is True, f"{flag} must be true")
     execution_status = report.get("execution_status")
     _expect(isinstance(execution_status, dict), "execution_status must be an object")
+    _validate_simulator_tree(report.get("simulator_tree"))
+    tree_extracted = bool(report["simulator_tree"]["present"])
     _expect(
-        execution_status.get("current_outcome") == "PARTIAL_GO_PACKAGE_PRESENT_RUN_BLOCKED",
+        execution_status.get("current_outcome") == _current_outcome(tree_extracted=tree_extracted),
         "execution outcome drifted",
+    )
+    _expect(
+        execution_status.get("nested_windows_simulator_extracted_by_probe") is tree_extracted,
+        "tree extraction flag drifted",
     )
     _expect(
         execution_status.get("flight_sim_executable_run_by_probe") is False,
@@ -264,6 +271,129 @@ def _protocol_observations(source_files: dict[str, SourceFile]) -> dict[str, Any
     }
 
 
+def _sim_tree_not_inspected() -> dict[str, Any]:
+    return {
+        "present": False,
+        "path_policy": "local extracted simulator path is intentionally not recorded",
+        "file_count": 0,
+        "total_file_size_bytes": 0,
+        "entrypoints": [],
+        "content_pak": None,
+        "pgos_config": None,
+        "manifest_files": [],
+    }
+
+
+def _sim_tree_report(sim_tree: Path) -> dict[str, Any]:
+    if not sim_tree.is_dir():
+        raise OfficialPackageProbeError("sim_tree must be an extracted simulator directory")
+    files = sorted(path for path in sim_tree.rglob("*") if path.is_file())
+    rel_files = {path.relative_to(sim_tree).as_posix(): path for path in files}
+    entrypoint_names = (
+        "FlightSim.exe",
+        "FlightSim/Binaries/Win64/DCGame-Win64-Shipping.exe",
+    )
+    entrypoints = []
+    for name in entrypoint_names:
+        path = rel_files.get(name)
+        entrypoints.append(
+            {
+                "path": name,
+                "present": path is not None,
+                "size_bytes": path.stat().st_size if path is not None else None,
+                "platform": "windows-pe-x86-64",
+            }
+        )
+    pak_path = rel_files.get("FlightSim/Content/Paks/FlightSim-WindowsNoEditor.pak")
+    pgos_path = rel_files.get("FlightSim/Binaries/pgos_res/pgos_config.ini")
+    return {
+        "present": True,
+        "path_policy": "local extracted simulator path is intentionally not recorded",
+        "file_count": len(files),
+        "total_file_size_bytes": sum(path.stat().st_size for path in files),
+        "entrypoints": entrypoints,
+        "content_pak": {
+            "path": "FlightSim/Content/Paks/FlightSim-WindowsNoEditor.pak",
+            "present": pak_path is not None,
+            "size_bytes": pak_path.stat().st_size if pak_path is not None else None,
+        },
+        "pgos_config": _pgos_config(pgos_path),
+        "manifest_files": [
+            name
+            for name in ("Manifest_DebugFiles_Win64.txt", "Manifest_NonUFSFiles_Win64.txt")
+            if name in rel_files
+        ],
+    }
+
+
+def _pgos_config(path: Path | None) -> dict[str, Any] | None:
+    if path is None:
+        return None
+    values = {}
+    for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
+        if "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        values[key.strip()] = value.strip()
+    return {
+        "path": "FlightSim/Binaries/pgos_res/pgos_config.ini",
+        "title_id_empty": values.get("title_id", "") == "",
+        "socket_base_url": values.get("socket_base_url"),
+        "http_base_url": values.get("http_base_url"),
+    }
+
+
+def _current_outcome(*, tree_extracted: bool) -> str:
+    if tree_extracted:
+        return "PARTIAL_GO_PACKAGE_AND_TREE_PRESENT_RUN_BLOCKED"
+    return "PARTIAL_GO_PACKAGE_PRESENT_RUN_BLOCKED"
+
+
+def _blocked_by(*, tree_extracted: bool) -> list[str]:
+    blockers = []
+    if not tree_extracted:
+        blockers.append(
+            "full Windows simulator extraction deferred until enough disk headroom exists"
+        )
+    blockers.extend(
+        [
+            "FlightSim.exe requires a Windows 10/11 host",
+            "virtual qualifier requires official simulator account credentials",
+        ]
+    )
+    return blockers
+
+
+def _validate_simulator_tree(value: object) -> None:
+    _expect(isinstance(value, dict), "simulator_tree must be an object")
+    present = value.get("present")
+    _expect(type(present) is bool, "simulator_tree.present must be bool")
+    _expect(
+        value.get("path_policy") == "local extracted simulator path is intentionally not recorded",
+        "simulator_tree path policy drifted",
+    )
+    _expect(isinstance(value.get("file_count"), int), "simulator_tree.file_count must be int")
+    _expect(
+        isinstance(value.get("total_file_size_bytes"), int),
+        "simulator_tree.total_file_size_bytes must be int",
+    )
+    if not present:
+        _expect(value.get("entrypoints") == [], "absent simulator_tree must not list entrypoints")
+        return
+    entrypoints = value.get("entrypoints")
+    _expect(isinstance(entrypoints, list) and len(entrypoints) == 2, "entrypoints drifted")
+    _expect(all(item.get("present") is True for item in entrypoints), "entrypoints must exist")
+    content_pak = value.get("content_pak")
+    _expect(isinstance(content_pak, dict), "content_pak must be an object")
+    _expect(content_pak.get("present") is True, "content_pak must exist")
+    pgos_config = value.get("pgos_config")
+    _expect(isinstance(pgos_config, dict), "pgos_config must be an object")
+    _expect(
+        pgos_config.get("path") == "FlightSim/Binaries/pgos_res/pgos_config.ini",
+        "pgos_config path drifted",
+    )
+
+
 def _validate_zip_entries(value: object, expected_names: tuple[str, ...], label: str) -> None:
     _expect(isinstance(value, list), f"{label} entries must be a list")
     names = tuple(item.get("filename") for item in value if isinstance(item, dict))
@@ -284,6 +414,7 @@ def _expect(condition: bool, message: str) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--source-zip", type=Path)
+    parser.add_argument("--sim-tree", type=Path)
     parser.add_argument("--write-json", type=Path)
     parser.add_argument("--check-json", type=Path)
     args = parser.parse_args()
@@ -291,7 +422,7 @@ def main() -> int:
     if args.write_json is not None:
         if args.source_zip is None:
             parser.error("--write-json requires --source-zip")
-        write_json(args.write_json, build_report_from_zip(args.source_zip))
+        write_json(args.write_json, build_report_from_zip(args.source_zip, sim_tree=args.sim_tree))
 
     if args.check_json is not None:
         validate_report(json.loads(args.check_json.read_text(encoding="utf-8")))
