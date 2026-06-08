@@ -81,6 +81,7 @@ def build_evidence() -> dict[str, Any]:
         "test_controller_reacquires_outside_conservative_tracking_range",
         "test_controller_reacquires_on_non_finite_gate_pose",
         "test_controller_rejects_invalid_safety_thresholds",
+        "test_controller_rejects_unbounded_center_offset_ratio",
     ]
     return _fixed_float_evidence(
         {

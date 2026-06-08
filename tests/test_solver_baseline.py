@@ -197,11 +197,17 @@ def test_controller_reacquires_on_non_finite_gate_pose(gate_pose: CameraPoseEsti
         {"max_track_depth_m": 0.0},
         {"min_track_depth_m": 2.0, "max_track_depth_m": 1.0},
         {"max_center_offset_ratio": 0.0},
+        {"max_center_offset_ratio": 1.1},
     ],
 )
 def test_controller_rejects_invalid_safety_thresholds(kwargs: dict[str, object]) -> None:
     with pytest.raises(ValueError):
         ConservativeController(**kwargs)
+
+
+def test_controller_rejects_unbounded_center_offset_ratio() -> None:
+    with pytest.raises(ValueError, match="max_center_offset_ratio"):
+        ConservativeController(max_center_offset_ratio=1000.0)
 
 
 def test_command_rate_limiter_keeps_below_100hz() -> None:
