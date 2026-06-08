@@ -61,14 +61,22 @@ Checked-in evidence:
 docs/engineering/evidence/official-sim-package-probe-2026-06-08.json
 ```
 
-The package probe inspected the outer zip manifest and the small official
-`PyAIPilotExample.zip` template without extracting the nested Windows simulator.
+The package probe inspected the outer zip manifest, the small official
+`PyAIPilotExample.zip` template, and the locally extracted Windows simulator
+tree. It did not run the simulator.
 
 Observed package contents:
 
 - `AIGP_3364.zip`: nested Windows simulator archive.
 - `PyAIPilotExample.zip`: official Python interface template.
 - `README.md`: development-kit setup and host requirements.
+
+Observed extracted simulator tree:
+
+- `FlightSim.exe`: Windows launcher.
+- `FlightSim/Binaries/Win64/DCGame-Win64-Shipping.exe`: Windows shipping binary.
+- `FlightSim/Content/Paks/FlightSim-WindowsNoEditor.pak`: 4.36 GB content pack.
+- 64 files totaling 4,755,012,758 bytes.
 
 Observed from the official Python template:
 

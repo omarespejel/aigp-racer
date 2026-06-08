@@ -16,7 +16,7 @@ sha256 a09f4e6669b099a28183178ecdeea627c2409723bd78bebf6e3867fadd26ba9b
 size 1931484223 bytes
 ```
 
-The probe did not extract the nested simulator archive and did not run
+The probe now records the extracted nested simulator tree. It did not run
 `FlightSim.exe`.
 
 ## Evidence
@@ -27,12 +27,14 @@ Generated artifact:
 docs/engineering/evidence/official-sim-package-probe-2026-06-08.json
 ```
 
-Reproduction command on the machine that holds the local package:
+Reproduction command on the machine that holds the local package and extracted
+tree:
 
 ```bash
 uv run --python 3.14 --with jsonschema --with pyyaml --with ruff --with pytest \
   python scripts/aigp_official_package_probe.py \
   --source-zip /Users/espejelomar/Downloads/'AI-GP Simulator v1.0.3364.zip' \
+  --sim-tree .local/simulator-v1.0.3364/AIGP_3364 \
   --write-json docs/engineering/evidence/official-sim-package-probe-2026-06-08.json \
   --check-json docs/engineering/evidence/official-sim-package-probe-2026-06-08.json
 ```
@@ -52,6 +54,14 @@ The official development kit includes:
 - `AIGP_3364.zip`: Windows simulator archive.
 - `PyAIPilotExample.zip`: official Python interface template.
 - `README.md`: setup, login, and host requirements.
+
+The extracted simulator tree records:
+
+- `FlightSim.exe`: Windows launcher.
+- `FlightSim/Binaries/Win64/DCGame-Win64-Shipping.exe`: Windows shipping binary.
+- `FlightSim/Content/Paks/FlightSim-WindowsNoEditor.pak`: 4.36 GB content pack.
+- `FlightSim/Binaries/pgos_res/pgos_config.ini`: PGOS network configuration.
+- 64 files totaling 4,755,012,758 bytes.
 
 The Python template confirms several practical details:
 
@@ -75,9 +85,9 @@ added.
 
 ## GO / NO-GO
 
-`GO`: move to live simulator probing when `FlightSim.exe` launches on a Windows
-host, account login succeeds, and the repo captures one JPEG sequence plus one
-decoded telemetry/race/track sample.
+`GO`: move to live simulator probing when the extracted tree is available on a
+Windows host, `FlightSim.exe` launches, account login succeeds, and the repo
+captures one JPEG sequence plus one decoded telemetry/race/track sample.
 
 `NARROW_CLAIM`: package evidence is real, but no runtime behavior has been
 observed yet.

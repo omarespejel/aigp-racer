@@ -17,9 +17,29 @@ def test_build_report_from_zip_extracts_official_template_observations(tmp_path:
     assert report["schema_version"] == probe.SCHEMA_VERSION
     assert report["source_zip"]["basename"] == "AI-GP Simulator v1.0.3364.zip"
     assert report["execution_status"]["current_outcome"] == "PARTIAL_GO_PACKAGE_PRESENT_RUN_BLOCKED"
+    assert report["simulator_tree"]["present"] is False
     assert report["protocol_observations"]["vision_header_matches_reassembler"] is True
     assert report["protocol_observations"]["raw_actuator_command_path_detected"] is True
     assert report["template_dependencies"] == ["pymavlink", "opencv-python", "numpy"]
+
+
+def test_build_report_from_zip_records_extracted_simulator_tree(tmp_path: Path) -> None:
+    source_zip = _write_fixture_package(tmp_path)
+    sim_tree = _write_fixture_sim_tree(tmp_path)
+
+    report = probe.build_report_from_zip(source_zip, sim_tree=sim_tree)
+
+    assert (
+        report["execution_status"]["current_outcome"]
+        == "PARTIAL_GO_PACKAGE_AND_TREE_PRESENT_RUN_BLOCKED"
+    )
+    assert report["execution_status"]["nested_windows_simulator_extracted_by_probe"] is True
+    assert report["simulator_tree"]["present"] is True
+    assert report["simulator_tree"]["file_count"] == 5
+    assert report["simulator_tree"]["entrypoints"][0]["path"] == "FlightSim.exe"
+    assert report["simulator_tree"]["entrypoints"][0]["present"] is True
+    assert report["simulator_tree"]["content_pak"]["present"] is True
+    assert report["simulator_tree"]["pgos_config"]["title_id_empty"] is True
 
 
 def test_validate_report_accepts_checked_evidence_shape(tmp_path: Path) -> None:
@@ -84,6 +104,32 @@ def _write_fixture_package(tmp_path: Path) -> Path:
             ),
         )
     return source_zip
+
+
+def _write_fixture_sim_tree(tmp_path: Path) -> Path:
+    sim_tree = tmp_path / "AIGP_3364"
+    (sim_tree / "FlightSim/Binaries/Win64").mkdir(parents=True)
+    (sim_tree / "FlightSim/Content/Paks").mkdir(parents=True)
+    (sim_tree / "FlightSim/Binaries/pgos_res").mkdir(parents=True)
+    (sim_tree / "FlightSim.exe").write_bytes(b"launcher")
+    (sim_tree / "FlightSim/Binaries/Win64/DCGame-Win64-Shipping.exe").write_bytes(b"game")
+    (sim_tree / "FlightSim/Content/Paks/FlightSim-WindowsNoEditor.pak").write_bytes(b"pak")
+    (sim_tree / "FlightSim/Binaries/pgos_res/pgos_config.ini").write_text(
+        "\n".join(
+            [
+                "[PGOS environment]",
+                "title_id =",
+                "socket_base_url = wss://{lc}.ws.pgos.intlgame.{com}",
+                "http_base_url = https://{lc}.client.pgos.intlgame.{com}",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    (sim_tree / "Manifest_NonUFSFiles_Win64.txt").write_text(
+        "FlightSim/Binaries/Win64/DCGame-Win64-Shipping.exe\n",
+        encoding="utf-8",
+    )
+    return sim_tree
 
 
 def _mavlink_rx_text() -> str:
