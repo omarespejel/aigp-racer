@@ -13,19 +13,20 @@ Last updated: 2026-06-08.
 - PR #7 merged issue #3. The decoded-message telemetry probe supports deterministic JSON fixtures and local UDP JSON smoke testing only; it does not decode official binary MAVLink 2 packets.
 - Issue #4 is blocked on team-portal credentials or an official package link. Public and local search found no unauthenticated simulator/SDK package URL; evidence is recorded in https://github.com/omarespejel/aigp-racer/issues/4#issuecomment-4643872137.
 - PR #8 merged issue #5. Full planar PnP is available only for physical-labeled, front-facing gate corners; detector bbox corners remain screen-space observations.
-- Active branch `codex/aigp-estimator-gate-measurement-2026-06-08` works issue #9: bridge detector observations to estimator measurements without overclaiming roll.
+- PR #10 merged issue #9. Detector observations now bridge into estimator measurements through an explicit `GatePoseMeasurement` boundary without overclaiming full planar PnP from screen-space bbox corners.
+- Active branch `codex/aigp-controller-safety-2026-06-08` works issue #19: harden conservative valid-run commands with confidence, range, status, and offset guards.
 
 ## Active Objective
 
-Bridge detector output into estimator pose measurements while preserving the screen-space versus physical-labeled corner boundary.
+Harden the conservative valid-run controller so degraded, low-confidence, out-of-range, or far-off-center gate estimates do not emit tracking commands.
 
 Immediate next code objectives:
 
-1. Land issue #9 gate-measurement boundary in the estimator.
+1. Land issue #19 controller safety policy and evidence.
 2. Recheck issue #4 once team-portal credentials or an official package link are available.
 3. Capture real official simulator packet examples once access exists.
 4. Choose and gate a binary MAVLink decoder only after packet evidence exists.
-5. Convert screen-space center/depth measurements into the conservative valid-run controller input.
+5. Emit RaceEpisode and DecisionTrace from an actual practice or official run.
 
 ## Current Known Unknowns
 
