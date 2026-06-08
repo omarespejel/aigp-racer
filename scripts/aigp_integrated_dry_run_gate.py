@@ -93,23 +93,29 @@ def build_integrated_dry_run_decision_trace() -> DecisionTrace:
     chain = _run_chain()
     command = chain["command"]
     intent = chain["intent"]
-    selected_action = _command_summary(command)
-    hold_action = _command_summary(
-        ControlCommand(
-            sim_time_ns=SIM_TIME_NS,
-            kind=CommandKind.HOLD,
-            source_frame_id=SOURCE_FRAME_ID,
-            reason="candidate baseline hold",
-        )
+    selected_action = _identified_action("controller_output", _command_summary(command))
+    hold_action = _identified_action(
+        "hold",
+        _command_summary(
+            ControlCommand(
+                sim_time_ns=SIM_TIME_NS,
+                kind=CommandKind.HOLD,
+                source_frame_id=SOURCE_FRAME_ID,
+                reason="candidate baseline hold",
+            )
+        ),
     )
-    reacquire_action = _command_summary(
-        ControlCommand(
-            sim_time_ns=SIM_TIME_NS,
-            kind=CommandKind.REACQUIRE,
-            source_frame_id=SOURCE_FRAME_ID,
-            yaw_rate_rad_s=0.2,
-            reason="candidate reacquire",
-        )
+    reacquire_action = _identified_action(
+        "reacquire",
+        _command_summary(
+            ControlCommand(
+                sim_time_ns=SIM_TIME_NS,
+                kind=CommandKind.REACQUIRE,
+                source_frame_id=SOURCE_FRAME_ID,
+                yaw_rate_rad_s=0.2,
+                reason="candidate reacquire",
+            )
+        ),
     )
     return DecisionTrace(
         schema_version="decision_trace.v1-draft",
@@ -266,6 +272,10 @@ def _command_summary(command: ControlCommand) -> dict[str, Any]:
         "yaw_rate_rad_s": command.yaw_rate_rad_s,
         "reason": command.reason,
     }
+
+
+def _identified_action(action_id: str, command_summary: dict[str, Any]) -> dict[str, Any]:
+    return {"id": action_id, **command_summary}
 
 
 def _fixed_json_value(value: Any) -> Any:

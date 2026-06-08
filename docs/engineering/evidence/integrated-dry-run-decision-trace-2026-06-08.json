@@ -3,6 +3,7 @@
     {
       "down_m_s": "0.000000",
       "forward_m_s": "0.000000",
+      "id": "hold",
       "kind": "HOLD",
       "reason": "candidate baseline hold",
       "right_m_s": "0.000000",
@@ -13,6 +14,7 @@
     {
       "down_m_s": "0.000000",
       "forward_m_s": "0.000000",
+      "id": "reacquire",
       "kind": "REACQUIRE",
       "reason": "candidate reacquire",
       "right_m_s": "0.000000",
@@ -23,6 +25,7 @@
     {
       "down_m_s": "0.000000",
       "forward_m_s": "0.750000",
+      "id": "controller_output",
       "kind": "BODY_VELOCITY",
       "reason": "tracking visible gate",
       "right_m_s": "0.000000",
@@ -139,6 +142,7 @@
     "command": {
       "down_m_s": "0.000000",
       "forward_m_s": "0.750000",
+      "id": "controller_output",
       "kind": "BODY_VELOCITY",
       "reason": "tracking visible gate",
       "right_m_s": "0.000000",
