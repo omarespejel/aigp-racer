@@ -1,0 +1,175 @@
+{
+  "candidate_actions": [
+    {
+      "down_m_s": "0.000000",
+      "forward_m_s": "0.000000",
+      "kind": "HOLD",
+      "reason": "candidate baseline hold",
+      "right_m_s": "0.000000",
+      "sim_time_ns": 33333333,
+      "source_frame_id": 1,
+      "yaw_rate_rad_s": "0.000000"
+    },
+    {
+      "down_m_s": "0.000000",
+      "forward_m_s": "0.000000",
+      "kind": "REACQUIRE",
+      "reason": "candidate reacquire",
+      "right_m_s": "0.000000",
+      "sim_time_ns": 33333333,
+      "source_frame_id": 1,
+      "yaw_rate_rad_s": "0.200000"
+    },
+    {
+      "down_m_s": "0.000000",
+      "forward_m_s": "0.750000",
+      "kind": "BODY_VELOCITY",
+      "reason": "tracking visible gate",
+      "right_m_s": "0.000000",
+      "sim_time_ns": 33333333,
+      "source_frame_id": 1,
+      "yaw_rate_rad_s": "0.000000"
+    }
+  ],
+  "episode_id": "integrated-dry-run-2026-06-08",
+  "goal": {
+    "local_goal": "emit a bounded command toward a detected centered gate",
+    "objective": "conservative first valid-run bootstrap"
+  },
+  "measured_or_analytic_outcome": {
+    "command_kind": "BODY_VELOCITY",
+    "detected": true,
+    "intent_mode": "TRACK_GATE",
+    "source": "module-chain dry-run",
+    "state_status": "GATE_WITHOUT_VELOCITY"
+  },
+  "non_claims": [
+    "not official simulator compatibility evidence",
+    "not a valid-run result",
+    "not a lap-time, latency, or reliability claim",
+    "not a learned-policy result",
+    "not physical-drone transfer evidence",
+    "not proof that screen-space detector corners are physical gate-corner labels"
+  ],
+  "observation": {
+    "detector": {
+      "confidence": "1.000000",
+      "detected": true,
+      "mask_pixels": 25921,
+      "observation": {
+        "confidence": "1.000000",
+        "corner_uncertainty_px": [
+          "1.000000",
+          "1.000000",
+          "1.000000",
+          "1.000000"
+        ],
+        "corners_px": [
+          {
+            "u_px": "240.000000",
+            "v_px": "100.000000"
+          },
+          {
+            "u_px": "400.000000",
+            "v_px": "100.000000"
+          },
+          {
+            "u_px": "400.000000",
+            "v_px": "260.000000"
+          },
+          {
+            "u_px": "240.000000",
+            "v_px": "260.000000"
+          }
+        ],
+        "sim_time_ns": 33333333,
+        "source": "round1_color_bbox",
+        "source_frame_id": 1
+      },
+      "source": "round1_color_bbox",
+      "status": "DETECTED"
+    },
+    "state": {
+      "degraded_reason": null,
+      "diagnostic_count": 0,
+      "gate_confidence": "1.000000",
+      "gate_measurement_has_full_planar_pose": false,
+      "gate_measurement_mode": "SCREEN_SPACE_CENTER_DEPTH",
+      "gate_pose_camera_m": {
+        "x_right_m": "0.000000",
+        "y_down_m": "0.000000",
+        "z_forward_m": "3.000000"
+      },
+      "sim_time_ns": 33333333,
+      "source_frame_id": 1,
+      "stale": false,
+      "status": "GATE_WITHOUT_VELOCITY",
+      "velocity_available": false
+    }
+  },
+  "predicted_outcome": {
+    "expected_behavior": "move toward visible gate center without speed claim",
+    "source": "analytic dry-run"
+  },
+  "reproducibility": {
+    "followup_depth_basis_issue": "https://github.com/omarespejel/aigp-racer/issues/23",
+    "followup_latency_issue": "https://github.com/omarespejel/aigp-racer/issues/24",
+    "generator": "scripts/aigp_integrated_dry_run_gate.py",
+    "issue": "https://github.com/omarespejel/aigp-racer/issues/21"
+  },
+  "schema_version": "decision_trace.v1-draft",
+  "scores": [
+    {
+      "action_id": "hold",
+      "reason": "safe but no gate progress",
+      "score": "0.100000"
+    },
+    {
+      "action_id": "reacquire",
+      "reason": "unnecessary with detected gate",
+      "score": "0.200000"
+    },
+    {
+      "action_id": "controller_output",
+      "reason": "actual controller output for commandable dry-run state",
+      "score": "0.600000"
+    }
+  ],
+  "selected_action": {
+    "command": {
+      "down_m_s": "0.000000",
+      "forward_m_s": "0.750000",
+      "kind": "BODY_VELOCITY",
+      "reason": "tracking visible gate",
+      "right_m_s": "0.000000",
+      "sim_time_ns": 33333333,
+      "source_frame_id": 1,
+      "yaw_rate_rad_s": "0.000000"
+    },
+    "command_intent": {
+      "claim_boundary": "transport-independent command intent only; not binary MAVLink or MAVSDK evidence",
+      "frame": "MAV_FRAME_BODY_NED",
+      "ignored_setpoint_groups": [
+        "position",
+        "acceleration",
+        "yaw_angle"
+      ],
+      "intent_profile": "body_ned_velocity_plus_yaw_rate",
+      "message_name": "SET_POSITION_TARGET_LOCAL_NED",
+      "mode": "TRACK_GATE",
+      "reason": "tracking visible gate",
+      "schema_version": "aigp.command_intent.v0",
+      "sim_time_ns": 33333333,
+      "source_command_kind": "BODY_VELOCITY",
+      "source_frame_id": 1,
+      "velocity_body_ned_m_s": [
+        "0.750000",
+        "0.000000",
+        "0.000000"
+      ],
+      "yaw_rate_rad_s": "0.000000"
+    },
+    "id": "controller_output"
+  },
+  "trace_id": "integrated-dry-run-control-decision-2026-06-08"
+}

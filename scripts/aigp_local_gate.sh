@@ -46,6 +46,10 @@ uv run --python 3.14 --with jsonschema --with pyyaml --with ruff --with pytest \
   --write-json docs/engineering/evidence/controller-safety-2026-06-08.json
 
 uv run --python 3.14 --with jsonschema --with pyyaml --with ruff --with pytest \
+  python scripts/aigp_integrated_dry_run_gate.py \
+  --write-json
+
+uv run --python 3.14 --with jsonschema --with pyyaml --with ruff --with pytest \
   python -m ruff check .
 
 uv run --python 3.14 --with jsonschema --with pyyaml --with ruff --with pytest \
@@ -66,3 +70,5 @@ git diff --exit-code docs/engineering/evidence/jpeg-decode-benchmark-2026-06-08.
 git diff --exit-code docs/engineering/evidence/practice-adapter-2026-06-08.json
 git diff --exit-code docs/engineering/evidence/gate-measurement-boundary-2026-06-08.json
 git diff --exit-code docs/engineering/evidence/controller-safety-2026-06-08.json
+git diff --exit-code docs/engineering/evidence/integrated-dry-run-episode-2026-06-08.json
+git diff --exit-code docs/engineering/evidence/integrated-dry-run-decision-trace-2026-06-08.json
