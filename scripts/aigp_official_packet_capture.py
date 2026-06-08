@@ -168,6 +168,7 @@ def capture_live_report(
         max_datagrams_per_stream=max_datagrams_per_stream,
         max_total_bytes=max_total_bytes,
     )
+    _validate_runtime_stream_configs(streams)
     sockets: dict[socket.socket, UdpStreamConfig] = {}
     stream_counts = {stream.name: 0 for stream in streams}
     total_bytes = 0
@@ -509,10 +510,19 @@ def _validate_stream_entries(streams: Any) -> tuple[str, ...]:
         if parser not in {"official_chunked_jpeg_header", "mavlink_frame_header_only"}:
             raise PacketCaptureError(f"stream {name} has unknown parser")
         max_datagram_bytes = stream.get("max_datagram_bytes")
-        if not isinstance(max_datagram_bytes, int) or max_datagram_bytes <= 0:
-            raise PacketCaptureError(f"stream {name} max_datagram_bytes must be positive")
+        if (
+            not isinstance(max_datagram_bytes, int)
+            or not 0 < max_datagram_bytes <= DEFAULT_MAX_DATAGRAM_BYTES
+        ):
+            raise PacketCaptureError(
+                f"stream {name} max_datagram_bytes must be in 1..{DEFAULT_MAX_DATAGRAM_BYTES}"
+            )
         stream_names.append(name)
     return tuple(stream_names)
+
+
+def _validate_runtime_stream_configs(streams: tuple[UdpStreamConfig, ...]) -> None:
+    _validate_stream_entries([asdict(stream) for stream in streams])
 
 
 def _reject_forbidden_raw_payload_keys(value: Any, *, path: str = "datagram") -> None:

@@ -179,6 +179,34 @@ def test_report_validation_rejects_unknown_stream() -> None:
         capture.validate_report(report)
 
 
+def test_report_validation_rejects_oversized_stream_datagram_buffer() -> None:
+    report = capture.build_fixture_report()
+    report["streams"][0]["max_datagram_bytes"] = capture.DEFAULT_MAX_DATAGRAM_BYTES + 1
+
+    with pytest.raises(capture.PacketCaptureError, match="max_datagram_bytes"):
+        capture.validate_report(report)
+
+
+def test_live_capture_rejects_oversized_stream_datagram_buffer_before_binding() -> None:
+    streams = (
+        capture.UdpStreamConfig(
+            name="vision",
+            host="127.0.0.1",
+            port=capture.DEFAULT_VISION_PORT,
+            parser="official_chunked_jpeg_header",
+            max_datagram_bytes=capture.DEFAULT_MAX_DATAGRAM_BYTES + 1,
+        ),
+    )
+
+    with pytest.raises(capture.PacketCaptureError, match="max_datagram_bytes"):
+        capture.capture_live_report(
+            streams=streams,
+            duration_s=0.001,
+            max_datagrams_per_stream=1,
+            max_total_bytes=1024,
+        )
+
+
 def test_check_json_rejects_drift(tmp_path: Path) -> None:
     path = tmp_path / "capture.json"
     report = capture.build_fixture_report()
