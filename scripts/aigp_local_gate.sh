@@ -55,6 +55,13 @@ uv run --python 3.14 --with jsonschema --with pyyaml --with ruff --with pytest \
   --fixture tests/fixtures/frame_640x360_synthetic.jpg
 
 uv run --python 3.14 --with jsonschema --with pyyaml --with ruff --with pytest \
+  python scripts/aigp_compiled_vision_gate.py \
+  --check-json docs/engineering/evidence/compiled-vision-latency-2026-06-08.json \
+  --iterations 1000 \
+  --warmup 25 \
+  --fixture tests/fixtures/frame_640x360_synthetic.jpg
+
+uv run --python 3.14 --with jsonschema --with pyyaml --with ruff --with pytest \
   python -m ruff check .
 
 uv run --python 3.14 --with jsonschema --with pyyaml --with ruff --with pytest \
@@ -78,3 +85,4 @@ git diff --exit-code docs/engineering/evidence/controller-safety-2026-06-08.json
 git diff --exit-code docs/engineering/evidence/integrated-dry-run-episode-2026-06-08.json
 git diff --exit-code docs/engineering/evidence/integrated-dry-run-decision-trace-2026-06-08.json
 git diff --exit-code docs/engineering/evidence/minimal-loop-latency-2026-06-08.json
+git diff --exit-code docs/engineering/evidence/compiled-vision-latency-2026-06-08.json
