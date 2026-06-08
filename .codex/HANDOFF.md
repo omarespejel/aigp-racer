@@ -17,19 +17,20 @@ Last updated: 2026-06-08.
 - PR #20 merged issue #19. Conservative valid-run commands now gate tracking on confidence, range, status, and center offset.
 - PR #25 merged issue #21. Integrated dry-run RaceEpisode and DecisionTrace evidence now exercises the detector -> estimator -> controller -> command-intent module chain without claiming simulator compatibility or latency.
 - PR #26 merged issue #22. Simulator-time replay command gating is split from wall-clock send-layer gating.
-- Active branch `codex/aigp-gate-depth-basis-2026-06-08` works issue #23: make screen-space gate depth basis explicit and first-frame calibratable.
+- PR #27 merged issue #23. Screen-space gate depth conversion now carries an explicit inner-opening versus outer-frame measurement basis and preserves the first-frame calibration caveat.
+- Active branch `codex/aigp-minimal-loop-latency-2026-06-08` works issue #24: assemble and measure the local camera-bytes-to-command-intent loop.
 
 ## Active Objective
 
-Make screen-space gate depth conversion explicit by declaring whether bbox width uses the 1.5 m inner opening or 2.7 m outer frame, while preserving the first-frame calibration caveat.
+Measure the minimal local camera-bytes-to-command-intent loop and record whether the current Python/Pillow vision path is viable for the 30 Hz frame budget.
 
 Immediate next code objectives:
 
-1. Land issue #23 gate depth measurement-basis hardening.
+1. Land issue #24 minimal loop latency evidence.
 2. Recheck issue #4 once team-portal credentials or an official package link are available.
 3. Capture real official simulator packet examples once access exists.
 4. Calibrate Round 1 highlight basis from the first official simulator frame.
-5. Assemble and measure a minimal hot loop in issue #24.
+5. Pursue issue #28 compiled/vectorized vision path if issue #24 remains a pure-Python NO-GO.
 
 ## Current Known Unknowns
 
