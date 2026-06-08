@@ -35,7 +35,7 @@ Generated artifact:
 
 ```text
 docs/engineering/evidence/controller-safety-2026-06-08.json
-sha256 7a3134ba12a30564a49cdfa1e0eb50e03efee4331a913f0531c48541e3c268d8
+sha256 598dcfb21f6886a4560a7984824c961f4e77b306fa23a6d5c86cb23bb0ab2086
 ```
 
 The artifact records deterministic state-to-command-to-intent examples. It does
@@ -71,6 +71,7 @@ Focused result:
 - `test_controller_reacquires_outside_conservative_tracking_range`
 - `test_controller_reacquires_on_non_finite_gate_pose`
 - `test_controller_rejects_invalid_safety_thresholds`
+- `test_controller_rejects_unbounded_center_offset_ratio`
 - `test_controller_safety_evidence_matches_generator`
 
 ## Non-Claims

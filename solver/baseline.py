@@ -39,7 +39,7 @@ class ConservativeController:
         _require_positive_real("max_track_depth_m", self.max_track_depth_m)
         if self.min_track_depth_m >= self.max_track_depth_m:
             raise ValueError("min_track_depth_m must be < max_track_depth_m")
-        _require_positive_real("max_center_offset_ratio", self.max_center_offset_ratio)
+        _require_offset_ratio("max_center_offset_ratio", self.max_center_offset_ratio)
 
     def command(self, state: StateEstimate) -> ControlCommand:
         if state.stale:
@@ -185,3 +185,8 @@ def _require_non_negative_real(name: str, value: object) -> None:
 def _require_probability(name: str, value: object) -> None:
     if not _is_probability(value):
         raise ValueError(f"{name} must be a probability in [0, 1]")
+
+
+def _require_offset_ratio(name: str, value: object) -> None:
+    if not _is_finite_real(value) or not 0.0 < float(value) <= 1.0:
+        raise ValueError(f"{name} must be in (0, 1]")
