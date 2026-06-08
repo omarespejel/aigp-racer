@@ -207,6 +207,14 @@ def test_live_capture_rejects_oversized_stream_datagram_buffer_before_binding() 
         )
 
 
+def test_report_validation_rejects_undersized_stream_datagram_buffer() -> None:
+    report = capture.build_fixture_report()
+    report["streams"][0]["max_datagram_bytes"] = capture.DEFAULT_MAX_DATAGRAM_BYTES - 1
+
+    with pytest.raises(capture.PacketCaptureError, match="max_datagram_bytes"):
+        capture.validate_report(report)
+
+
 def test_check_json_rejects_drift(tmp_path: Path) -> None:
     path = tmp_path / "capture.json"
     report = capture.build_fixture_report()

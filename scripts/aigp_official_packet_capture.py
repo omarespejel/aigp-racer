@@ -510,12 +510,9 @@ def _validate_stream_entries(streams: Any) -> tuple[str, ...]:
         if parser not in {"official_chunked_jpeg_header", "mavlink_frame_header_only"}:
             raise PacketCaptureError(f"stream {name} has unknown parser")
         max_datagram_bytes = stream.get("max_datagram_bytes")
-        if (
-            not isinstance(max_datagram_bytes, int)
-            or not 0 < max_datagram_bytes <= DEFAULT_MAX_DATAGRAM_BYTES
-        ):
+        if max_datagram_bytes != DEFAULT_MAX_DATAGRAM_BYTES:
             raise PacketCaptureError(
-                f"stream {name} max_datagram_bytes must be in 1..{DEFAULT_MAX_DATAGRAM_BYTES}"
+                f"stream {name} max_datagram_bytes must be {DEFAULT_MAX_DATAGRAM_BYTES}"
             )
         stream_names.append(name)
     return tuple(stream_names)
