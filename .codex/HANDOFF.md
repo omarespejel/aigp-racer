@@ -24,8 +24,8 @@ Last updated: 2026-06-08.
 - Official simulator package `AI-GP Simulator v1.0.3364.zip` is now locally present outside git. Evidence is recorded in `docs/engineering/evidence/official-sim-package-probe-2026-06-08.json`.
 - The official package probe confirms the outer archive contains `AIGP_3364.zip`, `PyAIPilotExample.zip`, and `README.md`; the nested simulator tree is extracted locally but the Windows executable has not been run.
 - Extracted simulator tree facts: `FlightSim.exe`, `FlightSim/Binaries/Win64/DCGame-Win64-Shipping.exe`, `FlightSim/Content/Paks/FlightSim-WindowsNoEditor.pak`, 64 files, 4,755,012,758 bytes.
-- The official Python template adds useful protocol evidence beyond the PDF: MAVLink UDP port 14550, vision UDP port 5600, `LOCAL_POSITION_NED`, `ODOMETRY`, `ACTUATOR_OUTPUT_STATUS`, `COLLISION`, race status, track-info chunks, reset command `31000`, and a sample raw actuator command path at `CONTROL_HZ = 250`.
-- Issue #35 owns the first live packet-capture bridge. The scaffold records bounded UDP summaries for vision port `5600` and MAVLink port `14550` without raw payload bytes, image decode, command emission, or decoded binary MAVLink claims.
+- The official Python template adds useful protocol evidence beyond the PDF: MAVLink UDP port 14550, vision UDP port 5600, `LOCAL_POSITION_NED`, `ODOMETRY`, `ACTUATOR_OUTPUT_STATUS`, `COLLISION`, race status, track-info chunks, reset command `31000`, and a sample raw actuator command path at `CONTROL_HZ = 250`. Source: `docs/engineering/evidence/official-sim-package-probe-2026-06-08.json`.
+- Issue #35 owns the first live packet-capture bridge. The scaffold records bounded UDP summaries for vision port `5600` and MAVLink port `14550` without raw payload bytes, image decode, command emission, or decoded binary MAVLink claims. Sources: `docs/engineering/evidence/official-sim-package-probe-2026-06-08.json` and `docs/engineering/official-packet-capture-2026-06-08.md`.
 
 ## Active Objective
 

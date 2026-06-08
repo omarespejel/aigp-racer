@@ -116,6 +116,10 @@ ports and records bounded packet summaries only:
 - vision UDP `0.0.0.0:5600`, parsed as the `<IHHIIQ` chunked JPEG header;
 - MAVLink UDP `127.0.0.1:14550`, parsed only as MAVLink v1/v2 frame headers.
 
+Sources for these packet-capture facts are the primary spec URL at the top of
+this file plus the checked official-template evidence in
+`docs/engineering/evidence/official-sim-package-probe-2026-06-08.json`.
+
 It deliberately does not record raw JPEG bytes, raw MAVLink payload bytes, send
 commands, decode images, or claim binary MAVLink message support. Live capture
 output should stay under ignored `.local/` storage until reviewed and reduced

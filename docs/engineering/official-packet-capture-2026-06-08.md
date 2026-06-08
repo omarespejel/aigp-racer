@@ -50,6 +50,16 @@ review, promote only a small redacted or summarized fixture into
 
 ## What The Scaffold Records
 
+Sources for the official port/header facts below:
+
+- AI Grand Prix Technical Specification VADR-TS-002, Issue 00.02, dated
+  2026-05-08:
+  https://www.theaigrandprix.com/wp-content/uploads/2026/05/260508_Technical_Spec_0002.pdf
+- Checked package evidence from the official `PyAIPilotExample.zip` template:
+  `docs/engineering/evidence/official-sim-package-probe-2026-06-08.json`
+- Human-readable package probe note:
+  `docs/engineering/official-sim-package-probe-2026-06-08.md`
+
 - Vision UDP stream on `0.0.0.0:5600`.
 - MAVLink UDP stream on `127.0.0.1:14550`.
 - Datagram size and SHA-256 prefix.

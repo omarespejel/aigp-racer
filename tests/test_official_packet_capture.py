@@ -113,12 +113,69 @@ def test_report_validation_rejects_payload_leakage() -> None:
         capture.validate_report(report)
 
 
+def test_report_validation_rejects_nested_payload_leakage() -> None:
+    report = capture.build_fixture_report()
+    report["datagrams"][0]["vision"]["payload"] = "ff00"
+
+    with pytest.raises(capture.PacketCaptureError, match="forbidden raw payload key"):
+        capture.validate_report(report)
+
+
+def test_report_validation_allows_payload_size_metadata() -> None:
+    report = capture.build_fixture_report()
+
+    capture.validate_report(report)
+
+    assert "payload_size_bytes" in report["datagrams"][0]["vision"]
+    assert "payload_length" in report["datagrams"][1]["mavlink"]
+
+
 def test_report_validation_rejects_unbounded_stream_counts() -> None:
     report = capture.build_fixture_report()
     report["limits"]["max_datagrams_per_stream"] = 1
     report["datagrams"].append(dict(report["datagrams"][0]))
 
     with pytest.raises(capture.PacketCaptureError, match="max_datagrams_per_stream"):
+        capture.validate_report(report)
+
+
+def test_report_validation_rejects_incorrect_aggregates() -> None:
+    report = capture.build_fixture_report()
+    report["stream_counts"]["vision"] = 99
+
+    with pytest.raises(capture.PacketCaptureError, match="stream_counts"):
+        capture.validate_report(report)
+
+
+def test_report_validation_rejects_incorrect_stream_bytes() -> None:
+    report = capture.build_fixture_report()
+    report["stream_bytes"]["mavlink"] = 99
+
+    with pytest.raises(capture.PacketCaptureError, match="stream_bytes"):
+        capture.validate_report(report)
+
+
+def test_report_validation_rejects_fixed_metadata_drift() -> None:
+    report = capture.build_fixture_report()
+    report["issue"] = "https://example.invalid/wrong"
+
+    with pytest.raises(capture.PacketCaptureError, match="issue URL"):
+        capture.validate_report(report)
+
+
+def test_report_validation_rejects_duration_drift() -> None:
+    report = capture.build_fixture_report()
+    report["duration_s"] = "-1.000000"
+
+    with pytest.raises(capture.PacketCaptureError, match="duration_s"):
+        capture.validate_report(report)
+
+
+def test_report_validation_rejects_unknown_stream() -> None:
+    report = capture.build_fixture_report()
+    report["datagrams"][0]["stream"] = "unknown"
+
+    with pytest.raises(capture.PacketCaptureError, match="unknown stream"):
         capture.validate_report(report)
 
 
@@ -130,5 +187,5 @@ def test_check_json_rejects_drift(tmp_path: Path) -> None:
     drifted["stream_counts"]["vision"] = 99
     path.write_text(json.dumps(drifted, sort_keys=True), encoding="utf-8")
 
-    with pytest.raises(capture.PacketCaptureError, match="does not match"):
+    with pytest.raises(capture.PacketCaptureError, match="stream_counts"):
         capture.check_json(path, report)

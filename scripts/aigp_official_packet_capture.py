@@ -36,6 +36,14 @@ DEFAULT_DURATION_S = 10.0
 DEFAULT_MAX_DATAGRAMS_PER_STREAM = 64
 DEFAULT_MAX_TOTAL_BYTES = 10 * 1024 * 1024
 DEFAULT_MAX_DATAGRAM_BYTES = 65_535
+FORBIDDEN_RAW_PAYLOAD_KEYS = {
+    "payload",
+    "raw_payload",
+    "jpeg",
+    "jpeg_bytes",
+    "mavlink_payload",
+    "raw_mavlink_payload",
+}
 
 NON_CLAIMS = (
     "not a successful official simulator run",
@@ -320,8 +328,13 @@ def build_report(
 def validate_report(report: dict[str, Any]) -> None:
     if report.get("schema_version") != SCHEMA_VERSION:
         raise PacketCaptureError("unexpected schema_version")
+    if report.get("issue") != ISSUE_URL:
+        raise PacketCaptureError("unexpected issue URL")
+    if report.get("non_claims") != list(NON_CLAIMS):
+        raise PacketCaptureError("unexpected non_claims")
     if report.get("mode") not in {"fixture", "live"}:
         raise PacketCaptureError("mode must be fixture or live")
+    _validate_fixed_non_negative_float(report.get("duration_s"), "duration_s")
     limits = report.get("limits")
     if not isinstance(limits, dict):
         raise PacketCaptureError("limits must be an object")
@@ -334,14 +347,18 @@ def validate_report(report: dict[str, Any]) -> None:
     datagrams = report.get("datagrams")
     if not isinstance(datagrams, list):
         raise PacketCaptureError("datagrams must be a list")
+    streams = report.get("streams")
+    stream_names = _validate_stream_entries(streams)
     total_bytes = 0
     counts: dict[str, int] = {}
+    stream_bytes = {stream_name: 0 for stream_name in stream_names}
     for datagram in datagrams:
         if not isinstance(datagram, dict):
             raise PacketCaptureError("datagram entries must be objects")
-        if "raw_payload" in datagram or "payload" in datagram:
-            raise PacketCaptureError("datagram entries must not record raw payload bytes")
+        _reject_forbidden_raw_payload_keys(datagram)
         stream = str(datagram.get("stream"))
+        if stream not in stream_names:
+            raise PacketCaptureError(f"datagram references unknown stream {stream}")
         counts[stream] = counts.get(stream, 0) + 1
         if counts[stream] > max_datagrams_per_stream:
             raise PacketCaptureError("datagram count exceeds max_datagrams_per_stream")
@@ -349,8 +366,14 @@ def validate_report(report: dict[str, Any]) -> None:
         if size_bytes < 0:
             raise PacketCaptureError("size_bytes must be non-negative")
         total_bytes += size_bytes
+        stream_bytes[stream] += size_bytes
     if total_bytes > max_total_bytes:
         raise PacketCaptureError("total datagram bytes exceed max_total_bytes")
+    expected_counts = {stream_name: counts.get(stream_name, 0) for stream_name in stream_names}
+    if report.get("stream_counts") != expected_counts:
+        raise PacketCaptureError("stream_counts do not match datagrams")
+    if report.get("stream_bytes") != stream_bytes:
+        raise PacketCaptureError("stream_bytes do not match datagrams")
 
 
 def write_json(path: Path, report: dict[str, Any]) -> None:
@@ -462,6 +485,57 @@ def _validate_capture_limits(
         raise PacketCaptureError("max_datagrams_per_stream must be positive")
     if max_total_bytes <= 0:
         raise PacketCaptureError("max_total_bytes must be positive")
+
+
+def _validate_stream_entries(streams: Any) -> tuple[str, ...]:
+    if not isinstance(streams, list):
+        raise PacketCaptureError("streams must be a list")
+    stream_names: list[str] = []
+    for stream in streams:
+        if not isinstance(stream, dict):
+            raise PacketCaptureError("stream entries must be objects")
+        name = stream.get("name")
+        if not isinstance(name, str) or not name:
+            raise PacketCaptureError("stream name must be a non-empty string")
+        if name in stream_names:
+            raise PacketCaptureError(f"duplicate stream name {name}")
+        host = stream.get("host")
+        if not isinstance(host, str) or not host:
+            raise PacketCaptureError(f"stream {name} host must be a non-empty string")
+        port = stream.get("port")
+        if not isinstance(port, int) or not 0 < port <= 65_535:
+            raise PacketCaptureError(f"stream {name} port must be in 1..65535")
+        parser = stream.get("parser")
+        if parser not in {"official_chunked_jpeg_header", "mavlink_frame_header_only"}:
+            raise PacketCaptureError(f"stream {name} has unknown parser")
+        max_datagram_bytes = stream.get("max_datagram_bytes")
+        if not isinstance(max_datagram_bytes, int) or max_datagram_bytes <= 0:
+            raise PacketCaptureError(f"stream {name} max_datagram_bytes must be positive")
+        stream_names.append(name)
+    return tuple(stream_names)
+
+
+def _reject_forbidden_raw_payload_keys(value: Any, *, path: str = "datagram") -> None:
+    if isinstance(value, dict):
+        for key, nested_value in value.items():
+            key_text = str(key)
+            if key_text in FORBIDDEN_RAW_PAYLOAD_KEYS:
+                raise PacketCaptureError(f"forbidden raw payload key at {path}.{key_text}")
+            _reject_forbidden_raw_payload_keys(nested_value, path=f"{path}.{key_text}")
+    elif isinstance(value, list):
+        for index, nested_value in enumerate(value):
+            _reject_forbidden_raw_payload_keys(nested_value, path=f"{path}[{index}]")
+
+
+def _validate_fixed_non_negative_float(value: Any, name: str) -> None:
+    if not isinstance(value, str):
+        raise PacketCaptureError(f"{name} must be a fixed float string")
+    try:
+        parsed = float(value)
+    except ValueError as exc:
+        raise PacketCaptureError(f"{name} must be a finite non-negative float") from exc
+    if not math.isfinite(parsed) or parsed < 0.0:
+        raise PacketCaptureError(f"{name} must be a finite non-negative float")
 
 
 def _fixed_float(value: float) -> str:
