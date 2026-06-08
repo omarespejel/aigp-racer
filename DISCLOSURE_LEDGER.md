@@ -15,6 +15,7 @@ This file tracks competition-relevant disclosure material for AI Grand Prix work
 - 2026-06-08: Simulator-access probe fixture, evidence note, and no-drift gates drafted with Codex for issue #4; no official simulator package or SDK was downloaded.
 - 2026-06-08: Integrated dry-run RaceEpisode / DecisionTrace generator, deterministic evidence, tests, and follow-up issues #22, #23, and #24 drafted with Codex for issue #21.
 - 2026-06-08: Simulator-time command-rate limiter, deterministic boundary tests, and engineering note drafted with Codex for issue #22.
+- 2026-06-08: Gate depth measurement-basis hardening, estimator propagation, deterministic basis tests, and engineering note drafted with Codex for issue #23.
 
 ## FLOSS Dependencies
 

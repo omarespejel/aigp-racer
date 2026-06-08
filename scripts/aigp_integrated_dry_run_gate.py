@@ -227,6 +227,7 @@ def _detection_summary(detection: GateDetectionResult) -> dict[str, Any]:
             "source": detection.observation.source,
             "sim_time_ns": detection.observation.sim_time_ns,
             "source_frame_id": detection.observation.source_frame_id,
+            "measurement_basis": detection.observation.measurement_basis.value,
             "corners_px": [
                 {"u_px": point.u_px, "v_px": point.v_px} for point in detection.observation.corners
             ],
@@ -252,6 +253,9 @@ def _state_summary(state: StateEstimate) -> dict[str, Any]:
         "gate_measurement_mode": None
         if state.gate_measurement is None
         else state.gate_measurement.mode.value,
+        "gate_measurement_basis": None
+        if state.gate_measurement is None
+        else state.gate_measurement.measurement_basis.value,
         "gate_measurement_has_full_planar_pose": None
         if state.gate_measurement is None
         else state.gate_measurement.has_full_planar_pose,

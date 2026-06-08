@@ -5,6 +5,12 @@ from __future__ import annotations
 import math
 from collections.abc import Iterable
 from dataclasses import dataclass
+from enum import StrEnum
+
+
+class GateMeasurementBasis(StrEnum):
+    INNER_OPENING = "INNER_OPENING"
+    OUTER_FRAME = "OUTER_FRAME"
 
 
 @dataclass(frozen=True)
@@ -168,6 +174,7 @@ def estimate_frontoparallel_gate_pose(
     corners: Iterable[ImagePoint],
     camera: CameraIntrinsics = AIGP_CAMERA,
     gate: GateGeometry = AIGP_GATE,
+    measurement_basis: GateMeasurementBasis = GateMeasurementBasis.INNER_OPENING,
 ) -> CameraPoseEstimate:
     """Estimate gate center pose for fronto-parallel gate sanity tests."""
 
@@ -183,7 +190,8 @@ def estimate_frontoparallel_gate_pose(
 
     center_u = sum(point.u_px for point in points) / 4.0
     center_v = sum(point.v_px for point in points) / 4.0
-    z_forward_m = camera.fx_px * gate.inner_width_m / mean_width_px
+    width_m = gate_width_m_for_basis(gate, measurement_basis)
+    z_forward_m = camera.fx_px * width_m / mean_width_px
     x_right_m = (center_u - camera.cx_px) * z_forward_m / camera.fx_px
     y_down_m = (center_v - camera.cy_px) * z_forward_m / camera.fy_px
     return CameraPoseEstimate(
@@ -191,6 +199,25 @@ def estimate_frontoparallel_gate_pose(
         y_down_m=y_down_m,
         z_forward_m=z_forward_m,
     )
+
+
+def gate_width_m_for_basis(
+    gate: GateGeometry = AIGP_GATE,
+    measurement_basis: GateMeasurementBasis = GateMeasurementBasis.INNER_OPENING,
+) -> float:
+    basis = coerce_gate_measurement_basis(measurement_basis)
+    if basis == GateMeasurementBasis.INNER_OPENING:
+        return gate.inner_width_m
+    if basis == GateMeasurementBasis.OUTER_FRAME:
+        return gate.outer_width_m
+    raise ValueError("unsupported gate measurement basis")
+
+
+def coerce_gate_measurement_basis(value: GateMeasurementBasis | str) -> GateMeasurementBasis:
+    try:
+        return value if isinstance(value, GateMeasurementBasis) else GateMeasurementBasis(value)
+    except (TypeError, ValueError) as exc:
+        raise ValueError("gate measurement basis must be INNER_OPENING or OUTER_FRAME") from exc
 
 
 def estimate_planar_gate_pose(

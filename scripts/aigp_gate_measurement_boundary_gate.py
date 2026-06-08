@@ -17,14 +17,31 @@ def build_evidence() -> dict[str, Any]:
             "tests/test_perception_detector.py",
             "./scripts/aigp_local_gate.sh",
         ],
-        "github_issue": "https://github.com/omarespejel/aigp-racer/issues/9",
+        "github_issues": [
+            "https://github.com/omarespejel/aigp-racer/issues/9",
+            "https://github.com/omarespejel/aigp-racer/issues/23",
+        ],
+        "depth_measurement_bases": [
+            {
+                "basis": "INNER_OPENING",
+                "width_m": 1.5,
+                "source": "AI Grand Prix Technical Specification VADR-TS-002 gate inner opening",
+            },
+            {
+                "basis": "OUTER_FRAME",
+                "width_m": 2.7,
+                "source": "AI Grand Prix Technical Specification VADR-TS-002 gate outer frame",
+            },
+        ],
         "measurement_modes": [
             {
+                "declares_measurement_basis": True,
                 "full_planar_pose": False,
                 "mode": "SCREEN_SPACE_CENTER_DEPTH",
                 "source": "GateObservation screen-space bbox corners",
             },
             {
+                "declares_measurement_basis": True,
                 "full_planar_pose": True,
                 "mode": "LABELED_PLANAR_PNP",
                 "source": "LabeledGateImageCorners physical gate-local labels",
@@ -35,10 +52,14 @@ def build_evidence() -> dict[str, Any]:
             "not ADR-VINS or partial-corner reprojection evidence",
             "not Round 2 visual robustness evidence",
             "not physical-camera calibration evidence",
+            "not official Round 1 highlight-basis evidence before a real frame is captured",
             "not full square-gate in-plane roll disambiguation from bbox corners",
         ],
         "required_boundary": {
+            "depth_basis_must_be_declared": True,
             "labeled_corners_required_for_full_planar_pnp": True,
+            "round1_color_bbox_basis": "OUTER_FRAME",
+            "round1_color_bbox_basis_status": "provisional until first official simulator frame",
             "screen_space_measurement_requires_uncertainty": True,
             "screen_space_observation_can_claim_roll": False,
             "screen_space_observation_mode": "SCREEN_SPACE_CENTER_DEPTH",
@@ -51,9 +72,21 @@ def build_evidence() -> dict[str, Any]:
             "perception/geometry.py",
             "scripts/aigp_gate_measurement_boundary_gate.py",
             "docs/engineering/gate-measurement-boundary-2026-06-08.md",
+            "docs/engineering/gate-depth-measurement-basis-2026-06-08.md",
         ],
         "status": "passed",
         "tests": [
+            {
+                "name": "test_frontoparallel_pose_estimate_uses_declared_measurement_basis",
+                "path": "tests/test_perception_geometry.py",
+                "purpose": "verify 1.5 m inner-opening and 2.7 m outer-frame bases "
+                "produce distinct depth estimates",
+            },
+            {
+                "name": "test_gate_observation_measurement_uses_declared_depth_basis",
+                "path": "tests/test_estimation.py",
+                "purpose": "verify estimator measurements propagate the declared depth basis",
+            },
             {
                 "name": "test_gate_observation_measurement_is_center_depth_only",
                 "path": "tests/test_estimation.py",
@@ -142,8 +175,8 @@ def build_evidence() -> dict[str, Any]:
             },
         ],
         "validation": {
-            "focused_pytest_count": 43,
-            "local_gate_pytest_count": 162,
+            "focused_pytest_count": 46,
+            "local_gate_pytest_count": 223,
             "status": "passed",
         },
     }

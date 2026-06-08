@@ -3,6 +3,7 @@ from __future__ import annotations
 import pytest
 
 from perception.detector import GateDetectionStatus, Round1ColorGateDetector
+from perception.geometry import GateMeasurementBasis
 
 
 def black_image(width: int = 16, height: int = 12) -> list[list[tuple[int, int, int]]]:
@@ -28,6 +29,7 @@ def test_round1_color_detector_finds_highlighted_gate_bbox() -> None:
     assert observation.sim_time_ns == 44
     assert observation.source_frame_id == 7
     assert observation.source == "round1_color_bbox"
+    assert observation.measurement_basis == GateMeasurementBasis.OUTER_FRAME
     assert observation.corners[0].u_px == 4.0
     assert observation.corners[0].v_px == 3.0
     assert observation.corners[2].u_px == 10.0
@@ -81,3 +83,5 @@ def test_round1_color_detector_validates_thresholds() -> None:
         Round1ColorGateDetector(min_confidence=-0.1)
     with pytest.raises(ValueError, match="min_confidence"):
         Round1ColorGateDetector(min_confidence=1.1)
+    with pytest.raises(ValueError, match="gate measurement basis"):
+        Round1ColorGateDetector(measurement_basis="UNKNOWN")  # type: ignore[arg-type]
