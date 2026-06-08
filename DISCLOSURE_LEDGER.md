@@ -19,6 +19,7 @@ This file tracks competition-relevant disclosure material for AI Grand Prix work
 - 2026-06-08: Minimal assembled loop latency runner, local Pillow timing evidence, engineering note, and compiled-vision follow-up issue #28 drafted with Codex for issue #24.
 - 2026-06-08: OpenCV/NumPy compiled-vectorized vision latency benchmark, local timing evidence, tests, and engineering note drafted with Codex for issue #28.
 - 2026-06-08: OpenCV/NumPy packaging probe, local import/decode evidence, tests, and engineering note drafted with Codex for issue #31.
+- 2026-06-08: Official simulator package probe, official-template race/track payload parsers, deterministic evidence, and engineering notes drafted with Codex for issue #4. The large simulator archive was not committed.
 
 ## FLOSS Dependencies
 
@@ -39,6 +40,7 @@ This file tracks competition-relevant disclosure material for AI Grand Prix work
 - OpenCV and PyTurboJPEG are recorded as candidate JPEG decode dependencies for issue #17, but were not installed or benchmarked in this local evidence artifact.
 - `opencv-python` `4.13.0.92` and `numpy` `2.4.6` were installed ephemerally with `uv --with opencv-python --with numpy` to generate the compiled-vectorized vision latency artifact for issue #28. They are not mandatory project dependencies or a final runtime decision until Windows 11 packaging is verified.
 - `opencv-python` `4.13.0.92` and `numpy` `2.4.6` were installed ephemerally with `uv --with opencv-python --with numpy` to generate the local packaging/import/decode probe artifact for issue #31. This is not Windows 11 packaging proof.
+- Official `PyAIPilotExample.zip` template dependencies inspected from the local AI-GP development kit: `pymavlink`, `opencv-python`, `numpy`, `matplotlib`, and `keyboard`. These are not repo runtime dependencies until a focused dependency decision lands.
 
 Runtime dependencies remain pending. Add every runtime, training, evaluation, and simulation dependency before submission.
 
@@ -50,6 +52,7 @@ Pending. Record source, license, checkpoint hash, training data, and whether the
 
 - AI Grand Prix official rules: https://www.theaigrandprix.com/official-rules/
 - AI Grand Prix technical specification VADR-TS-002: https://www.theaigrandprix.com/wp-content/uploads/2026/05/260508_Technical_Spec_0002.pdf
+- AI Grand Prix Simulator v1.0.3364 local development-kit package; checked-in evidence records archive hash and manifest without committing the package.
 - Elodin AI Grand Prix harness: https://www.elodin.systems/post/elodin-ai-grand-prix-race-sim-harness
 - AGIBOT World Challenge dataset: https://huggingface.co/datasets/agibot-world/AgiBotWorldChallenge-2026
 - Go2 Air ControlBench public preview: https://huggingface.co/datasets/espejelomar/go2-air-controlbench-v1
