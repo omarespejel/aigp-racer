@@ -44,3 +44,7 @@ def test_integrated_dry_run_decision_trace_matches_generator() -> None:
     assert actual["selected_action"]["command"]["kind"] == "BODY_VELOCITY"
     assert actual["selected_action"]["command_intent"]["mode"] == "TRACK_GATE"
     assert actual["reproducibility"]["issue"].endswith("/issues/21")
+    candidate_ids = {action["id"] for action in actual["candidate_actions"]}
+    score_ids = {score["action_id"] for score in actual["scores"]}
+    assert candidate_ids == score_ids
+    assert actual["selected_action"]["id"] in candidate_ids
