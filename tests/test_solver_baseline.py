@@ -6,7 +6,11 @@ from estimation.state import StateEstimate
 from mavlink.telemetry import Attitude, HighresImu
 from perception.geometry import CameraPoseEstimate
 from solver.baseline import ConservativeController
-from solver.commands import CommandKind, CommandRateLimiter
+from solver.commands import (
+    CommandKind,
+    SimTimeCommandRateLimiter,
+    WallClockCommandRateLimiter,
+)
 
 
 def state(
@@ -210,30 +214,53 @@ def test_controller_rejects_unbounded_center_offset_ratio() -> None:
         ConservativeController(max_center_offset_ratio=1000.0)
 
 
-def test_command_rate_limiter_keeps_below_100hz() -> None:
-    limiter = CommandRateLimiter(max_rate_hz=95.0)
+def test_wall_clock_command_rate_limiter_keeps_below_100hz() -> None:
+    limiter = WallClockCommandRateLimiter(max_rate_hz=95.0)
 
     assert limiter.allow(0.0)
     assert not limiter.allow(0.005)
     assert limiter.allow(0.011)
 
 
-@pytest.mark.parametrize("max_rate_hz", [0.0, -1.0, 100.0, 120.0])
-def test_command_rate_limiter_rejects_invalid_rates(max_rate_hz: float) -> None:
-    with pytest.raises(ValueError, match="less than 100"):
-        CommandRateLimiter(max_rate_hz=max_rate_hz)
+@pytest.mark.parametrize(
+    "max_rate_hz",
+    [0.0, -1.0, 100.0, 120.0, True, float("nan"), float("inf"), "95"],
+)
+def test_wall_clock_command_rate_limiter_rejects_invalid_rates(
+    max_rate_hz: object,
+) -> None:
+    with pytest.raises(ValueError, match="max_rate_hz"):
+        WallClockCommandRateLimiter(max_rate_hz=max_rate_hz)
 
 
-def test_command_rate_limiter_catches_late_rate_mutation() -> None:
-    limiter = CommandRateLimiter(max_rate_hz=95.0)
+def test_wall_clock_command_rate_limiter_catches_late_rate_mutation() -> None:
+    limiter = WallClockCommandRateLimiter(max_rate_hz=95.0)
     limiter.max_rate_hz = 100.0
 
-    with pytest.raises(ValueError, match="less than 100"):
+    with pytest.raises(ValueError, match="max_rate_hz"):
         _ = limiter.min_interval_s
 
 
-def test_command_rate_limiter_rejects_backward_time_without_rewind() -> None:
-    limiter = CommandRateLimiter(max_rate_hz=95.0)
+def test_wall_clock_command_rate_limiter_rejects_late_rate_mutation_on_first_allow() -> None:
+    limiter = WallClockCommandRateLimiter(max_rate_hz=95.0)
+    limiter.max_rate_hz = 100.0
+
+    with pytest.raises(ValueError, match="max_rate_hz"):
+        limiter.allow(0.0)
+    assert limiter.last_emit_monotonic_s is None
+
+
+def test_wall_clock_command_rate_limiter_rejects_bool_rate_mutation_on_first_allow() -> None:
+    limiter = WallClockCommandRateLimiter(max_rate_hz=95.0)
+    limiter.max_rate_hz = True
+
+    with pytest.raises(ValueError, match="max_rate_hz"):
+        limiter.allow(0.0)
+    assert limiter.last_emit_monotonic_s is None
+
+
+def test_wall_clock_command_rate_limiter_rejects_backward_time_without_rewind() -> None:
+    limiter = WallClockCommandRateLimiter(max_rate_hz=95.0)
 
     assert limiter.allow(10.0)
     assert not limiter.allow(9.0)
@@ -242,17 +269,108 @@ def test_command_rate_limiter_rejects_backward_time_without_rewind() -> None:
 
 
 @pytest.mark.parametrize("monotonic_s", [float("nan"), float("inf"), float("-inf")])
-def test_command_rate_limiter_rejects_non_finite_first_timestamp(monotonic_s: float) -> None:
-    limiter = CommandRateLimiter(max_rate_hz=95.0)
+def test_wall_clock_command_rate_limiter_rejects_non_finite_first_timestamp(
+    monotonic_s: float,
+) -> None:
+    limiter = WallClockCommandRateLimiter(max_rate_hz=95.0)
 
     assert not limiter.allow(monotonic_s)
     assert limiter.last_emit_monotonic_s is None
 
 
 @pytest.mark.parametrize("monotonic_s", [float("nan"), float("inf"), float("-inf")])
-def test_command_rate_limiter_rejects_non_finite_later_timestamp(monotonic_s: float) -> None:
-    limiter = CommandRateLimiter(max_rate_hz=95.0)
+def test_wall_clock_command_rate_limiter_rejects_non_finite_later_timestamp(
+    monotonic_s: float,
+) -> None:
+    limiter = WallClockCommandRateLimiter(max_rate_hz=95.0)
 
     assert limiter.allow(10.0)
     assert not limiter.allow(monotonic_s)
     assert limiter.last_emit_monotonic_s == 10.0
+
+
+def test_sim_time_command_rate_limiter_keeps_below_100hz() -> None:
+    limiter = SimTimeCommandRateLimiter(max_rate_hz=95.0)
+    start_ns = 1_000_000_000
+    min_interval_ns = limiter.min_interval_ns
+
+    assert min_interval_ns == 10_526_316
+    assert limiter.allow(start_ns)
+    assert not limiter.allow(start_ns + min_interval_ns - 1)
+    assert limiter.allow(start_ns + min_interval_ns)
+
+
+def test_sim_time_command_rate_limiter_rejects_backward_time_without_rewind() -> None:
+    limiter = SimTimeCommandRateLimiter(max_rate_hz=95.0)
+    start_ns = 1_000_000_000
+
+    assert limiter.allow(start_ns)
+    assert not limiter.allow(start_ns - 1)
+    assert limiter.last_emit_sim_time_ns == start_ns
+    assert limiter.allow(start_ns + limiter.min_interval_ns)
+
+
+@pytest.mark.parametrize("sim_time_ns", [-1, True, 1.0, "1"])
+def test_sim_time_command_rate_limiter_rejects_invalid_timestamps(
+    sim_time_ns: object,
+) -> None:
+    limiter = SimTimeCommandRateLimiter(max_rate_hz=95.0)
+
+    assert not limiter.allow(sim_time_ns)  # type: ignore[arg-type]
+    assert limiter.last_emit_sim_time_ns is None
+
+
+def test_sim_time_command_rate_limiter_rejects_int_subclass_timestamps() -> None:
+    class SimTimeSubclass(int):
+        pass
+
+    limiter = SimTimeCommandRateLimiter(max_rate_hz=95.0)
+
+    assert not limiter.allow(SimTimeSubclass(1))
+    assert limiter.last_emit_sim_time_ns is None
+
+
+@pytest.mark.parametrize(
+    "max_rate_hz",
+    [0.0, -1.0, 100.0, 120.0, True, float("nan"), float("inf"), "95"],
+)
+def test_sim_time_command_rate_limiter_rejects_invalid_rates(
+    max_rate_hz: object,
+) -> None:
+    with pytest.raises(ValueError, match="max_rate_hz"):
+        SimTimeCommandRateLimiter(max_rate_hz=max_rate_hz)
+
+
+def test_sim_time_command_rate_limiter_catches_late_rate_mutation() -> None:
+    limiter = SimTimeCommandRateLimiter(max_rate_hz=95.0)
+    limiter.max_rate_hz = 100.0
+
+    with pytest.raises(ValueError, match="max_rate_hz"):
+        _ = limiter.min_interval_ns
+
+
+def test_sim_time_command_rate_limiter_rejects_late_rate_mutation_on_first_allow() -> None:
+    limiter = SimTimeCommandRateLimiter(max_rate_hz=95.0)
+    limiter.max_rate_hz = 100.0
+
+    with pytest.raises(ValueError, match="max_rate_hz"):
+        limiter.allow(0)
+    assert limiter.last_emit_sim_time_ns is None
+
+
+def test_sim_time_command_rate_limiter_rejects_bool_rate_mutation_on_first_allow() -> None:
+    limiter = SimTimeCommandRateLimiter(max_rate_hz=95.0)
+    limiter.max_rate_hz = True
+
+    with pytest.raises(ValueError, match="max_rate_hz"):
+        limiter.allow(0)
+    assert limiter.last_emit_sim_time_ns is None
+
+
+def test_sim_time_command_rate_limiter_rejects_too_small_rate_on_first_allow() -> None:
+    limiter = SimTimeCommandRateLimiter(max_rate_hz=95.0)
+    limiter.max_rate_hz = 5e-324
+
+    with pytest.raises(ValueError, match="too small"):
+        limiter.allow(0)
+    assert limiter.last_emit_sim_time_ns is None
