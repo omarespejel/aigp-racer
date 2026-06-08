@@ -24,18 +24,18 @@ Last updated: 2026-06-08.
 - Official simulator package `AI-GP Simulator v1.0.3364.zip` is now locally present outside git. Evidence is recorded in `docs/engineering/evidence/official-sim-package-probe-2026-06-08.json`.
 - The official package probe confirms the outer archive contains `AIGP_3364.zip`, `PyAIPilotExample.zip`, and `README.md`; the nested simulator tree is extracted locally but the Windows executable has not been run.
 - Extracted simulator tree facts: `FlightSim.exe`, `FlightSim/Binaries/Win64/DCGame-Win64-Shipping.exe`, `FlightSim/Content/Paks/FlightSim-WindowsNoEditor.pak`, 64 files, 4,755,012,758 bytes.
-- The official Python template adds useful protocol evidence beyond the PDF: MAVLink UDP port 14550, vision UDP port 5600, `LOCAL_POSITION_NED`, `ODOMETRY`, `ACTUATOR_OUTPUT_STATUS`, `COLLISION`, race status, track-info chunks, reset command `31000`, and a sample raw actuator command path at `CONTROL_HZ = 250`.
+- The official Python template adds useful protocol evidence beyond the PDF: MAVLink UDP port 14550, vision UDP port 5600, `LOCAL_POSITION_NED`, `ODOMETRY`, `ACTUATOR_OUTPUT_STATUS`, `COLLISION`, race status, track-info chunks, reset command `31000`, and a sample raw actuator command path at `CONTROL_HZ = 250`. Source: `docs/engineering/evidence/official-sim-package-probe-2026-06-08.json`.
+- Issue #35 owns the first live packet-capture bridge. The scaffold records bounded UDP summaries for vision port `5600` and MAVLink port `14550` without raw payload bytes, image decode, command emission, or decoded binary MAVLink claims. Sources: `docs/engineering/evidence/official-sim-package-probe-2026-06-08.json` and `docs/engineering/official-packet-capture-2026-06-08.md`.
 
 ## Active Objective
 
-Add a packaging probe for the OpenCV/NumPy dependency pair so the compiled
-vision path cannot silently become a runtime dependency before Windows 11
-simulator-host evidence exists.
+Run the official simulator on a Windows 10/11 host and capture the first live
+vision plus MAVLink packet summaries using the bounded scaffold from issue #35.
 
 Immediate next code objectives:
 
 1. Extract/run `AIGP_3364.zip` on a Windows 10/11 simulator host once enough disk and account access are ready.
-2. Capture real official simulator packet examples: one JPEG frame sequence and one decoded telemetry/race/track sample.
+2. Capture real official simulator packet examples under `.local/` with `scripts/aigp_official_packet_capture.py --live`.
 3. Run the velocity telemetry probe against live `LOCAL_POSITION_NED` / `ODOMETRY` / `HIGHRES_IMU` traffic.
 4. Calibrate Round 1 highlight basis from the first official simulator frame.
 5. Investigate whether the sample raw actuator command path is legal/useful before adding any raw motor command intent.

@@ -1,0 +1,100 @@
+{
+  "datagrams": [
+    {
+      "index": 0,
+      "local_bind": {
+        "host": "0.0.0.0",
+        "port": 5600
+      },
+      "received_monotonic_s": "1.000000",
+      "remote": {
+        "host": "127.0.0.1",
+        "port": 49000
+      },
+      "sha256_16": "0cbf9da4113f765f",
+      "size_bytes": 28,
+      "stream": "vision",
+      "vision": {
+        "chunk_id": 0,
+        "frame_id": 1,
+        "is_complete_single_chunk_frame": true,
+        "jpeg_size_bytes": 4,
+        "parse_status": "OK",
+        "payload_size_bytes": 4,
+        "sim_time_ns": 33333333,
+        "total_chunks": 1
+      }
+    },
+    {
+      "index": 0,
+      "local_bind": {
+        "host": "127.0.0.1",
+        "port": 14550
+      },
+      "mavlink": {
+        "compat_flags": 0,
+        "compid": 1,
+        "frame_size_bytes": 12,
+        "incompat_flags": 0,
+        "message_name": "HEARTBEAT",
+        "msgid": 0,
+        "parse_status": "OK",
+        "payload_length": 0,
+        "seq": 7,
+        "signed": false,
+        "sysid": 1,
+        "trailing_bytes": 0,
+        "version": 2
+      },
+      "received_monotonic_s": "1.001000",
+      "remote": {
+        "host": "127.0.0.1",
+        "port": 49001
+      },
+      "sha256_16": "1115889253d81b68",
+      "size_bytes": 12,
+      "stream": "mavlink"
+    }
+  ],
+  "duration_s": "0.000000",
+  "issue": "https://github.com/omarespejel/aigp-racer/issues/35",
+  "limits": {
+    "max_datagrams_per_stream": 64,
+    "max_total_bytes": 10485760,
+    "raw_payload_bytes_recorded": false
+  },
+  "mode": "fixture",
+  "non_claims": [
+    "not a successful official simulator run",
+    "not decoded binary MAVLink support",
+    "not velocity availability evidence until a live run is attached",
+    "not valid-run, latency, reliability, lap-time, or controller evidence",
+    "not permission to use raw actuator control"
+  ],
+  "schema_version": "aigp.official_packet_capture.v0",
+  "source": "deterministic local packet-capture fixture",
+  "stream_bytes": {
+    "mavlink": 12,
+    "vision": 28
+  },
+  "stream_counts": {
+    "mavlink": 1,
+    "vision": 1
+  },
+  "streams": [
+    {
+      "host": "0.0.0.0",
+      "max_datagram_bytes": 65535,
+      "name": "vision",
+      "parser": "official_chunked_jpeg_header",
+      "port": 5600
+    },
+    {
+      "host": "127.0.0.1",
+      "max_datagram_bytes": 65535,
+      "name": "mavlink",
+      "parser": "mavlink_frame_header_only",
+      "port": 14550
+    }
+  ]
+}

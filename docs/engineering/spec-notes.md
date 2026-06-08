@@ -101,6 +101,30 @@ Raw actuator control is an observed official-template path, not a default repo
 decision. It is tracked in issue #33 and needs a focused legality, rate, and
 safety gate before use.
 
+## Official Packet Capture Scaffold
+
+Checked-in deterministic fixture:
+
+```text
+docs/engineering/evidence/official-packet-capture-fixture-2026-06-08.json
+```
+
+The scaffold in `scripts/aigp_official_packet_capture.py` can be run on the
+Windows simulator host before any solver loop. It binds the observed official
+ports and records bounded packet summaries only:
+
+- vision UDP `0.0.0.0:5600`, parsed as the `<IHHIIQ` chunked JPEG header;
+- MAVLink UDP `127.0.0.1:14550`, parsed only as MAVLink v1/v2 frame headers.
+
+Sources for these packet-capture facts are the primary spec URL at the top of
+this file plus the checked official-template evidence in
+`docs/engineering/evidence/official-sim-package-probe-2026-06-08.json`.
+
+It deliberately does not record raw JPEG bytes, raw MAVLink payload bytes, send
+commands, decode images, or claim binary MAVLink message support. Live capture
+output should stay under ignored `.local/` storage until reviewed and reduced
+to a small evidence fixture.
+
 ## Current Ambiguity
 
 The spec text says telemetry includes linear velocities, but the explicit
