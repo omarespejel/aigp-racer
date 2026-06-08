@@ -1,0 +1,68 @@
+{
+  "claim_boundary": "packaging and import probe only; not latency evidence, not official simulator evidence, and not a runtime dependency decision until run on the Windows 11 simulator host",
+  "decode_smoke": {
+    "decoded_shape_hwc": [
+      360,
+      640,
+      3
+    ],
+    "expected_shape_hwc": [
+      360,
+      640,
+      3
+    ],
+    "ok": true,
+    "reason": null
+  },
+  "environment": {
+    "machine": "arm64",
+    "platform": "macOS-26.5.1-arm64-arm-64bit-Mach-O",
+    "processor": "arm",
+    "python_version": "3.14.3",
+    "release": "25.5.0",
+    "system": "Darwin"
+  },
+  "fixture": {
+    "path": "tests/fixtures/frame_640x360_synthetic.jpg",
+    "sha256": "300317f992c7d4c90396af410c46832d58cc6efed480d229ffaff4b4239b9401",
+    "size_bytes": 65050
+  },
+  "github_issue": "https://github.com/omarespejel/aigp-racer/issues/31",
+  "host_is_windows_11": false,
+  "local_smoke_ok": true,
+  "non_claims": [
+    "not Windows packaging proof unless environment.host_is_windows_11 is true",
+    "not official simulator compatibility evidence",
+    "not runtime dependency approval",
+    "not latency evidence",
+    "not valid-run evidence"
+  ],
+  "outcome": "NARROW_CLAIM_LOCAL_ONLY",
+  "packages": [
+    {
+      "expected_version": "4.13.0.92",
+      "import_error": null,
+      "import_name": "cv2",
+      "import_ok": true,
+      "installed_version": "4.13.0.92",
+      "package_name": "opencv-python",
+      "version_matches": true
+    },
+    {
+      "expected_version": "2.4.6",
+      "import_error": null,
+      "import_name": "numpy",
+      "import_ok": true,
+      "installed_version": "2.4.6",
+      "package_name": "numpy",
+      "version_matches": true
+    }
+  ],
+  "reproduction_command": "uv run --python 3.14 --with opencv-python --with numpy python scripts/aigp_packaging_probe.py --fixture tests/fixtures/frame_640x360_synthetic.jpg --write-json docs/engineering/evidence/opencv-numpy-packaging-probe-2026-06-08.json",
+  "schema_version": "aigp.packaging_probe.v0",
+  "target_environment": {
+    "os": "Windows 11",
+    "purpose": "AI Grand Prix official simulator host packaging check",
+    "python": "3.14"
+  }
+}

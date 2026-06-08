@@ -18,20 +18,23 @@ Last updated: 2026-06-08.
 - PR #25 merged issue #21. Integrated dry-run RaceEpisode and DecisionTrace evidence now exercises the detector -> estimator -> controller -> command-intent module chain without claiming simulator compatibility or latency.
 - PR #26 merged issue #22. Simulator-time replay command gating is split from wall-clock send-layer gating.
 - PR #27 merged issue #23. Screen-space gate depth conversion now carries an explicit inner-opening versus outer-frame measurement basis and preserves the first-frame calibration caveat.
-- PR #29 merged issue #24. The minimal local camera-bytes-to-command-intent loop is measured; the Pillow plus pure-Python detector path is a local p99 NO-GO and is routed to issue #28.
-- Active branch `codex/aigp-compiled-vision-benchmark-2026-06-08` works issue #28: benchmark OpenCV/NumPy vectorized decode and detection against the same fixture and schema.
+- PR #29 merged issue #24. The minimal local camera-bytes-to-command-intent loop is measured; the Pillow plus pure-Python detector path is a local p99 NO-GO and was routed to issue #28.
+- PR #30 merged issue #28. The OpenCV/NumPy compiled-vectorized path is a local fixture latency GO with a measured combined decode+detect p99 of 2.020049 ms, but it remains a non-claim for Windows packaging and official simulator compatibility.
+- Active branch `codex/aigp-packaging-probe-2026-06-08` works issue #31: record package/import/decode evidence for OpenCV/NumPy and keep the Windows 11 simulator-host GO gate explicit.
 
 ## Active Objective
 
-Benchmark a compiled/vectorized vision path and record whether it recovers enough frame budget for the local minimal loop.
+Add a packaging probe for the OpenCV/NumPy dependency pair so the compiled
+vision path cannot silently become a runtime dependency before Windows 11
+simulator-host evidence exists.
 
 Immediate next code objectives:
 
-1. Land issue #28 compiled/vectorized vision latency evidence.
+1. Land issue #31 packaging probe infrastructure without closing the Windows GO gate.
 2. Recheck issue #4 once team-portal credentials or an official package link are available.
 3. Capture real official simulator packet examples once access exists.
 4. Calibrate Round 1 highlight basis from the first official simulator frame.
-5. Verify OpenCV/NumPy packaging on the official Windows 11 simulator host before making any runtime dependency decision.
+5. Run the packaging probe on the official Windows 11 simulator host before making any runtime dependency decision.
 
 ## Current Known Unknowns
 
