@@ -52,6 +52,8 @@ jobs:
             --write-json docs/engineering/evidence/gate-measurement-boundary-2026-06-08.json
           python scripts/aigp_controller_safety_gate.py \
             --write-json docs/engineering/evidence/controller-safety-2026-06-08.json
+          python scripts/aigp_integrated_dry_run_gate.py \
+            --write-json
           git diff --exit-code docs/engineering/evidence/aigp-profile-fixture-2026-06-08.json
           git diff --exit-code docs/engineering/evidence/race-episode-fixture-2026-06-08.json
           git diff --exit-code docs/engineering/evidence/decision-trace-fixture-2026-06-08.json
@@ -63,6 +65,8 @@ jobs:
           git diff --exit-code docs/engineering/evidence/practice-adapter-2026-06-08.json
           git diff --exit-code docs/engineering/evidence/gate-measurement-boundary-2026-06-08.json
           git diff --exit-code docs/engineering/evidence/controller-safety-2026-06-08.json
+          git diff --exit-code docs/engineering/evidence/integrated-dry-run-episode-2026-06-08.json
+          git diff --exit-code docs/engineering/evidence/integrated-dry-run-decision-trace-2026-06-08.json
 
       - name: Ruff check
         run: python -m ruff check .

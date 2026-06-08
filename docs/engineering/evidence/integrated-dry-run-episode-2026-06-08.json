@@ -1,0 +1,141 @@
+{
+  "claim_boundary": "offline dry-run fixture only; detector, estimator, controller, and command-intent modules are real, but no simulator or MAVLink transport is exercised",
+  "episode_id": "integrated-dry-run-2026-06-08",
+  "events": [
+    {
+      "event_type": "synthetic_frame",
+      "payload": {
+        "gate_highlight_bbox_px": [
+          240,
+          100,
+          400,
+          260
+        ],
+        "image_size_px": [
+          640,
+          360
+        ],
+        "pixel_contract": "RGB rows; magenta rectangle on black background"
+      },
+      "sim_time_ns": 33333333,
+      "source_frame_id": 1
+    },
+    {
+      "event_type": "gate_detection_result",
+      "payload": {
+        "confidence": "1.000000",
+        "detected": true,
+        "mask_pixels": 25921,
+        "observation": {
+          "confidence": "1.000000",
+          "corner_uncertainty_px": [
+            "1.000000",
+            "1.000000",
+            "1.000000",
+            "1.000000"
+          ],
+          "corners_px": [
+            {
+              "u_px": "240.000000",
+              "v_px": "100.000000"
+            },
+            {
+              "u_px": "400.000000",
+              "v_px": "100.000000"
+            },
+            {
+              "u_px": "400.000000",
+              "v_px": "260.000000"
+            },
+            {
+              "u_px": "240.000000",
+              "v_px": "260.000000"
+            }
+          ],
+          "sim_time_ns": 33333333,
+          "source": "round1_color_bbox",
+          "source_frame_id": 1
+        },
+        "source": "round1_color_bbox",
+        "status": "DETECTED"
+      },
+      "sim_time_ns": 33333333,
+      "source_frame_id": 1
+    },
+    {
+      "event_type": "state_estimate",
+      "payload": {
+        "degraded_reason": null,
+        "diagnostic_count": 0,
+        "gate_confidence": "1.000000",
+        "gate_measurement_has_full_planar_pose": false,
+        "gate_measurement_mode": "SCREEN_SPACE_CENTER_DEPTH",
+        "gate_pose_camera_m": {
+          "x_right_m": "0.000000",
+          "y_down_m": "0.000000",
+          "z_forward_m": "3.000000"
+        },
+        "sim_time_ns": 33333333,
+        "source_frame_id": 1,
+        "stale": false,
+        "status": "GATE_WITHOUT_VELOCITY",
+        "velocity_available": false
+      },
+      "sim_time_ns": 33333333,
+      "source_frame_id": 1
+    },
+    {
+      "event_type": "control_command",
+      "payload": {
+        "down_m_s": "0.000000",
+        "forward_m_s": "0.750000",
+        "kind": "BODY_VELOCITY",
+        "reason": "tracking visible gate",
+        "right_m_s": "0.000000",
+        "sim_time_ns": 33333333,
+        "source_frame_id": 1,
+        "yaw_rate_rad_s": "0.000000"
+      },
+      "sim_time_ns": 33333333,
+      "source_frame_id": 1
+    },
+    {
+      "event_type": "command_intent",
+      "payload": {
+        "claim_boundary": "transport-independent command intent only; not binary MAVLink or MAVSDK evidence",
+        "frame": "MAV_FRAME_BODY_NED",
+        "ignored_setpoint_groups": [
+          "position",
+          "acceleration",
+          "yaw_angle"
+        ],
+        "intent_profile": "body_ned_velocity_plus_yaw_rate",
+        "message_name": "SET_POSITION_TARGET_LOCAL_NED",
+        "mode": "TRACK_GATE",
+        "reason": "tracking visible gate",
+        "schema_version": "aigp.command_intent.v0",
+        "sim_time_ns": 33333333,
+        "source_command_kind": "BODY_VELOCITY",
+        "source_frame_id": 1,
+        "velocity_body_ned_m_s": [
+          "0.750000",
+          "0.000000",
+          "0.000000"
+        ],
+        "yaw_rate_rad_s": "0.000000"
+      },
+      "sim_time_ns": 33333333,
+      "source_frame_id": 1
+    }
+  ],
+  "non_claims": [
+    "not official simulator compatibility evidence",
+    "not a valid-run result",
+    "not a lap-time, latency, or reliability claim",
+    "not a learned-policy result",
+    "not physical-drone transfer evidence",
+    "not proof that screen-space detector corners are physical gate-corner labels"
+  ],
+  "schema_version": "aigp.race_episode.v0",
+  "source": "deterministic local synthetic frame"
+}

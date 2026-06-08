@@ -14,19 +14,21 @@ Last updated: 2026-06-08.
 - Issue #4 is blocked on team-portal credentials or an official package link. Public and local search found no unauthenticated simulator/SDK package URL; evidence is recorded in https://github.com/omarespejel/aigp-racer/issues/4#issuecomment-4643872137.
 - PR #8 merged issue #5. Full planar PnP is available only for physical-labeled, front-facing gate corners; detector bbox corners remain screen-space observations.
 - PR #10 merged issue #9. Detector observations now bridge into estimator measurements through an explicit `GatePoseMeasurement` boundary without overclaiming full planar PnP from screen-space bbox corners.
-- Active branch `codex/aigp-controller-safety-2026-06-08` works issue #19: harden conservative valid-run commands with confidence, range, status, and offset guards.
+- PR #20 merged issue #19. Conservative valid-run commands now gate tracking on confidence, range, status, and center offset.
+- Active branch `codex/aigp-integrated-dry-run-2026-06-08` works issue #21: emit integrated dry-run RaceEpisode and DecisionTrace evidence from the actual detector -> estimator -> controller -> command-intent module chain.
 
 ## Active Objective
 
-Harden the conservative valid-run controller so degraded, low-confidence, out-of-range, or far-off-center gate estimates do not emit tracking commands.
+Prove the current runtime modules can produce offline replay evidence through one deterministic integrated dry run, without claiming official simulator compatibility or latency.
 
 Immediate next code objectives:
 
-1. Land issue #19 controller safety policy and evidence.
+1. Land issue #21 integrated dry-run evidence.
 2. Recheck issue #4 once team-portal credentials or an official package link are available.
 3. Capture real official simulator packet examples once access exists.
-4. Choose and gate a binary MAVLink decoder only after packet evidence exists.
-5. Emit RaceEpisode and DecisionTrace from an actual practice or official run.
+4. Resolve depth measurement basis/calibration in issue #23.
+5. Move command-rate replay decisions to simulator time in issue #22.
+6. Assemble and measure a minimal hot loop in issue #24.
 
 ## Current Known Unknowns
 
