@@ -27,13 +27,16 @@ Generated artifact:
 docs/engineering/evidence/official-sim-package-probe-2026-06-08.json
 ```
 
-Reproduction command on the machine that holds the local package and extracted
-tree:
+Reproduction command on a machine that holds the local package and extracted
+tree. `AIGP_OFFICIAL_ZIP` is host-specific and should point to the local
+download path outside git:
 
 ```bash
+export AIGP_OFFICIAL_ZIP="/path/to/AI-GP Simulator v1.0.3364.zip"
+
 uv run --python 3.14 --with jsonschema --with pyyaml --with ruff --with pytest \
   python scripts/aigp_official_package_probe.py \
-  --source-zip /Users/espejelomar/Downloads/'AI-GP Simulator v1.0.3364.zip' \
+  --source-zip "$AIGP_OFFICIAL_ZIP" \
   --sim-tree .local/simulator-v1.0.3364/AIGP_3364 \
   --write-json docs/engineering/evidence/official-sim-package-probe-2026-06-08.json \
   --check-json docs/engineering/evidence/official-sim-package-probe-2026-06-08.json

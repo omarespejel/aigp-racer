@@ -64,6 +64,42 @@ def test_validate_report_rejects_path_policy_drift(tmp_path: Path) -> None:
         probe.validate_report(report)
 
 
+def test_build_report_rejects_missing_readme(tmp_path: Path) -> None:
+    source_zip = tmp_path / "AI-GP Simulator v1.0.3364.zip"
+    with zipfile.ZipFile(source_zip, "w") as archive:
+        archive.writestr("AIGP_3364.zip", b"windows-sim")
+        archive.writestr("PyAIPilotExample.zip", b"not-used")
+
+    with pytest.raises(probe.OfficialPackageProbeError, match=r"missing README\.md"):
+        probe.build_report_from_zip(source_zip)
+
+
+def test_build_report_rejects_invalid_utf8_template_member(tmp_path: Path) -> None:
+    py_example_zip = tmp_path / "PyAIPilotExample.zip"
+    with zipfile.ZipFile(py_example_zip, "w") as archive:
+        archive.writestr("controller.py", b"\xff")
+        archive.writestr("main.py", "SIM_SERVER_UDP_PORT = 14550\n")
+        archive.writestr("mavlink_rx.py", _mavlink_rx_text())
+        archive.writestr("requirements.txt", "pymavlink\n")
+        archive.writestr("setup.py", "mavutil.mavlink_connection('udpin:%s:%s')\n")
+        archive.writestr("timesync.py", "class TimeSync: pass\n")
+        archive.writestr("vision_rx.py", 'SIM_SERVER_UDP_PORT = 5600\nheader_format = "<IHHIIQ"\n')
+    source_zip = _write_fixture_package(tmp_path, py_example_zip=py_example_zip)
+
+    with pytest.raises(probe.OfficialPackageProbeError, match=r"invalid UTF-8 in controller\.py"):
+        probe.build_report_from_zip(source_zip)
+
+
+def test_build_report_rejects_oversized_template_zip(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(probe, "DEFAULT_MAX_TEMPLATE_ZIP_BYTES", 1)
+
+    with pytest.raises(probe.OfficialPackageProbeError, match="exceeds size limit"):
+        probe.build_report_from_zip(_write_fixture_package(tmp_path))
+
+
 def test_checked_evidence_file_validates() -> None:
     evidence_path = (
         Path(__file__).resolve().parents[1]
@@ -75,16 +111,23 @@ def test_checked_evidence_file_validates() -> None:
     probe.validate_report(json.loads(evidence_path.read_text(encoding="utf-8")))
 
 
-def _write_fixture_package(tmp_path: Path) -> Path:
-    py_example_zip = tmp_path / "PyAIPilotExample.zip"
-    with zipfile.ZipFile(py_example_zip, "w") as archive:
-        archive.writestr("controller.py", _controller_text())
-        archive.writestr("main.py", "SIM_SERVER_UDP_PORT = 14550\n")
-        archive.writestr("mavlink_rx.py", _mavlink_rx_text())
-        archive.writestr("requirements.txt", "pymavlink\nopencv-python\nnumpy\n")
-        archive.writestr("setup.py", "mavutil.mavlink_connection('udpin:%s:%s' % ('x', 1))\n")
-        archive.writestr("timesync.py", "class TimeSync: pass\n")
-        archive.writestr("vision_rx.py", 'SIM_SERVER_UDP_PORT = 5600\nheader_format = "<IHHIIQ"\n')
+def _write_fixture_package(tmp_path: Path, *, py_example_zip: Path | None = None) -> Path:
+    if py_example_zip is None:
+        py_example_zip = tmp_path / "PyAIPilotExample.zip"
+        with zipfile.ZipFile(py_example_zip, "w") as archive:
+            archive.writestr("controller.py", _controller_text())
+            archive.writestr("main.py", "SIM_SERVER_UDP_PORT = 14550\n")
+            archive.writestr("mavlink_rx.py", _mavlink_rx_text())
+            archive.writestr("requirements.txt", "pymavlink\nopencv-python\nnumpy\n")
+            archive.writestr(
+                "setup.py",
+                "mavutil.mavlink_connection('udpin:%s:%s' % ('x', 1))\n",
+            )
+            archive.writestr("timesync.py", "class TimeSync: pass\n")
+            archive.writestr(
+                "vision_rx.py",
+                'SIM_SERVER_UDP_PORT = 5600\nheader_format = "<IHHIIQ"\n',
+            )
 
     source_zip = tmp_path / "AI-GP Simulator v1.0.3364.zip"
     with zipfile.ZipFile(source_zip, "w") as archive:
