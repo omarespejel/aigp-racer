@@ -1,0 +1,118 @@
+{
+  "baseline_issue": "https://github.com/omarespejel/aigp-racer/issues/24",
+  "candidate": {
+    "dependency_note": "OpenCV imdecode plus NumPy vectorized color threshold and bbox extraction",
+    "name": "opencv_vectorized",
+    "numpy_version": "2.4.6",
+    "opencv_version": "4.13.0.92",
+    "windows_packaging_note": "Python 3.14 wheels installed in this macOS evidence run; Windows 11 wheel availability must be verified on the official simulator host"
+  },
+  "claim_boundary": "local fixture timing only; modules are assembled from frame reassembly through command intent, but no official simulator, UDP socket, or MAVLink send path is exercised",
+  "config": {
+    "budget_source": "AI Grand Prix Technical Specification VADR-TS-002, Issue 00.02, 2026-05-08; camera 30 Hz and command rate <100 Hz",
+    "budget_source_url": "https://www.theaigrandprix.com/wp-content/uploads/2026/05/260508_Technical_Spec_0002.pdf",
+    "command_budget_ms": "10.526316",
+    "decode_detect_budget_ms": "25.000000",
+    "frame_budget_ms": "33.333333",
+    "iterations": 1000,
+    "warmup": 25
+  },
+  "environment": {
+    "machine": "arm64",
+    "platform": "macOS-26.5.1-arm64-arm-64bit-Mach-O",
+    "processor": "arm",
+    "python_version": "3.14.3"
+  },
+  "fixture": {
+    "chunk_count": 4,
+    "path": "tests/fixtures/frame_640x360_synthetic.jpg",
+    "sha256": "300317f992c7d4c90396af410c46832d58cc6efed480d229ffaff4b4239b9401",
+    "size_bytes": 65050
+  },
+  "github_issue": "https://github.com/omarespejel/aigp-racer/issues/28",
+  "last_output": {
+    "command_kind": "REACQUIRE",
+    "command_reason": "gate confidence below threshold",
+    "detected": true,
+    "detection_status": "DETECTED",
+    "frame_id": 1,
+    "gate_confidence": "0.096866",
+    "gate_z_forward_m": "1.352113",
+    "intent_mode": "REACQUIRE",
+    "mask_pixels": 22318,
+    "measurement_basis": "OUTER_FRAME",
+    "message_name": "SET_POSITION_TARGET_LOCAL_NED",
+    "sim_time_ns": 33333333,
+    "state_status": "GATE_WITHOUT_VELOCITY"
+  },
+  "non_claims": [
+    "not official simulator latency evidence",
+    "not official simulator frame evidence",
+    "not a valid-run result",
+    "not Round 2 detector evidence",
+    "not a final runtime dependency decision",
+    "not Windows packaging proof"
+  ],
+  "passes_command_p99_budget": true,
+  "passes_decode_plus_detect_p99_budget": true,
+  "passes_frame_p99_budget": true,
+  "schema_version": "aigp.compiled_vision_latency.v0",
+  "stage_latency_ms": {
+    "control": {
+      "max": "0.002916",
+      "median": "0.001333",
+      "min": "0.001208",
+      "p50": "0.001333",
+      "p95": "0.001541",
+      "p99": "0.001917"
+    },
+    "decode": {
+      "max": "0.852125",
+      "median": "0.613500",
+      "min": "0.604041",
+      "p50": "0.613500",
+      "p95": "0.646936",
+      "p99": "0.701588"
+    },
+    "detect": {
+      "max": "1.477583",
+      "median": "1.187229",
+      "min": "1.177959",
+      "p50": "1.187229",
+      "p95": "1.235050",
+      "p99": "1.351726"
+    },
+    "estimate": {
+      "max": "0.030500",
+      "median": "0.009125",
+      "min": "0.008833",
+      "p50": "0.009125",
+      "p95": "0.011667",
+      "p99": "0.015375"
+    },
+    "intent": {
+      "max": "0.008583",
+      "median": "0.003500",
+      "min": "0.003292",
+      "p50": "0.003500",
+      "p95": "0.004042",
+      "p99": "0.004876"
+    },
+    "reassemble": {
+      "max": "0.025833",
+      "median": "0.011083",
+      "min": "0.010625",
+      "p50": "0.011083",
+      "p95": "0.013791",
+      "p99": "0.016627"
+    }
+  },
+  "total_latency_ms": {
+    "max": "2.319292",
+    "median": "1.832875",
+    "min": "1.819792",
+    "p50": "1.832875",
+    "p95": "1.913184",
+    "p99": "2.078857"
+  }
+}

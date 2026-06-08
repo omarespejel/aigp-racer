@@ -17,6 +17,7 @@ This file tracks competition-relevant disclosure material for AI Grand Prix work
 - 2026-06-08: Simulator-time command-rate limiter, deterministic boundary tests, and engineering note drafted with Codex for issue #22.
 - 2026-06-08: Gate depth measurement-basis hardening, estimator propagation, deterministic basis tests, and engineering note drafted with Codex for issue #23.
 - 2026-06-08: Minimal assembled loop latency runner, local Pillow timing evidence, engineering note, and compiled-vision follow-up issue #28 drafted with Codex for issue #24.
+- 2026-06-08: OpenCV/NumPy compiled-vectorized vision latency benchmark, local timing evidence, tests, and engineering note drafted with Codex for issue #28.
 
 ## FLOSS Dependencies
 
@@ -35,6 +36,7 @@ This file tracks competition-relevant disclosure material for AI Grand Prix work
 - Pillow `12.2.0` was installed ephemerally with `uv --with pillow==12.2.0` to generate the synthetic JPEG fixture and local decode benchmark artifact for issue #17. It is not a mandatory project dependency or runtime decision.
 - Pillow `12.2.0` was installed ephemerally with `uv --with pillow==12.2.0` to generate the minimal loop latency artifact for issue #24. It is not a mandatory project dependency or runtime decision.
 - OpenCV and PyTurboJPEG are recorded as candidate JPEG decode dependencies for issue #17, but were not installed or benchmarked in this local evidence artifact.
+- `opencv-python` `4.13.0.92` and `numpy` `2.4.6` were installed ephemerally with `uv --with opencv-python --with numpy` to generate the compiled-vectorized vision latency artifact for issue #28. They are not mandatory project dependencies or a final runtime decision until Windows 11 packaging is verified.
 
 Runtime dependencies remain pending. Add every runtime, training, evaluation, and simulation dependency before submission.
 
