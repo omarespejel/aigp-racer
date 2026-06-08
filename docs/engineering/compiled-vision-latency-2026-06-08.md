@@ -34,6 +34,12 @@ Measured artifact:
 docs/engineering/evidence/compiled-vision-latency-2026-06-08.json
 ```
 
+Deterministic drift-check artifact:
+
+```text
+docs/engineering/evidence/compiled-vision-latency-drift-check-2026-06-08.json
+```
+
 Measured command:
 
 ```bash
@@ -61,11 +67,11 @@ candidate: opencv_vectorized
 opencv-python: 4.13.0.92
 numpy: 2.4.6
 fixture: tests/fixtures/frame_640x360_synthetic.jpg
-total p99: 2.078857 ms
-decode p99: 0.701588 ms
-detect p99: 1.351726 ms
-decode + detect p99: 2.053314 ms
-control + intent p99: 0.006793 ms
+total p99: 2.064688 ms
+decode p99: 0.693483 ms
+detect p99: 1.341061 ms
+decode + detect p99: 2.020049 ms
+control + intent p99: 0.006167 ms
 passes frame p99 budget: true
 passes decode + detect p99 budget: true
 passes command p99 budget: true
@@ -102,11 +108,17 @@ runtime dependency decision.
 
 ## Drift Policy
 
-The timing JSON is measured evidence, not a deterministic generator output. The
-local gate checks schema, fixture integrity, source metadata, pinned config,
-candidate provenance, stage latency shape, recomputed budget booleans, and
-non-claims with `--check-json`, then asserts the checked-in artifact has no
-worktree drift. It does not regenerate p99 values on every run.
+The measured timing JSON is wall-clock evidence, so its OpenCV p99 values are
+not regenerated on every local gate run. It is still self-contained: the JSON
+stores the exact reproduction command, and the local gate checks schema, fixture
+integrity, source metadata, pinned config, candidate provenance, stage latency
+shape, combined p99 budget booleans, and non-claims with `--check-json`.
+
+The local gate also regenerates
+`compiled-vision-latency-drift-check-2026-06-08.json` with a deterministic
+fixture candidate, injected clock, and deterministic environment metadata, then
+compares it against the committed copy. That companion artifact is the automated
+no-drift surface for the compiled-vision schema and budget logic.
 
 ## Non-Claims
 
@@ -128,5 +140,14 @@ uv run --python 3.14 \
   --iterations 1000 \
   --warmup 25 \
   --fixture tests/fixtures/frame_640x360_synthetic.jpg
+uv run --python 3.14 \
+  python scripts/aigp_compiled_vision_gate.py \
+  --candidate fixture_step \
+  --iterations 2 \
+  --warmup 0 \
+  --fixture tests/fixtures/frame_640x360_synthetic.jpg \
+  --deterministic-clock-step-ns 1000000 \
+  --deterministic-environment \
+  --write-json docs/engineering/evidence/compiled-vision-latency-drift-check-2026-06-08.json
 ./scripts/aigp_local_gate.sh
 ```
