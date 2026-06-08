@@ -15,20 +15,20 @@ Last updated: 2026-06-08.
 - PR #8 merged issue #5. Full planar PnP is available only for physical-labeled, front-facing gate corners; detector bbox corners remain screen-space observations.
 - PR #10 merged issue #9. Detector observations now bridge into estimator measurements through an explicit `GatePoseMeasurement` boundary without overclaiming full planar PnP from screen-space bbox corners.
 - PR #20 merged issue #19. Conservative valid-run commands now gate tracking on confidence, range, status, and center offset.
-- Active branch `codex/aigp-integrated-dry-run-2026-06-08` works issue #21: emit integrated dry-run RaceEpisode and DecisionTrace evidence from the actual detector -> estimator -> controller -> command-intent module chain.
+- PR #25 merged issue #21. Integrated dry-run RaceEpisode and DecisionTrace evidence now exercises the detector -> estimator -> controller -> command-intent module chain without claiming simulator compatibility or latency.
+- Active branch `codex/aigp-command-rate-simtime-2026-06-08` works issue #22: split simulator-time replay command gating from wall-clock send-layer gating.
 
 ## Active Objective
 
-Prove the current runtime modules can produce offline replay evidence through one deterministic integrated dry run, without claiming official simulator compatibility or latency.
+Make command-rate decisions replay-deterministic by providing a simulator-time limiter for offline evidence and AutoRaceEvolve-style evaluation while keeping wall-clock transport deadlines separate.
 
 Immediate next code objectives:
 
-1. Land issue #21 integrated dry-run evidence.
+1. Land issue #22 simulator-time command-rate limiter.
 2. Recheck issue #4 once team-portal credentials or an official package link are available.
 3. Capture real official simulator packet examples once access exists.
 4. Resolve depth measurement basis/calibration in issue #23.
-5. Move command-rate replay decisions to simulator time in issue #22.
-6. Assemble and measure a minimal hot loop in issue #24.
+5. Assemble and measure a minimal hot loop in issue #24.
 
 ## Current Known Unknowns
 
