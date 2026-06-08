@@ -42,6 +42,10 @@ uv run --python 3.14 --with jsonschema --with pyyaml --with ruff --with pytest \
   --write-json docs/engineering/evidence/gate-measurement-boundary-2026-06-08.json
 
 uv run --python 3.14 --with jsonschema --with pyyaml --with ruff --with pytest \
+  python scripts/aigp_controller_safety_gate.py \
+  --write-json docs/engineering/evidence/controller-safety-2026-06-08.json
+
+uv run --python 3.14 --with jsonschema --with pyyaml --with ruff --with pytest \
   python -m ruff check .
 
 uv run --python 3.14 --with jsonschema --with pyyaml --with ruff --with pytest \
@@ -61,3 +65,4 @@ git diff --exit-code docs/engineering/evidence/command-intent-envelope-2026-06-0
 git diff --exit-code docs/engineering/evidence/jpeg-decode-benchmark-2026-06-08.json
 git diff --exit-code docs/engineering/evidence/practice-adapter-2026-06-08.json
 git diff --exit-code docs/engineering/evidence/gate-measurement-boundary-2026-06-08.json
+git diff --exit-code docs/engineering/evidence/controller-safety-2026-06-08.json

@@ -1,0 +1,430 @@
+{
+  "claim_boundary": "deterministic controller fixture only; not a simulator run, valid-run result, latency result, or reliability claim",
+  "commands": [
+    "uv run --python 3.14 --with pytest python -m pytest tests/test_solver_baseline.py tests/test_mavlink_command_intent.py",
+    "./scripts/aigp_local_gate.sh"
+  ],
+  "controller": {
+    "class": "ConservativeController",
+    "max_center_offset_ratio": "0.450000",
+    "max_forward_m_s": "1.000000",
+    "max_lateral_m_s": "0.500000",
+    "max_track_depth_m": "8.000000",
+    "max_vertical_m_s": "0.500000",
+    "min_gate_confidence": "0.350000",
+    "min_track_depth_m": "0.750000",
+    "module": "solver/baseline.py"
+  },
+  "github_issue": "https://github.com/omarespejel/aigp-racer/issues/19",
+  "go_gate_evidence": {
+    "command_intent_mapping_remains_valid": true,
+    "degraded_state_reacquires": true,
+    "missing_or_low_confidence_reacquires": true,
+    "nominal_centered_gate_tracks": true,
+    "off_center_gate_reacquires": true,
+    "out_of_range_depth_reacquires": true,
+    "stale_state_holds": true
+  },
+  "non_claims": [
+    "not an official simulator run",
+    "not an Elodin practice run",
+    "not a valid-run result",
+    "not latency, lap-time, or reliability evidence",
+    "not a learned-policy or AutoRaceEvolve result",
+    "not proof that SET_POSITION_TARGET_LOCAL_NED is sufficient for Round 1"
+  ],
+  "scenarios": [
+    {
+      "command": {
+        "down_m_s": "0.000000",
+        "forward_m_s": "0.750000",
+        "kind": "BODY_VELOCITY",
+        "reason": "tracking visible gate",
+        "right_m_s": "0.000000",
+        "sim_time_ns": 100,
+        "source_frame_id": 7,
+        "yaw_rate_rad_s": "0.000000"
+      },
+      "command_intent": {
+        "claim_boundary": "transport-independent command intent only; not binary MAVLink or MAVSDK evidence",
+        "frame": "MAV_FRAME_BODY_NED",
+        "ignored_setpoint_groups": [
+          "position",
+          "acceleration",
+          "yaw_angle"
+        ],
+        "intent_profile": "body_ned_velocity_plus_yaw_rate",
+        "message_name": "SET_POSITION_TARGET_LOCAL_NED",
+        "mode": "TRACK_GATE",
+        "reason": "tracking visible gate",
+        "schema_version": "aigp.command_intent.v0",
+        "sim_time_ns": 100,
+        "source_command_kind": "BODY_VELOCITY",
+        "source_frame_id": 7,
+        "velocity_body_ned_m_s": [
+          "0.750000",
+          "0.000000",
+          "0.000000"
+        ],
+        "yaw_rate_rad_s": "0.000000"
+      },
+      "name": "nominal_centered_track",
+      "state": {
+        "gate_confidence": "0.800000",
+        "gate_pose_camera_m": {
+          "x_right_m": "0.000000",
+          "y_down_m": "0.000000",
+          "z_forward_m": "3.000000"
+        },
+        "sim_time_ns": 100,
+        "source_frame_id": 7,
+        "stale": false,
+        "status": "READY"
+      }
+    },
+    {
+      "command": {
+        "down_m_s": "0.000000",
+        "forward_m_s": "0.750000",
+        "kind": "BODY_VELOCITY",
+        "reason": "tracking visible gate",
+        "right_m_s": "0.000000",
+        "sim_time_ns": 100,
+        "source_frame_id": 7,
+        "yaw_rate_rad_s": "0.000000"
+      },
+      "command_intent": {
+        "claim_boundary": "transport-independent command intent only; not binary MAVLink or MAVSDK evidence",
+        "frame": "MAV_FRAME_BODY_NED",
+        "ignored_setpoint_groups": [
+          "position",
+          "acceleration",
+          "yaw_angle"
+        ],
+        "intent_profile": "body_ned_velocity_plus_yaw_rate",
+        "message_name": "SET_POSITION_TARGET_LOCAL_NED",
+        "mode": "TRACK_GATE",
+        "reason": "tracking visible gate",
+        "schema_version": "aigp.command_intent.v0",
+        "sim_time_ns": 100,
+        "source_command_kind": "BODY_VELOCITY",
+        "source_frame_id": 7,
+        "velocity_body_ned_m_s": [
+          "0.750000",
+          "0.000000",
+          "0.000000"
+        ],
+        "yaw_rate_rad_s": "0.000000"
+      },
+      "name": "gate_without_velocity_track",
+      "state": {
+        "gate_confidence": "0.800000",
+        "gate_pose_camera_m": {
+          "x_right_m": "0.000000",
+          "y_down_m": "0.000000",
+          "z_forward_m": "3.000000"
+        },
+        "sim_time_ns": 100,
+        "source_frame_id": 7,
+        "stale": false,
+        "status": "GATE_WITHOUT_VELOCITY"
+      }
+    },
+    {
+      "command": {
+        "down_m_s": "0.000000",
+        "forward_m_s": "0.000000",
+        "kind": "HOLD",
+        "reason": "stale telemetry",
+        "right_m_s": "0.000000",
+        "sim_time_ns": 100,
+        "source_frame_id": 7,
+        "yaw_rate_rad_s": "0.000000"
+      },
+      "command_intent": {
+        "claim_boundary": "transport-independent command intent only; not binary MAVLink or MAVSDK evidence",
+        "frame": "MAV_FRAME_BODY_NED",
+        "ignored_setpoint_groups": [
+          "position",
+          "acceleration",
+          "yaw_angle"
+        ],
+        "intent_profile": "body_ned_velocity_plus_yaw_rate",
+        "message_name": "SET_POSITION_TARGET_LOCAL_NED",
+        "mode": "HOLD",
+        "reason": "stale telemetry",
+        "schema_version": "aigp.command_intent.v0",
+        "sim_time_ns": 100,
+        "source_command_kind": "HOLD",
+        "source_frame_id": 7,
+        "velocity_body_ned_m_s": [
+          "0.000000",
+          "0.000000",
+          "0.000000"
+        ],
+        "yaw_rate_rad_s": "0.000000"
+      },
+      "name": "stale_telemetry_hold",
+      "state": {
+        "gate_confidence": "0.800000",
+        "gate_pose_camera_m": {
+          "x_right_m": "0.000000",
+          "y_down_m": "0.000000",
+          "z_forward_m": "3.000000"
+        },
+        "sim_time_ns": 100,
+        "source_frame_id": 7,
+        "stale": true,
+        "status": "STALE_TELEMETRY"
+      }
+    },
+    {
+      "command": {
+        "down_m_s": "0.000000",
+        "forward_m_s": "0.000000",
+        "kind": "REACQUIRE",
+        "reason": "gate confidence below threshold",
+        "right_m_s": "0.000000",
+        "sim_time_ns": 100,
+        "source_frame_id": 7,
+        "yaw_rate_rad_s": "0.200000"
+      },
+      "command_intent": {
+        "claim_boundary": "transport-independent command intent only; not binary MAVLink or MAVSDK evidence",
+        "frame": "MAV_FRAME_BODY_NED",
+        "ignored_setpoint_groups": [
+          "position",
+          "acceleration",
+          "yaw_angle"
+        ],
+        "intent_profile": "body_ned_velocity_plus_yaw_rate",
+        "message_name": "SET_POSITION_TARGET_LOCAL_NED",
+        "mode": "REACQUIRE",
+        "reason": "gate confidence below threshold",
+        "schema_version": "aigp.command_intent.v0",
+        "sim_time_ns": 100,
+        "source_command_kind": "REACQUIRE",
+        "source_frame_id": 7,
+        "velocity_body_ned_m_s": [
+          "0.000000",
+          "0.000000",
+          "0.000000"
+        ],
+        "yaw_rate_rad_s": "0.200000"
+      },
+      "name": "low_confidence_reacquire",
+      "state": {
+        "gate_confidence": "0.100000",
+        "gate_pose_camera_m": {
+          "x_right_m": "0.000000",
+          "y_down_m": "0.000000",
+          "z_forward_m": "3.000000"
+        },
+        "sim_time_ns": 100,
+        "source_frame_id": 7,
+        "stale": false,
+        "status": "READY"
+      }
+    },
+    {
+      "command": {
+        "down_m_s": "0.000000",
+        "forward_m_s": "0.000000",
+        "kind": "REACQUIRE",
+        "reason": "gate depth above tracking range",
+        "right_m_s": "0.000000",
+        "sim_time_ns": 100,
+        "source_frame_id": 7,
+        "yaw_rate_rad_s": "0.200000"
+      },
+      "command_intent": {
+        "claim_boundary": "transport-independent command intent only; not binary MAVLink or MAVSDK evidence",
+        "frame": "MAV_FRAME_BODY_NED",
+        "ignored_setpoint_groups": [
+          "position",
+          "acceleration",
+          "yaw_angle"
+        ],
+        "intent_profile": "body_ned_velocity_plus_yaw_rate",
+        "message_name": "SET_POSITION_TARGET_LOCAL_NED",
+        "mode": "REACQUIRE",
+        "reason": "gate depth above tracking range",
+        "schema_version": "aigp.command_intent.v0",
+        "sim_time_ns": 100,
+        "source_command_kind": "REACQUIRE",
+        "source_frame_id": 7,
+        "velocity_body_ned_m_s": [
+          "0.000000",
+          "0.000000",
+          "0.000000"
+        ],
+        "yaw_rate_rad_s": "0.200000"
+      },
+      "name": "too_far_reacquire",
+      "state": {
+        "gate_confidence": "0.800000",
+        "gate_pose_camera_m": {
+          "x_right_m": "0.000000",
+          "y_down_m": "0.000000",
+          "z_forward_m": "9.000000"
+        },
+        "sim_time_ns": 100,
+        "source_frame_id": 7,
+        "stale": false,
+        "status": "READY"
+      }
+    },
+    {
+      "command": {
+        "down_m_s": "0.000000",
+        "forward_m_s": "0.000000",
+        "kind": "REACQUIRE",
+        "reason": "gate center offset above tracking range",
+        "right_m_s": "0.000000",
+        "sim_time_ns": 100,
+        "source_frame_id": 7,
+        "yaw_rate_rad_s": "0.200000"
+      },
+      "command_intent": {
+        "claim_boundary": "transport-independent command intent only; not binary MAVLink or MAVSDK evidence",
+        "frame": "MAV_FRAME_BODY_NED",
+        "ignored_setpoint_groups": [
+          "position",
+          "acceleration",
+          "yaw_angle"
+        ],
+        "intent_profile": "body_ned_velocity_plus_yaw_rate",
+        "message_name": "SET_POSITION_TARGET_LOCAL_NED",
+        "mode": "REACQUIRE",
+        "reason": "gate center offset above tracking range",
+        "schema_version": "aigp.command_intent.v0",
+        "sim_time_ns": 100,
+        "source_command_kind": "REACQUIRE",
+        "source_frame_id": 7,
+        "velocity_body_ned_m_s": [
+          "0.000000",
+          "0.000000",
+          "0.000000"
+        ],
+        "yaw_rate_rad_s": "0.200000"
+      },
+      "name": "off_center_reacquire",
+      "state": {
+        "gate_confidence": "0.800000",
+        "gate_pose_camera_m": {
+          "x_right_m": "2.000000",
+          "y_down_m": "0.000000",
+          "z_forward_m": "3.000000"
+        },
+        "sim_time_ns": 100,
+        "source_frame_id": 7,
+        "stale": false,
+        "status": "READY"
+      }
+    },
+    {
+      "command": {
+        "down_m_s": "0.000000",
+        "forward_m_s": "0.000000",
+        "kind": "REACQUIRE",
+        "reason": "state not commandable: MALFORMED_GATE_OBSERVATION",
+        "right_m_s": "0.000000",
+        "sim_time_ns": 100,
+        "source_frame_id": 7,
+        "yaw_rate_rad_s": "0.200000"
+      },
+      "command_intent": {
+        "claim_boundary": "transport-independent command intent only; not binary MAVLink or MAVSDK evidence",
+        "frame": "MAV_FRAME_BODY_NED",
+        "ignored_setpoint_groups": [
+          "position",
+          "acceleration",
+          "yaw_angle"
+        ],
+        "intent_profile": "body_ned_velocity_plus_yaw_rate",
+        "message_name": "SET_POSITION_TARGET_LOCAL_NED",
+        "mode": "REACQUIRE",
+        "reason": "state not commandable: MALFORMED_GATE_OBSERVATION",
+        "schema_version": "aigp.command_intent.v0",
+        "sim_time_ns": 100,
+        "source_command_kind": "REACQUIRE",
+        "source_frame_id": 7,
+        "velocity_body_ned_m_s": [
+          "0.000000",
+          "0.000000",
+          "0.000000"
+        ],
+        "yaw_rate_rad_s": "0.200000"
+      },
+      "name": "malformed_status_reacquire",
+      "state": {
+        "gate_confidence": "0.800000",
+        "gate_pose_camera_m": {
+          "x_right_m": "0.000000",
+          "y_down_m": "0.000000",
+          "z_forward_m": "3.000000"
+        },
+        "sim_time_ns": 100,
+        "source_frame_id": 7,
+        "stale": false,
+        "status": "MALFORMED_GATE_OBSERVATION"
+      }
+    }
+  ],
+  "schema_version": "aigp.controller_safety_evidence.v0",
+  "tests": [
+    {
+      "name": "test_controller_holds_on_stale_state",
+      "path": "tests/test_solver_baseline.py"
+    },
+    {
+      "name": "test_controller_reacquires_when_gate_missing",
+      "path": "tests/test_solver_baseline.py"
+    },
+    {
+      "name": "test_controller_tracks_visible_gate_conservatively",
+      "path": "tests/test_solver_baseline.py"
+    },
+    {
+      "name": "test_controller_tracks_gate_without_velocity_status",
+      "path": "tests/test_solver_baseline.py"
+    },
+    {
+      "name": "test_controller_reacquires_on_non_commandable_status",
+      "path": "tests/test_solver_baseline.py"
+    },
+    {
+      "name": "test_controller_reacquires_on_missing_gate_confidence",
+      "path": "tests/test_solver_baseline.py"
+    },
+    {
+      "name": "test_controller_reacquires_on_low_gate_confidence",
+      "path": "tests/test_solver_baseline.py"
+    },
+    {
+      "name": "test_controller_reacquires_on_invalid_gate_confidence",
+      "path": "tests/test_solver_baseline.py"
+    },
+    {
+      "name": "test_controller_reacquires_on_non_positive_gate_depth",
+      "path": "tests/test_solver_baseline.py"
+    },
+    {
+      "name": "test_controller_reacquires_outside_conservative_tracking_range",
+      "path": "tests/test_solver_baseline.py"
+    },
+    {
+      "name": "test_controller_reacquires_on_non_finite_gate_pose",
+      "path": "tests/test_solver_baseline.py"
+    },
+    {
+      "name": "test_controller_rejects_invalid_safety_thresholds",
+      "path": "tests/test_solver_baseline.py"
+    }
+  ],
+  "validation": {
+    "generator_executes_tests": false,
+    "listed_go_gate_test_count": 12,
+    "status_source": "external local or CI gate; this generator only writes evidence"
+  }
+}
