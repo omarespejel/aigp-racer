@@ -27,7 +27,7 @@ from perception.geometry import GateMeasurementBasis, ImagePoint
 from solver.baseline import ConservativeController
 from vision.reassembler import JpegFrameReassembler, VisionChunkHeader, pack_header
 
-SCHEMA_VERSION = "aigp.compiled_vision_latency.v0"
+SCHEMA_VERSION = "aigp.compiled_vision_latency.v1"
 GITHUB_ISSUE = "https://github.com/omarespejel/aigp-racer/issues/28"
 CLAIM_BOUNDARY = (
     "local fixture timing only; modules are assembled from frame reassembly through "
@@ -38,7 +38,13 @@ DEFAULT_WARMUP = 5
 DEFAULT_CHUNK_COUNT = 4
 DEFAULT_FIXTURE = Path("tests/fixtures/frame_640x360_synthetic.jpg")
 DEFAULT_EVIDENCE = Path("docs/engineering/evidence/compiled-vision-latency-2026-06-08.json")
+DEFAULT_DRIFT_EVIDENCE = Path(
+    "docs/engineering/evidence/compiled-vision-latency-drift-check-2026-06-08.json"
+)
 DEFAULT_CANDIDATE = "opencv_vectorized"
+DRIFT_CHECK_CANDIDATE = "fixture_step"
+MEASURED_EVIDENCE_MODE = "measured_latency"
+DRIFT_CHECK_EVIDENCE_MODE = "deterministic_drift_check"
 EXPECTED_OPENCV_VERSION = "4.13.0.92"
 EXPECTED_NUMPY_VERSION = "2.4.6"
 DEFAULT_FRAME_BUDGET_MS = 33.333333
@@ -51,6 +57,7 @@ TECHNICAL_SPEC_URL = (
     "https://www.theaigrandprix.com/wp-content/uploads/2026/05/260508_Technical_Spec_0002.pdf"
 )
 STAGES = ("reassemble", "decode", "detect", "estimate", "control", "intent")
+COMBINED_STAGES = ("decode_plus_detect", "command")
 NON_CLAIMS = (
     "not official simulator latency evidence",
     "not official simulator frame evidence",
@@ -101,9 +108,11 @@ class VisionCandidate:
 
 
 def discover_candidate(name: str) -> VisionCandidate:
-    if name != DEFAULT_CANDIDATE:
-        raise CompiledVisionGateError(f"unsupported candidate {name}")
-    return _discover_opencv_candidate()
+    if name == DEFAULT_CANDIDATE:
+        return _discover_opencv_candidate()
+    if name == DRIFT_CHECK_CANDIDATE:
+        return _discover_fixture_step_candidate()
+    raise CompiledVisionGateError(f"unsupported candidate {name}")
 
 
 def build_report(
@@ -112,6 +121,9 @@ def build_report(
     candidate: VisionCandidate,
     config: CompiledVisionConfig,
     clock_ns: Callable[[], int] | None = None,
+    deterministic_environment: bool = False,
+    evidence_mode: str = MEASURED_EVIDENCE_MODE,
+    reproduction_command: str | None = None,
 ) -> dict[str, Any]:
     fixture_bytes = fixture_path.read_bytes()
     datagrams = tuple(
@@ -125,6 +137,7 @@ def build_report(
         for index in range(config.chunk_count)
     )
     stage_samples_ms: dict[str, list[float]] = {stage: [] for stage in STAGES}
+    combined_samples_ms: dict[str, list[float]] = {stage: [] for stage in COMBINED_STAGES}
     total_samples_ms: list[float] = []
     last_output: dict[str, Any] | None = None
     clock = time.perf_counter_ns if clock_ns is None else clock_ns
@@ -133,6 +146,12 @@ def build_report(
         if index >= config.warmup:
             for stage in STAGES:
                 stage_samples_ms[stage].append(output["stage_latency_ms"][stage])
+            combined_samples_ms["decode_plus_detect"].append(
+                output["stage_latency_ms"]["decode"] + output["stage_latency_ms"]["detect"]
+            )
+            combined_samples_ms["command"].append(
+                output["stage_latency_ms"]["control"] + output["stage_latency_ms"]["intent"]
+            )
             total_samples_ms.append(output["total_latency_ms"])
             last_output = output["summary"]
     if last_output is None:
@@ -141,17 +160,20 @@ def build_report(
     stage_latency = {
         stage: _latency_summary(samples) for stage, samples in stage_samples_ms.items()
     }
+    combined_latency = {
+        stage: _latency_summary(samples) for stage, samples in combined_samples_ms.items()
+    }
     total_latency = _latency_summary(total_samples_ms)
     total_p99_ms = float(total_latency["p99"])
-    decode_p99_ms = float(stage_latency["decode"]["p99"])
-    detect_p99_ms = float(stage_latency["detect"]["p99"])
-    control_p99_ms = float(stage_latency["control"]["p99"])
-    intent_p99_ms = float(stage_latency["intent"]["p99"])
+    decode_detect_p99_ms = float(combined_latency["decode_plus_detect"]["p99"])
+    command_p99_ms = float(combined_latency["command"]["p99"])
     return {
         "schema_version": SCHEMA_VERSION,
+        "evidence_mode": evidence_mode,
         "github_issue": GITHUB_ISSUE,
         "baseline_issue": "https://github.com/omarespejel/aigp-racer/issues/24",
         "claim_boundary": CLAIM_BOUNDARY,
+        "reproduction_command": reproduction_command,
         "fixture": {
             "path": fixture_path.as_posix(),
             "size_bytes": len(fixture_bytes),
@@ -165,12 +187,7 @@ def build_report(
             "dependency_note": candidate.dependency_note,
             "windows_packaging_note": candidate.windows_packaging_note,
         },
-        "environment": {
-            "python_version": sys.version.split()[0],
-            "platform": platform.platform(),
-            "machine": platform.machine(),
-            "processor": platform.processor(),
-        },
+        "environment": _environment(deterministic=deterministic_environment),
         "config": {
             "iterations": config.iterations,
             "warmup": config.warmup,
@@ -181,12 +198,13 @@ def build_report(
             "budget_source_url": TECHNICAL_SPEC_URL,
         },
         "stage_latency_ms": stage_latency,
+        "combined_latency_ms": combined_latency,
         "total_latency_ms": total_latency,
         "passes_frame_p99_budget": total_p99_ms <= config.frame_budget_ms,
         "passes_decode_plus_detect_p99_budget": (
-            decode_p99_ms + detect_p99_ms <= config.decode_detect_budget_ms
+            decode_detect_p99_ms <= config.decode_detect_budget_ms
         ),
-        "passes_command_p99_budget": (control_p99_ms + intent_p99_ms <= config.command_budget_ms),
+        "passes_command_p99_budget": command_p99_ms <= config.command_budget_ms,
         "last_output": last_output,
         "non_claims": list(NON_CLAIMS),
     }
@@ -197,12 +215,23 @@ def validate_report(
     *,
     fixture_path: Path,
     expected_config: CompiledVisionConfig | None = None,
+    expected_candidate: str = DEFAULT_CANDIDATE,
+    expected_evidence_path: Path | None = None,
+    deterministic_clock_step_ns: int | None = None,
+    deterministic_environment: bool = False,
 ) -> None:
     config_expectation = CompiledVisionConfig() if expected_config is None else expected_config
     if not isinstance(report, dict):
         raise CompiledVisionGateError("report root must be an object")
     if report.get("schema_version") != SCHEMA_VERSION:
         raise CompiledVisionGateError("schema_version drifted")
+    expected_mode = (
+        DRIFT_CHECK_EVIDENCE_MODE
+        if deterministic_clock_step_ns is not None
+        else MEASURED_EVIDENCE_MODE
+    )
+    if report.get("evidence_mode") != expected_mode:
+        raise CompiledVisionGateError("evidence_mode drifted")
     if report.get("github_issue") != GITHUB_ISSUE:
         raise CompiledVisionGateError("github_issue drifted")
     if report.get("baseline_issue") != "https://github.com/omarespejel/aigp-racer/issues/24":
@@ -212,8 +241,17 @@ def validate_report(
     if report.get("non_claims") != list(NON_CLAIMS):
         raise CompiledVisionGateError("non_claims drifted")
     _validate_fixture(report.get("fixture"), fixture_path, config_expectation)
-    _validate_candidate(report.get("candidate"))
+    _validate_candidate(report.get("candidate"), expected_candidate)
     config = _validate_config(report.get("config"), config_expectation)
+    _validate_reproduction_command(
+        report.get("reproduction_command"),
+        candidate_name=expected_candidate,
+        fixture_path=fixture_path,
+        evidence_path=expected_evidence_path,
+        config=config_expectation,
+        deterministic_clock_step_ns=deterministic_clock_step_ns,
+        deterministic_environment=deterministic_environment,
+    )
     stage_latency = report.get("stage_latency_ms")
     if not isinstance(stage_latency, dict):
         raise CompiledVisionGateError("stage_latency_ms must be an object")
@@ -221,6 +259,13 @@ def validate_report(
         if stage not in stage_latency:
             raise CompiledVisionGateError(f"missing stage latency for {stage}")
         _validate_latency_summary(stage_latency[stage], f"stage_latency_ms.{stage}")
+    combined_latency = report.get("combined_latency_ms")
+    if not isinstance(combined_latency, dict):
+        raise CompiledVisionGateError("combined_latency_ms must be an object")
+    for stage in COMBINED_STAGES:
+        if stage not in combined_latency:
+            raise CompiledVisionGateError(f"missing combined latency for {stage}")
+        _validate_latency_summary(combined_latency[stage], f"combined_latency_ms.{stage}")
     _validate_latency_summary(report.get("total_latency_ms"), "total_latency_ms")
     total_latency = report["total_latency_ms"]
     expected_frame = (
@@ -228,13 +273,17 @@ def validate_report(
         <= config["frame_budget_ms"]
     )
     expected_decode_detect = (
-        _fixed_decimal_to_float(stage_latency["decode"]["p99"], "stage_latency_ms.decode.p99")
-        + _fixed_decimal_to_float(stage_latency["detect"]["p99"], "stage_latency_ms.detect.p99")
+        _fixed_decimal_to_float(
+            combined_latency["decode_plus_detect"]["p99"],
+            "combined_latency_ms.decode_plus_detect.p99",
+        )
         <= config["decode_detect_budget_ms"]
     )
     expected_command = (
-        _fixed_decimal_to_float(stage_latency["control"]["p99"], "stage_latency_ms.control.p99")
-        + _fixed_decimal_to_float(stage_latency["intent"]["p99"], "stage_latency_ms.intent.p99")
+        _fixed_decimal_to_float(
+            combined_latency["command"]["p99"],
+            "combined_latency_ms.command.p99",
+        )
         <= config["command_budget_ms"]
     )
     _validate_budget_bool(
@@ -473,6 +522,48 @@ def _discover_opencv_candidate() -> VisionCandidate:
     )
 
 
+def _discover_fixture_step_candidate() -> VisionCandidate:
+    def decode(data: bytes) -> object:
+        return {"fixture_bytes": len(data)}
+
+    def detect(_decoded: object, sim_time_ns: int, source_frame_id: int) -> GateDetectionResult:
+        observation = GateObservation(
+            corners=(
+                ImagePoint(180.0, 80.0),
+                ImagePoint(460.0, 80.0),
+                ImagePoint(460.0, 300.0),
+                ImagePoint(180.0, 300.0),
+            ),
+            confidence=0.1,
+            sim_time_ns=sim_time_ns,
+            source_frame_id=source_frame_id,
+            source="fixture_step_color_bbox",
+            measurement_basis=GateMeasurementBasis.OUTER_FRAME,
+            corner_uncertainty_px=(1.0, 1.0, 1.0, 1.0),
+        )
+        return GateDetectionResult(
+            status=GateDetectionStatus.DETECTED,
+            observation=observation,
+            sim_time_ns=sim_time_ns,
+            source_frame_id=source_frame_id,
+            source="fixture_step_color_bbox",
+            mask_pixels=20_000,
+            confidence=0.1,
+        )
+
+    return VisionCandidate(
+        name=DRIFT_CHECK_CANDIDATE,
+        decode=decode,
+        detect=detect,
+        dependency_note="Deterministic fixture candidate for compiled-vision schema drift checks",
+        windows_packaging_note=(
+            "No OpenCV or NumPy dependency is exercised by this drift-check candidate"
+        ),
+        opencv_version="not-applicable",
+        numpy_version="not-applicable",
+    )
+
+
 def _result(
     status: GateDetectionStatus,
     *,
@@ -532,6 +623,70 @@ def _elapsed_ms(start_ns: int, end_ns: int) -> float:
     return (end_ns - start_ns) / 1_000_000.0
 
 
+class _StepClock:
+    def __init__(self, *, step_ns: int) -> None:
+        if step_ns <= 0:
+            raise CompiledVisionGateError("deterministic clock step must be positive")
+        self.step_ns = step_ns
+        self.calls = -1
+
+    def __call__(self) -> int:
+        self.calls += 1
+        return self.calls * self.step_ns
+
+
+def _environment(*, deterministic: bool) -> dict[str, str]:
+    if deterministic:
+        return {
+            "python_version": "deterministic",
+            "platform": "deterministic",
+            "machine": "deterministic",
+            "processor": "deterministic",
+        }
+    return {
+        "python_version": sys.version.split()[0],
+        "platform": platform.platform(),
+        "machine": platform.machine(),
+        "processor": platform.processor(),
+    }
+
+
+def _reproduction_command(
+    *,
+    candidate_name: str,
+    fixture_path: Path,
+    evidence_path: Path | None,
+    config: CompiledVisionConfig,
+    deterministic_clock_step_ns: int | None,
+    deterministic_environment: bool,
+) -> str:
+    if evidence_path is None:
+        raise CompiledVisionGateError("evidence path is required for reproduction command")
+    command = ["uv", "run", "--python", "3.14"]
+    if candidate_name == DEFAULT_CANDIDATE:
+        command.extend(["--with", "opencv-python", "--with", "numpy"])
+    command.extend(
+        [
+            "python",
+            "scripts/aigp_compiled_vision_gate.py",
+            "--candidate",
+            candidate_name,
+            "--iterations",
+            str(config.iterations),
+            "--warmup",
+            str(config.warmup),
+            "--fixture",
+            fixture_path.as_posix(),
+        ]
+    )
+    if deterministic_clock_step_ns is not None:
+        command.extend(["--deterministic-clock-step-ns", str(deterministic_clock_step_ns)])
+    if deterministic_environment:
+        command.append("--deterministic-environment")
+    command.extend(["--write-json", evidence_path.as_posix()])
+    return " ".join(command)
+
+
 def _format_decimal(value: float) -> str:
     return f"{value:.6f}"
 
@@ -568,19 +723,56 @@ def _validate_fixture(
         raise CompiledVisionGateError("fixture chunk_count drifted")
 
 
-def _validate_candidate(value: object) -> None:
+def _validate_candidate(value: object, expected_candidate: str) -> None:
     if not isinstance(value, dict):
         raise CompiledVisionGateError("candidate must be an object")
-    if value.get("name") != DEFAULT_CANDIDATE:
+    if value.get("name") != expected_candidate:
         raise CompiledVisionGateError("candidate.name drifted")
-    if value.get("opencv_version") != EXPECTED_OPENCV_VERSION:
-        raise CompiledVisionGateError("candidate.opencv_version drifted")
-    if value.get("numpy_version") != EXPECTED_NUMPY_VERSION:
-        raise CompiledVisionGateError("candidate.numpy_version drifted")
-    if "OpenCV imdecode" not in str(value.get("dependency_note")):
-        raise CompiledVisionGateError("candidate.dependency_note drifted")
-    if "Windows 11" not in str(value.get("windows_packaging_note")):
-        raise CompiledVisionGateError("candidate.windows_packaging_note drifted")
+    if expected_candidate == DEFAULT_CANDIDATE:
+        if value.get("opencv_version") != EXPECTED_OPENCV_VERSION:
+            raise CompiledVisionGateError("candidate.opencv_version drifted")
+        if value.get("numpy_version") != EXPECTED_NUMPY_VERSION:
+            raise CompiledVisionGateError("candidate.numpy_version drifted")
+        if "OpenCV imdecode" not in str(value.get("dependency_note")):
+            raise CompiledVisionGateError("candidate.dependency_note drifted")
+        if "Windows 11" not in str(value.get("windows_packaging_note")):
+            raise CompiledVisionGateError("candidate.windows_packaging_note drifted")
+        return
+    if expected_candidate == DRIFT_CHECK_CANDIDATE:
+        if value.get("opencv_version") != "not-applicable":
+            raise CompiledVisionGateError("candidate.opencv_version drifted")
+        if value.get("numpy_version") != "not-applicable":
+            raise CompiledVisionGateError("candidate.numpy_version drifted")
+        if "schema drift" not in str(value.get("dependency_note")):
+            raise CompiledVisionGateError("candidate.dependency_note drifted")
+        return
+    raise CompiledVisionGateError(f"unsupported expected candidate {expected_candidate}")
+
+
+def _validate_reproduction_command(
+    value: object,
+    *,
+    candidate_name: str,
+    fixture_path: Path,
+    evidence_path: Path | None,
+    config: CompiledVisionConfig,
+    deterministic_clock_step_ns: int | None,
+    deterministic_environment: bool,
+) -> None:
+    if evidence_path is None:
+        if not isinstance(value, str) or "scripts/aigp_compiled_vision_gate.py" not in value:
+            raise CompiledVisionGateError("reproduction_command must be copy-pastable")
+        return
+    expected = _reproduction_command(
+        candidate_name=candidate_name,
+        fixture_path=fixture_path,
+        evidence_path=evidence_path,
+        config=config,
+        deterministic_clock_step_ns=deterministic_clock_step_ns,
+        deterministic_environment=deterministic_environment,
+    )
+    if value != expected:
+        raise CompiledVisionGateError("reproduction_command drifted")
 
 
 def _validate_config(
@@ -650,9 +842,15 @@ def _package_version(name: str) -> str:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--fixture", type=Path, default=DEFAULT_FIXTURE)
-    parser.add_argument("--candidate", choices=(DEFAULT_CANDIDATE,), default=DEFAULT_CANDIDATE)
+    parser.add_argument(
+        "--candidate",
+        choices=(DEFAULT_CANDIDATE, DRIFT_CHECK_CANDIDATE),
+        default=DEFAULT_CANDIDATE,
+    )
     parser.add_argument("--iterations", type=int, default=DEFAULT_ITERATIONS)
     parser.add_argument("--warmup", type=int, default=DEFAULT_WARMUP)
+    parser.add_argument("--deterministic-clock-step-ns", type=int)
+    parser.add_argument("--deterministic-environment", action="store_true")
     parser.add_argument("--write-json", type=Path)
     parser.add_argument("--check-json", type=Path)
     args = parser.parse_args()
@@ -660,15 +858,41 @@ def main() -> int:
         parser.error("one of --write-json or --check-json is required")
     expected_config = CompiledVisionConfig(iterations=args.iterations, warmup=args.warmup)
     if args.write_json is not None:
+        clock = (
+            None
+            if args.deterministic_clock_step_ns is None
+            else _StepClock(step_ns=args.deterministic_clock_step_ns)
+        )
         report = build_report(
             fixture_path=args.fixture,
             candidate=discover_candidate(args.candidate),
             config=expected_config,
+            clock_ns=clock,
+            deterministic_environment=args.deterministic_environment,
+            evidence_mode=DRIFT_CHECK_EVIDENCE_MODE
+            if args.deterministic_clock_step_ns is not None
+            else MEASURED_EVIDENCE_MODE,
+            reproduction_command=_reproduction_command(
+                candidate_name=args.candidate,
+                fixture_path=args.fixture,
+                evidence_path=args.write_json,
+                config=expected_config,
+                deterministic_clock_step_ns=args.deterministic_clock_step_ns,
+                deterministic_environment=args.deterministic_environment,
+            ),
         )
         write_json(args.write_json, report)
     if args.check_json is not None:
         report = json.loads(args.check_json.read_text(encoding="utf-8"))
-        validate_report(report, fixture_path=args.fixture, expected_config=expected_config)
+        validate_report(
+            report,
+            fixture_path=args.fixture,
+            expected_config=expected_config,
+            expected_candidate=args.candidate,
+            expected_evidence_path=args.check_json,
+            deterministic_clock_step_ns=args.deterministic_clock_step_ns,
+            deterministic_environment=args.deterministic_environment,
+        )
     return 0
 
 

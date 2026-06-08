@@ -19,11 +19,14 @@ def test_build_report_runs_compiled_candidate_with_injected_clock(tmp_path: Path
         candidate=_fake_candidate(),
         config=config,
         clock_ns=_StepClock(step_ns=1_000_000),
+        reproduction_command=_test_command(),
     )
 
     assert report["schema_version"] == gate.SCHEMA_VERSION
     assert report["candidate"]["name"] == gate.DEFAULT_CANDIDATE
     assert report["stage_latency_ms"]["decode"]["p50"] == "1.000000"
+    assert report["combined_latency_ms"]["decode_plus_detect"]["p99"] == "2.000000"
+    assert report["combined_latency_ms"]["command"]["p99"] == "2.000000"
     assert report["total_latency_ms"]["p99"] == "12.000000"
     assert report["passes_frame_p99_budget"] is True
     assert report["passes_decode_plus_detect_p99_budget"] is True
@@ -42,6 +45,7 @@ def test_validate_report_accepts_checked_artifact_shape(tmp_path: Path) -> None:
         candidate=_fake_candidate(),
         config=config,
         clock_ns=_StepClock(step_ns=1_000_000),
+        reproduction_command=_test_command(),
     )
 
     gate.validate_report(report, fixture_path=fixture, expected_config=config)
@@ -64,6 +68,7 @@ def test_validate_report_rejects_candidate_drift(tmp_path: Path) -> None:
         candidate=_fake_candidate(),
         config=config,
         clock_ns=_StepClock(step_ns=1_000_000),
+        reproduction_command=_test_command(),
     )
     report["candidate"]["name"] = "pillow"
 
@@ -80,8 +85,26 @@ def test_validate_report_rejects_tampered_budget_result(tmp_path: Path) -> None:
         candidate=_fake_candidate(),
         config=config,
         clock_ns=_StepClock(step_ns=1_000_000),
+        reproduction_command=_test_command(),
     )
     report["passes_decode_plus_detect_p99_budget"] = False
+
+    with pytest.raises(gate.CompiledVisionGateError, match="passes_decode_plus_detect"):
+        gate.validate_report(report, fixture_path=fixture, expected_config=config)
+
+
+def test_validate_report_uses_combined_p99_for_budget(tmp_path: Path) -> None:
+    fixture = tmp_path / "frame.jpg"
+    fixture.write_bytes(b"jpeg fixture bytes")
+    config = gate.CompiledVisionConfig(iterations=1, warmup=0, decode_detect_budget_ms=1.5)
+    report = gate.build_report(
+        fixture_path=fixture,
+        candidate=_fake_candidate(),
+        config=config,
+        clock_ns=_StepClock(step_ns=1_000_000),
+        reproduction_command=_test_command(),
+    )
+    report["passes_decode_plus_detect_p99_budget"] = True
 
     with pytest.raises(gate.CompiledVisionGateError, match="passes_decode_plus_detect"):
         gate.validate_report(report, fixture_path=fixture, expected_config=config)
@@ -96,6 +119,7 @@ def test_validate_report_rejects_numeric_type_drift(tmp_path: Path) -> None:
         candidate=_fake_candidate(),
         config=config,
         clock_ns=_StepClock(step_ns=1_000_000),
+        reproduction_command=_test_command(),
     )
     report["fixture"]["chunk_count"] = float(config.chunk_count)
 
@@ -147,6 +171,10 @@ def _fake_candidate() -> gate.VisionCandidate:
         opencv_version=gate.EXPECTED_OPENCV_VERSION,
         numpy_version=gate.EXPECTED_NUMPY_VERSION,
     )
+
+
+def _test_command() -> str:
+    return "uv run --python 3.14 python scripts/aigp_compiled_vision_gate.py --write-json test.json"
 
 
 def _fake_detection(sim_time_ns: int, source_frame_id: int) -> GateDetectionResult:

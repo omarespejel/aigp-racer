@@ -62,6 +62,26 @@ uv run --python 3.14 --with jsonschema --with pyyaml --with ruff --with pytest \
   --fixture tests/fixtures/frame_640x360_synthetic.jpg
 
 uv run --python 3.14 --with jsonschema --with pyyaml --with ruff --with pytest \
+  python scripts/aigp_compiled_vision_gate.py \
+  --candidate fixture_step \
+  --iterations 2 \
+  --warmup 0 \
+  --fixture tests/fixtures/frame_640x360_synthetic.jpg \
+  --deterministic-clock-step-ns 1000000 \
+  --deterministic-environment \
+  --write-json docs/engineering/evidence/compiled-vision-latency-drift-check-2026-06-08.json
+
+uv run --python 3.14 --with jsonschema --with pyyaml --with ruff --with pytest \
+  python scripts/aigp_compiled_vision_gate.py \
+  --candidate fixture_step \
+  --iterations 2 \
+  --warmup 0 \
+  --fixture tests/fixtures/frame_640x360_synthetic.jpg \
+  --deterministic-clock-step-ns 1000000 \
+  --deterministic-environment \
+  --check-json docs/engineering/evidence/compiled-vision-latency-drift-check-2026-06-08.json
+
+uv run --python 3.14 --with jsonschema --with pyyaml --with ruff --with pytest \
   python -m ruff check .
 
 uv run --python 3.14 --with jsonschema --with pyyaml --with ruff --with pytest \
@@ -86,3 +106,4 @@ git diff --exit-code docs/engineering/evidence/integrated-dry-run-episode-2026-0
 git diff --exit-code docs/engineering/evidence/integrated-dry-run-decision-trace-2026-06-08.json
 git diff --exit-code docs/engineering/evidence/minimal-loop-latency-2026-06-08.json
 git diff --exit-code docs/engineering/evidence/compiled-vision-latency-2026-06-08.json
+git diff --exit-code docs/engineering/evidence/compiled-vision-latency-drift-check-2026-06-08.json
