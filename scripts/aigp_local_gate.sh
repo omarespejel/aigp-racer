@@ -50,6 +50,11 @@ uv run --python 3.14 --with jsonschema --with pyyaml --with ruff --with pytest \
   --write-json
 
 uv run --python 3.14 --with jsonschema --with pyyaml --with ruff --with pytest \
+  python scripts/aigp_minimal_loop_latency_gate.py \
+  --check-json docs/engineering/evidence/minimal-loop-latency-2026-06-08.json \
+  --fixture tests/fixtures/frame_640x360_synthetic.jpg
+
+uv run --python 3.14 --with jsonschema --with pyyaml --with ruff --with pytest \
   python -m ruff check .
 
 uv run --python 3.14 --with jsonschema --with pyyaml --with ruff --with pytest \
@@ -72,3 +77,4 @@ git diff --exit-code docs/engineering/evidence/gate-measurement-boundary-2026-06
 git diff --exit-code docs/engineering/evidence/controller-safety-2026-06-08.json
 git diff --exit-code docs/engineering/evidence/integrated-dry-run-episode-2026-06-08.json
 git diff --exit-code docs/engineering/evidence/integrated-dry-run-decision-trace-2026-06-08.json
+git diff --exit-code docs/engineering/evidence/minimal-loop-latency-2026-06-08.json
