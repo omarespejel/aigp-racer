@@ -9,6 +9,7 @@ __pycache__/
 venv/
 
 # Runtime and research artifacts
+.local/
 runs/
 artifacts/
 logs/

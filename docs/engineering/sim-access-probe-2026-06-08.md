@@ -7,12 +7,22 @@ Issue: #4.
 Keep official simulator access as a hardening blocker, but continue advancing
 practice-only work through deterministic fixtures and the Elodin harness.
 
-The current state is:
+This note records the earlier public unauthenticated access probe. It has been
+partially narrowed by the later local package evidence in:
+
+```text
+docs/engineering/official-sim-package-probe-2026-06-08.md
+docs/engineering/evidence/official-sim-package-probe-2026-06-08.json
+```
+
+The current narrowed state is:
 
 - public unauthenticated search has not found an official simulator or SDK
   package URL;
-- team-portal credentials are still required before we can record an official
-  package version or run official telemetry;
+- the official simulator package is now present locally from user-provided
+  download evidence;
+- Windows extraction, simulator account login, and live telemetry capture are
+  still required before we can claim official simulator execution;
 - repo fixtures already cover the official UDP vision header, decoded-message
   telemetry probe shape, conservative command intent, and offline RaceEpisode /
   DecisionTrace schemas;

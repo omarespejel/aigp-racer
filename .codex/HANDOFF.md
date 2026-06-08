@@ -20,7 +20,10 @@ Last updated: 2026-06-08.
 - PR #27 merged issue #23. Screen-space gate depth conversion now carries an explicit inner-opening versus outer-frame measurement basis and preserves the first-frame calibration caveat.
 - PR #29 merged issue #24. The minimal local camera-bytes-to-command-intent loop is measured; the Pillow plus pure-Python detector path is a local p99 NO-GO and was routed to issue #28.
 - PR #30 merged issue #28. The OpenCV/NumPy compiled-vectorized path is a local fixture latency GO with a measured combined decode+detect p99 of 2.020049 ms, but it remains a non-claim for Windows packaging and official simulator compatibility.
-- Active branch `codex/aigp-packaging-probe-2026-06-08` works issue #31: record package/import/decode evidence for OpenCV/NumPy and keep the Windows 11 simulator-host GO gate explicit.
+- PR #32 merged issue #31. OpenCV/NumPy import/decode packaging evidence is local macOS only; Windows 11 simulator-host packaging remains open.
+- Official simulator package `AI-GP Simulator v1.0.3364.zip` is now locally present outside git. Evidence is recorded in `docs/engineering/evidence/official-sim-package-probe-2026-06-08.json`.
+- The official package probe confirms the outer archive contains `AIGP_3364.zip`, `PyAIPilotExample.zip`, and `README.md`; it does not extract or run the Windows simulator.
+- The official Python template adds useful protocol evidence beyond the PDF: MAVLink UDP port 14550, vision UDP port 5600, `LOCAL_POSITION_NED`, `ODOMETRY`, `ACTUATOR_OUTPUT_STATUS`, `COLLISION`, race status, track-info chunks, reset command `31000`, and a sample raw actuator command path at `CONTROL_HZ = 250`.
 
 ## Active Objective
 
@@ -30,17 +33,19 @@ simulator-host evidence exists.
 
 Immediate next code objectives:
 
-1. Land issue #31 packaging probe infrastructure without closing the Windows GO gate.
-2. Recheck issue #4 once team-portal credentials or an official package link are available.
-3. Capture real official simulator packet examples once access exists.
+1. Extract/run `AIGP_3364.zip` on a Windows 10/11 simulator host once enough disk and account access are ready.
+2. Capture real official simulator packet examples: one JPEG frame sequence and one decoded telemetry/race/track sample.
+3. Run the velocity telemetry probe against live `LOCAL_POSITION_NED` / `ODOMETRY` / `HIGHRES_IMU` traffic.
 4. Calibrate Round 1 highlight basis from the first official simulator frame.
-5. Run the packaging probe on the official Windows 11 simulator host before making any runtime dependency decision.
+5. Investigate whether the sample raw actuator command path is legal/useful before adding any raw motor command intent.
 
 ## Current Known Unknowns
 
-- Whether official simulator access is already available through team login.
+- Whether the local official simulator package can be extracted and launched on the Windows host.
+- Whether official simulator account login is available.
 - Whether telemetry actually exposes clean linear velocity.
 - Whether `SET_POSITION_TARGET_LOCAL_NED` is sufficient for a conservative first valid run.
+- Whether raw actuator control is legal, stable, and rate-compatible for the virtual qualifier.
 - Whether final submission allows compiled inference or only pure Python.
 - Whether physical-stage team eligibility imposes constraints on team composition.
 

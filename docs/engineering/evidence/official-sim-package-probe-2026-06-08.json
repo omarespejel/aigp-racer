@@ -1,0 +1,173 @@
+{
+  "claim_boundary": "local package-manifest and official-template source inspection only; not a simulator run, not official login evidence, and not Windows-host execution evidence",
+  "execution_status": {
+    "blocked_by": [
+      "full Windows simulator extraction deferred until enough disk headroom exists",
+      "FlightSim.exe requires a Windows 10/11 host",
+      "virtual qualifier requires official simulator account credentials"
+    ],
+    "current_outcome": "PARTIAL_GO_PACKAGE_PRESENT_RUN_BLOCKED",
+    "flight_sim_executable_run_by_probe": false,
+    "nested_windows_simulator_archive_present": true,
+    "nested_windows_simulator_extracted_by_probe": false,
+    "official_package_present_locally": true,
+    "simulator_account_login_verified": false
+  },
+  "github_issue": "https://github.com/omarespejel/aigp-racer/issues/4",
+  "next_actions": [
+    {
+      "action": "extract AIGP_3364.zip on a Windows 10/11 host with adequate free disk",
+      "gate": "FlightSim.exe launches and reaches login without modifying repo state",
+      "priority": 1
+    },
+    {
+      "action": "run the day-one telemetry probe against live pymavlink messages",
+      "gate": "velocity probe resolves AVAILABLE, NOT_AVAILABLE, or AMBIGUOUS",
+      "priority": 2
+    },
+    {
+      "action": "capture one official JPEG datagram sequence and one decoded telemetry sample",
+      "gate": "fixtures decode through repo parsers without simulator-only shortcuts",
+      "priority": 3
+    },
+    {
+      "action": "decide whether raw actuator control is legal and useful",
+      "gate": "official docs or live simulator behavior supports a bounded command intent",
+      "priority": 4
+    }
+  ],
+  "non_claims": [
+    "not a successful official simulator run",
+    "not Windows execution evidence",
+    "not official account-login evidence",
+    "not velocity availability evidence",
+    "not raw actuator command approval",
+    "not latency, reliability, lap-time, or valid-run evidence"
+  ],
+  "outer_archive_entries": [
+    {
+      "compress_size": 1931475316,
+      "crc32_hex": "38fe8e4a",
+      "date_time": "2026-05-29T13:56:12",
+      "file_size": 1948180284,
+      "filename": "AIGP_3364.zip"
+    },
+    {
+      "compress_size": 6845,
+      "crc32_hex": "028e560c",
+      "date_time": "2026-05-28T11:37:36",
+      "file_size": 7260,
+      "filename": "PyAIPilotExample.zip"
+    },
+    {
+      "compress_size": 1620,
+      "crc32_hex": "db42a504",
+      "date_time": "2026-05-29T20:25:26",
+      "file_size": 3222,
+      "filename": "README.md"
+    }
+  ],
+  "protocol_observations": {
+    "attitude_command_path_detected": true,
+    "handled_mavlink_messages": [
+      "HEARTBEAT",
+      "TIMESYNC",
+      "ATTITUDE",
+      "LOCAL_POSITION_NED",
+      "ODOMETRY",
+      "HIGHRES_IMU",
+      "ENCAPSULATED_DATA",
+      "ACTUATOR_OUTPUT_STATUS",
+      "COLLISION",
+      "DATA_TRANSMISSION_HANDSHAKE"
+    ],
+    "main_uses_mavlink_udp_14550": true,
+    "position_command_path_detected": true,
+    "race_status_format_detected": true,
+    "raw_actuator_command_path_detected": true,
+    "sample_control_hz": 250,
+    "sample_default_update_uses_motor_control": true,
+    "setup_uses_pymavlink_udpin": true,
+    "sim_reset_command_detected": true,
+    "track_gate_format_detected": true,
+    "track_packet_header_format_detected": true,
+    "vision_header_format": "<IHHIIQ",
+    "vision_header_matches_reassembler": true,
+    "vision_uses_udp_5600": true
+  },
+  "py_ai_pilot_example_entries": [
+    {
+      "compress_size": 1625,
+      "crc32_hex": "9ed5f8fd",
+      "date_time": "2026-04-28T21:14:28",
+      "file_size": 7266,
+      "filename": "controller.py"
+    },
+    {
+      "compress_size": 483,
+      "crc32_hex": "a074fb67",
+      "date_time": "2026-04-29T11:56:36",
+      "file_size": 1038,
+      "filename": "main.py"
+    },
+    {
+      "compress_size": 2152,
+      "crc32_hex": "ed7e7024",
+      "date_time": "2026-05-28T11:36:18",
+      "file_size": 9825,
+      "filename": "mavlink_rx.py"
+    },
+    {
+      "compress_size": 86,
+      "crc32_hex": "4ee24f35",
+      "date_time": "2026-02-14T13:38:58",
+      "file_size": 93,
+      "filename": "requirements.txt"
+    },
+    {
+      "compress_size": 482,
+      "crc32_hex": "c918c20a",
+      "date_time": "2026-04-29T11:56:58",
+      "file_size": 1594,
+      "filename": "setup.py"
+    },
+    {
+      "compress_size": 386,
+      "crc32_hex": "4fef2e6c",
+      "date_time": "2026-04-30T11:44:38",
+      "file_size": 1016,
+      "filename": "timesync.py"
+    },
+    {
+      "compress_size": 1080,
+      "crc32_hex": "93f3e603",
+      "date_time": "2026-05-08T14:21:56",
+      "file_size": 3157,
+      "filename": "vision_rx.py"
+    }
+  ],
+  "readme_facts": {
+    "account_login_required": true,
+    "development_kit_name_detected": true,
+    "flight_sim_executable_described": true,
+    "python_3142_template_described": true,
+    "storage_requirement_gb": 12,
+    "windows_10_11_requirement_described": true,
+    "windows_simulator_archive_described": true
+  },
+  "schema_version": "aigp.official_package_probe.v0",
+  "snapshot_date": "2026-06-08",
+  "source_zip": {
+    "basename": "AI-GP Simulator v1.0.3364.zip",
+    "path_policy": "local user-provided package path is intentionally not recorded",
+    "sha256": "a09f4e6669b099a28183178ecdeea627c2409723bd78bebf6e3867fadd26ba9b",
+    "size_bytes": 1931484223
+  },
+  "template_dependencies": [
+    "pymavlink",
+    "opencv-python",
+    "numpy",
+    "matplotlib",
+    "keyboard"
+  ]
+}

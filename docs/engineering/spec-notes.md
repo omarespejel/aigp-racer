@@ -1,6 +1,6 @@
 # AI Grand Prix Spec Notes
 
-Last checked: 2026-06-07T17:06:04Z (2026-06-08T02:06:04+09:00 JST).
+Last checked: 2026-06-08.
 
 Primary source:
 
@@ -45,6 +45,54 @@ Primary source:
   rejects frames above 256 chunks or 2 MiB declared JPEG size to bound per-frame
   memory and CPU exposure.
 
+## Official Development Kit v1.0.3364
+
+User-provided local package:
+
+```text
+AI-GP Simulator v1.0.3364.zip
+sha256 a09f4e6669b099a28183178ecdeea627c2409723bd78bebf6e3867fadd26ba9b
+size 1931484223 bytes
+```
+
+Checked-in evidence:
+
+```text
+docs/engineering/evidence/official-sim-package-probe-2026-06-08.json
+```
+
+The package probe inspected the outer zip manifest and the small official
+`PyAIPilotExample.zip` template without extracting the nested Windows simulator.
+
+Observed package contents:
+
+- `AIGP_3364.zip`: nested Windows simulator archive.
+- `PyAIPilotExample.zip`: official Python interface template.
+- `README.md`: development-kit setup and host requirements.
+
+Observed from the official Python template:
+
+- MAVLink UDP target: `127.0.0.1:14550`.
+- Vision listener: UDP `0.0.0.0:5600`.
+- Vision header format: `<IHHIIQ`, matching `vision.reassembler`.
+- Dependencies: `pymavlink`, `opencv-python`, `numpy`, `matplotlib`, `keyboard`.
+- Additional simulator-to-client messages handled by the sample:
+  `LOCAL_POSITION_NED`, `ODOMETRY`, `ENCAPSULATED_DATA`,
+  `ACTUATOR_OUTPUT_STATUS`, `COLLISION`, and
+  `DATA_TRANSMISSION_HANDSHAKE`.
+- Encapsulated race-status payload format: `<BQqqIq`.
+- Encapsulated track-packet header format: `<BH`.
+- Track gate payload format: `<Hfffffffff`.
+- Simulator reset command: `MAVLINK_CMD_SIM_RESET = 31000`.
+- Sample controller exposes `SET_ACTUATOR_CONTROL_TARGET`,
+  `SET_ATTITUDE_TARGET`, and `SET_POSITION_TARGET_LOCAL_NED` send paths.
+- Sample `Controller.update()` defaults to raw actuator control at
+  `CONTROL_HZ = 250`.
+
+Raw actuator control is an observed official-template path, not a default repo
+decision. It is tracked in issue #33 and needs a focused legality, rate, and
+safety gate before use.
+
 ## Current Ambiguity
 
 The spec text says telemetry includes linear velocities, but the explicit
@@ -59,6 +107,10 @@ Current repo behavior:
   the probe reports `AVAILABLE` or `AMBIGUOUS`.
 
 This must be tested against the official simulator.
+
+The official Python template increases the chance that velocity is available:
+it handles `LOCAL_POSITION_NED` and `ODOMETRY`, both with `vx/vy/vz` fields in
+the sample. This is still not live evidence until captured from the simulator.
 
 ## Elodin Practice Harness
 
