@@ -14,6 +14,7 @@ RACE_STATUS_STRUCT = struct.Struct("<BQqqIq")
 TRACK_DATA_PACKET_HEADER_STRUCT = struct.Struct("<BH")
 TRACK_GATE_COUNT_STRUCT = struct.Struct("<H")
 TRACK_GATE_STRUCT = struct.Struct("<Hfffffffff")
+DEFAULT_MAX_TRACK_GATES = 256
 
 
 class OfficialProtocolError(ValueError):
@@ -95,11 +96,20 @@ def parse_track_data_packet_payload(payload: bytes) -> TrackDataPacket:
     )
 
 
-def parse_track_info_payload(payload: bytes, *, allow_trailing_padding: bool = False) -> TrackInfo:
+def parse_track_info_payload(
+    payload: bytes,
+    *,
+    allow_trailing_padding: bool = False,
+    max_gates: int = DEFAULT_MAX_TRACK_GATES,
+) -> TrackInfo:
     """Parse the reassembled official track-info payload."""
 
+    if type(max_gates) is not int or max_gates <= 0:
+        raise OfficialProtocolError("max_gates must be a positive integer")
     _require_minimum_length(payload, TRACK_GATE_COUNT_STRUCT.size, "track info")
     (num_gates,) = TRACK_GATE_COUNT_STRUCT.unpack_from(payload)
+    if int(num_gates) > max_gates:
+        raise OfficialProtocolError("track-info gate count exceeds configured maximum")
     expected_size = TRACK_GATE_COUNT_STRUCT.size + int(num_gates) * TRACK_GATE_STRUCT.size
     _require_minimum_length(payload, expected_size, "track info")
     if len(payload) != expected_size and not allow_trailing_padding:

@@ -5,6 +5,7 @@ import struct
 import pytest
 
 from mavlink.official_protocol import (
+    DEFAULT_MAX_TRACK_GATES,
     ENCAPSULATED_RACE_STATUS_MSG_ID,
     ENCAPSULATED_TRACK_INFO_MSG_ID,
     MAVLINK_CMD_SIM_RESET,
@@ -111,6 +112,24 @@ def test_parse_track_info_payload_rejects_non_positive_gate_size() -> None:
 
     with pytest.raises(OfficialProtocolError, match="positive"):
         parse_track_info_payload(payload)
+
+
+def test_parse_track_info_payload_rejects_gate_count_above_limit() -> None:
+    payload = struct.pack("<H", DEFAULT_MAX_TRACK_GATES + 1)
+
+    with pytest.raises(OfficialProtocolError, match="gate count"):
+        parse_track_info_payload(payload)
+
+
+def test_parse_track_info_payload_allows_custom_gate_count_limit() -> None:
+    payload = struct.pack("<H", 0)
+
+    assert parse_track_info_payload(payload, max_gates=1).gates == ()
+
+
+def test_parse_track_info_payload_rejects_invalid_gate_count_limit() -> None:
+    with pytest.raises(OfficialProtocolError, match="max_gates"):
+        parse_track_info_payload(struct.pack("<H", 0), max_gates=0)
 
 
 def test_official_reset_command_constant_matches_template() -> None:

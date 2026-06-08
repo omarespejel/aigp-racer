@@ -24,6 +24,7 @@ EXPECTED_EXAMPLE_FILES = (
     "timesync.py",
     "vision_rx.py",
 )
+DEFAULT_MAX_TEMPLATE_ZIP_BYTES = 10 * 1024 * 1024
 CLAIM_BOUNDARY = (
     "local package-manifest and official-template source inspection only; not a simulator run, "
     "not official login evidence, and not Windows-host execution evidence"
@@ -49,18 +50,28 @@ class SourceFile:
 
 
 def build_report_from_zip(source_zip: Path, *, sim_tree: Path | None = None) -> dict[str, Any]:
-    source_bytes = source_zip.read_bytes()
-    with zipfile.ZipFile(io.BytesIO(source_bytes)) as outer_zip:
-        outer_entries = [_zip_entry_info(info) for info in outer_zip.infolist()]
-        readme_text = outer_zip.read("README.md").decode("utf-8")
-        py_example_bytes = outer_zip.read("PyAIPilotExample.zip")
+    try:
+        source_size_bytes = source_zip.stat().st_size
+        source_sha256 = _sha256_file(source_zip)
+        with zipfile.ZipFile(source_zip) as outer_zip:
+            outer_entries = [_zip_entry_info(info) for info in outer_zip.infolist()]
+            readme_text = _read_zip_text(outer_zip, "README.md")
+            py_example_info = _zip_info(outer_zip, "PyAIPilotExample.zip")
+            if py_example_info.file_size > DEFAULT_MAX_TEMPLATE_ZIP_BYTES:
+                raise OfficialPackageProbeError("PyAIPilotExample.zip exceeds size limit")
+            py_example_bytes = _read_zip_member(outer_zip, "PyAIPilotExample.zip")
+    except zipfile.BadZipFile as exc:
+        raise OfficialPackageProbeError(f"invalid official package zip: {exc}") from exc
 
-    with zipfile.ZipFile(io.BytesIO(py_example_bytes)) as py_example_zip:
-        py_example_entries = [_zip_entry_info(info) for info in py_example_zip.infolist()]
-        source_files = {
-            name: SourceFile(name=name, text=py_example_zip.read(name).decode("utf-8"))
-            for name in EXPECTED_EXAMPLE_FILES
-        }
+    try:
+        with zipfile.ZipFile(io.BytesIO(py_example_bytes)) as py_example_zip:
+            py_example_entries = [_zip_entry_info(info) for info in py_example_zip.infolist()]
+            source_files = {
+                name: SourceFile(name=name, text=_read_zip_text(py_example_zip, name))
+                for name in EXPECTED_EXAMPLE_FILES
+            }
+    except zipfile.BadZipFile as exc:
+        raise OfficialPackageProbeError(f"invalid PyAIPilotExample.zip: {exc}") from exc
     sim_tree_report = (
         _sim_tree_report(sim_tree) if sim_tree is not None else _sim_tree_not_inspected()
     )
@@ -73,8 +84,8 @@ def build_report_from_zip(source_zip: Path, *, sim_tree: Path | None = None) -> 
         "claim_boundary": CLAIM_BOUNDARY,
         "source_zip": {
             "basename": source_zip.name,
-            "size_bytes": len(source_bytes),
-            "sha256": hashlib.sha256(source_bytes).hexdigest(),
+            "size_bytes": source_size_bytes,
+            "sha256": source_sha256,
             "path_policy": "local user-provided package path is intentionally not recorded",
         },
         "outer_archive_entries": outer_entries,
@@ -202,6 +213,38 @@ def _zip_entry_info(info: zipfile.ZipInfo) -> dict[str, Any]:
         "crc32_hex": f"{info.CRC:08x}",
         "date_time": _date_time(info.date_time),
     }
+
+
+def _sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as source_file:
+        while chunk := source_file.read(1024 * 1024):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _zip_info(archive: zipfile.ZipFile, member_name: str) -> zipfile.ZipInfo:
+    try:
+        return archive.getinfo(member_name)
+    except KeyError as exc:
+        raise OfficialPackageProbeError(f"missing {member_name}") from exc
+
+
+def _read_zip_member(archive: zipfile.ZipFile, member_name: str) -> bytes:
+    try:
+        return archive.read(member_name)
+    except KeyError as exc:
+        raise OfficialPackageProbeError(f"missing {member_name}") from exc
+    except RuntimeError as exc:
+        raise OfficialPackageProbeError(f"could not read {member_name}: {exc}") from exc
+
+
+def _read_zip_text(archive: zipfile.ZipFile, member_name: str) -> str:
+    raw = _read_zip_member(archive, member_name)
+    try:
+        return raw.decode("utf-8")
+    except UnicodeDecodeError as exc:
+        raise OfficialPackageProbeError(f"invalid UTF-8 in {member_name}") from exc
 
 
 def _date_time(value: tuple[int, int, int, int, int, int]) -> str:
