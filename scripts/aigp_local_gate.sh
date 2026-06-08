@@ -82,6 +82,11 @@ uv run --python 3.14 --with jsonschema --with pyyaml --with ruff --with pytest \
   --check-json docs/engineering/evidence/compiled-vision-latency-drift-check-2026-06-08.json
 
 uv run --python 3.14 --with jsonschema --with pyyaml --with ruff --with pytest \
+  python scripts/aigp_packaging_probe.py \
+  --fixture tests/fixtures/frame_640x360_synthetic.jpg \
+  --check-json docs/engineering/evidence/opencv-numpy-packaging-probe-2026-06-08.json
+
+uv run --python 3.14 --with jsonschema --with pyyaml --with ruff --with pytest \
   python -m ruff check .
 
 uv run --python 3.14 --with jsonschema --with pyyaml --with ruff --with pytest \
@@ -107,3 +112,4 @@ git diff --exit-code docs/engineering/evidence/integrated-dry-run-decision-trace
 git diff --exit-code docs/engineering/evidence/minimal-loop-latency-2026-06-08.json
 git diff --exit-code docs/engineering/evidence/compiled-vision-latency-2026-06-08.json
 git diff --exit-code docs/engineering/evidence/compiled-vision-latency-drift-check-2026-06-08.json
+git diff --exit-code docs/engineering/evidence/opencv-numpy-packaging-probe-2026-06-08.json
