@@ -1,6 +1,6 @@
 # Gate Measurement Boundary
 
-Issue: #9.
+Issues: #9, #23.
 
 ## Decision
 
@@ -13,6 +13,9 @@ gate-local corner labels.
 - `GateObservation` from the Round 1 bbox detector uses screen-space
   top-left, top-right, bottom-right, bottom-left corners.
 - Screen-space bbox corners produce `SCREEN_SPACE_CENTER_DEPTH` measurements.
+- Screen-space measurements carry `measurement_basis` so depth conversion is
+  explicit. The current Round 1 color bbox default is `OUTER_FRAME`, pending
+  first-frame official simulator calibration.
 - `LabeledGateImageCorners` produce `LABELED_PLANAR_PNP` measurements.
 - `StateEstimate` preserves the measurement mode so downstream code can branch
   without assuming that bbox corners observed full square-gate roll.
@@ -25,6 +28,8 @@ full-PnP boundary in tests.
 Tests:
 
 - `test_gate_observation_measurement_is_center_depth_only`
+- `test_gate_observation_measurement_uses_declared_depth_basis`
+- `test_frontoparallel_pose_estimate_uses_declared_measurement_basis`
 - `test_gate_observation_measurement_requires_uncertainty`
 - `test_labeled_gate_measurement_carries_full_planar_pose`
 - `test_screen_space_gate_observation_cannot_enter_full_planar_pnp_path`
@@ -50,7 +55,7 @@ Machine-readable evidence:
 
 ```text
 docs/engineering/evidence/gate-measurement-boundary-2026-06-08.json
-sha256 13d0f037acea9849940ebfcb45268e06e622536f8a9b80097d1772f82f42d8b6
+sha256 e425290756a0fc4309cdc3808dbaab130e815087e9615754bd3cc1dbcc66b656
 ```
 
 ## Non-Claims
@@ -59,4 +64,6 @@ sha256 13d0f037acea9849940ebfcb45268e06e622536f8a9b80097d1772f82f42d8b6
 - No ADR-VINS or partial-corner reprojection claim.
 - No Round 2 visual robustness claim.
 - No physical-camera calibration claim.
+- No official Round 1 highlight-basis claim before a real simulator frame is
+  captured.
 - No full square-gate in-plane roll disambiguation from bbox corners.

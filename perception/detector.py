@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from enum import StrEnum
 from typing import Protocol
 
-from perception.geometry import ImagePoint
+from perception.geometry import GateMeasurementBasis, ImagePoint, coerce_gate_measurement_basis
 
 RGBPixel = Sequence[int]
 RGBImage = Sequence[Sequence[RGBPixel]]
@@ -41,6 +41,8 @@ class GateObservation:
     pixel-radius bounds for bbox-derived corners, not statistical sigma values.
     `None` means the producer did not estimate corner uncertainty. Screen-space
     bbox corners are not physical gate-corner labels for arbitrary in-plane roll.
+    `measurement_basis` declares which physical gate width the bbox is interpreted
+    against for center/depth-only pose estimates.
     """
 
     corners: tuple[ImagePoint, ImagePoint, ImagePoint, ImagePoint]
@@ -48,7 +50,15 @@ class GateObservation:
     sim_time_ns: int | None
     source_frame_id: int | None
     source: str
+    measurement_basis: GateMeasurementBasis
     corner_uncertainty_px: tuple[float, float, float, float] | None = None
+
+    def __post_init__(self) -> None:
+        object.__setattr__(
+            self,
+            "measurement_basis",
+            coerce_gate_measurement_basis(self.measurement_basis),
+        )
 
 
 @dataclass(frozen=True)
@@ -82,12 +92,18 @@ class Round1ColorGateDetector:
 
     min_pixels: int = 12
     min_confidence: float = 0.05
+    measurement_basis: GateMeasurementBasis = GateMeasurementBasis.OUTER_FRAME
 
     def __post_init__(self) -> None:
         if self.min_pixels <= 0:
             raise ValueError("min_pixels must be positive")
         if not 0.0 <= self.min_confidence <= 1.0:
             raise ValueError("min_confidence must be in [0.0, 1.0]")
+        object.__setattr__(
+            self,
+            "measurement_basis",
+            coerce_gate_measurement_basis(self.measurement_basis),
+        )
 
     def analyze(
         self,
@@ -160,6 +176,7 @@ class Round1ColorGateDetector:
             sim_time_ns=sim_time_ns,
             source_frame_id=source_frame_id,
             source="round1_color_bbox",
+            measurement_basis=self.measurement_basis,
             corner_uncertainty_px=_bbox_corner_uncertainty(
                 mask_pixels=mask_pixels,
                 width_px=width,

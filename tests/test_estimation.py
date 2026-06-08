@@ -18,6 +18,7 @@ from mavlink.telemetry import Attitude, HighresImu, LinearVelocity
 from perception.detector import GateObservation
 from perception.geometry import (
     CameraPoseEstimate,
+    GateMeasurementBasis,
     ImagePoint,
     project_frontoparallel_gate,
     project_planar_gate,
@@ -54,6 +55,7 @@ def gate_observation() -> GateObservation:
         sim_time_ns=10,
         source_frame_id=7,
         source="test",
+        measurement_basis=GateMeasurementBasis.INNER_OPENING,
         corner_uncertainty_px=(2.0, 2.0, 2.0, 2.0),
     )
 
@@ -130,6 +132,7 @@ def test_estimator_degrades_malformed_gate_observation_to_no_gate(
         sim_time_ns=10,
         source_frame_id=7,
         source="test",
+        measurement_basis=GateMeasurementBasis.INNER_OPENING,
         corner_uncertainty_px=(2.0, 2.0, 2.0, 2.0),
     )
 
@@ -178,6 +181,7 @@ def test_estimator_degrades_bad_corner_types_without_crashing() -> None:
         sim_time_ns=10,
         source_frame_id=7,
         source="test",
+        measurement_basis=GateMeasurementBasis.INNER_OPENING,
     )
 
     estimate = MinimalStateEstimator().estimate(
@@ -205,6 +209,7 @@ def test_estimator_degrades_missing_corner_uncertainty_without_pose() -> None:
         sim_time_ns=observation.sim_time_ns,
         source_frame_id=observation.source_frame_id,
         source=observation.source,
+        measurement_basis=observation.measurement_basis,
         corner_uncertainty_px=None,
     )
 
@@ -235,6 +240,7 @@ def test_estimator_degrades_missing_gate_metadata_without_crashing(
         )
         confidence = 0.5
         sim_time_ns = 10
+        measurement_basis = GateMeasurementBasis.INNER_OPENING
         corner_uncertainty_px = (2.0, 2.0, 2.0, 2.0)
 
     with caplog.at_level(logging.WARNING, logger="estimation.state"):
@@ -275,6 +281,7 @@ def test_estimator_throttles_repeated_malformed_gate_logs(
         sim_time_ns=10,
         source_frame_id=7,
         source="test",
+        measurement_basis=GateMeasurementBasis.INNER_OPENING,
         corner_uncertainty_px=(2.0, 2.0, 2.0, 2.0),
     )
     estimator = MinimalStateEstimator(diagnostic_log_interval_ns=100)
@@ -363,12 +370,33 @@ def test_gate_observation_measurement_is_center_depth_only() -> None:
     measurement = gate_measurement_from_observation(gate_observation())
 
     assert measurement.mode == GatePoseMeasurementMode.SCREEN_SPACE_CENTER_DEPTH
+    assert measurement.measurement_basis == GateMeasurementBasis.INNER_OPENING
     assert measurement.center_camera.z_forward_m == 3.0
     assert measurement.confidence == 0.5
     assert measurement.source_frame_id == 7
     assert measurement.corner_uncertainty_px == (2.0, 2.0, 2.0, 2.0)
     assert measurement.planar_pose is None
     assert not measurement.has_full_planar_pose
+
+
+def test_gate_observation_measurement_uses_declared_depth_basis() -> None:
+    inner_observation = gate_observation()
+    outer_observation = GateObservation(
+        corners=inner_observation.corners,
+        confidence=inner_observation.confidence,
+        sim_time_ns=inner_observation.sim_time_ns,
+        source_frame_id=inner_observation.source_frame_id,
+        source=inner_observation.source,
+        measurement_basis=GateMeasurementBasis.OUTER_FRAME,
+        corner_uncertainty_px=inner_observation.corner_uncertainty_px,
+    )
+
+    inner_measurement = gate_measurement_from_observation(inner_observation)
+    outer_measurement = gate_measurement_from_observation(outer_observation)
+
+    assert outer_measurement.measurement_basis == GateMeasurementBasis.OUTER_FRAME
+    assert inner_measurement.center_camera.z_forward_m == pytest.approx(3.0)
+    assert outer_measurement.center_camera.z_forward_m == pytest.approx(5.4)
 
 
 def test_gate_observation_measurement_requires_uncertainty() -> None:
@@ -379,6 +407,7 @@ def test_gate_observation_measurement_requires_uncertainty() -> None:
         sim_time_ns=observation.sim_time_ns,
         source_frame_id=observation.source_frame_id,
         source=observation.source,
+        measurement_basis=observation.measurement_basis,
         corner_uncertainty_px=None,
     )
 
@@ -406,6 +435,7 @@ def test_labeled_gate_measurement_carries_full_planar_pose() -> None:
     )
 
     assert measurement.mode == GatePoseMeasurementMode.LABELED_PLANAR_PNP
+    assert measurement.measurement_basis == GateMeasurementBasis.INNER_OPENING
     assert measurement.has_full_planar_pose
     assert measurement.planar_pose is not None
     assert measurement.center_camera.x_right_m == pytest.approx(pose.x_right_m)
@@ -431,6 +461,7 @@ def test_gate_pose_measurement_rejects_contradictory_modes() -> None:
     with pytest.raises(ValueError, match="SCREEN_SPACE_CENTER_DEPTH"):
         GatePoseMeasurement(
             mode=GatePoseMeasurementMode.SCREEN_SPACE_CENTER_DEPTH,
+            measurement_basis=GateMeasurementBasis.INNER_OPENING,
             center_camera=pose,
             confidence=None,
             sim_time_ns=None,
@@ -442,6 +473,7 @@ def test_gate_pose_measurement_rejects_contradictory_modes() -> None:
     with pytest.raises(ValueError, match="LABELED_PLANAR_PNP"):
         GatePoseMeasurement(
             mode=GatePoseMeasurementMode.LABELED_PLANAR_PNP,
+            measurement_basis=GateMeasurementBasis.INNER_OPENING,
             center_camera=pose,
             confidence=None,
             sim_time_ns=None,
@@ -454,6 +486,7 @@ def test_gate_pose_measurement_rejects_missing_screen_space_uncertainty() -> Non
     with pytest.raises(ValueError, match="corner_uncertainty_px"):
         GatePoseMeasurement(
             mode=GatePoseMeasurementMode.SCREEN_SPACE_CENTER_DEPTH,
+            measurement_basis=GateMeasurementBasis.INNER_OPENING,
             center_camera=CameraPoseEstimate(x_right_m=0.0, y_down_m=0.0, z_forward_m=3.0),
             confidence=None,
             sim_time_ns=None,
@@ -465,6 +498,7 @@ def test_gate_pose_measurement_rejects_missing_screen_space_uncertainty() -> Non
     with pytest.raises(ValueError, match="four non-negative"):
         GatePoseMeasurement(
             mode=GatePoseMeasurementMode.SCREEN_SPACE_CENTER_DEPTH,
+            measurement_basis=GateMeasurementBasis.INNER_OPENING,
             center_camera=CameraPoseEstimate(x_right_m=0.0, y_down_m=0.0, z_forward_m=3.0),
             confidence=None,
             sim_time_ns=None,
@@ -489,6 +523,7 @@ def test_gate_pose_measurement_coerces_mode_and_preserves_invariants() -> None:
 
     measurement = GatePoseMeasurement(
         mode="SCREEN_SPACE_CENTER_DEPTH",  # type: ignore[arg-type]
+        measurement_basis="INNER_OPENING",  # type: ignore[arg-type]
         center_camera=pose,
         confidence=None,
         sim_time_ns=None,
@@ -502,6 +537,7 @@ def test_gate_pose_measurement_coerces_mode_and_preserves_invariants() -> None:
     with pytest.raises(ValueError, match="cannot carry planar_pose"):
         GatePoseMeasurement(
             mode="SCREEN_SPACE_CENTER_DEPTH",  # type: ignore[arg-type]
+            measurement_basis=GateMeasurementBasis.INNER_OPENING,
             center_camera=pose,
             confidence=None,
             sim_time_ns=None,
@@ -514,6 +550,7 @@ def test_gate_pose_measurement_coerces_mode_and_preserves_invariants() -> None:
     with pytest.raises(ValueError, match="GatePoseMeasurement mode"):
         GatePoseMeasurement(
             mode="UNKNOWN_MODE",  # type: ignore[arg-type]
+            measurement_basis=GateMeasurementBasis.INNER_OPENING,
             center_camera=pose,
             confidence=None,
             sim_time_ns=None,
@@ -527,6 +564,7 @@ def test_gate_pose_measurement_rejects_bool_uncertainty() -> None:
     with pytest.raises(ValueError, match="four non-negative"):
         GatePoseMeasurement(
             mode=GatePoseMeasurementMode.SCREEN_SPACE_CENTER_DEPTH,
+            measurement_basis=GateMeasurementBasis.INNER_OPENING,
             center_camera=CameraPoseEstimate(x_right_m=0.0, y_down_m=0.0, z_forward_m=3.0),
             confidence=None,
             sim_time_ns=None,
@@ -552,6 +590,7 @@ def test_gate_pose_measurement_rejects_planar_center_mismatch() -> None:
     with pytest.raises(ValueError, match="center_camera must match"):
         GatePoseMeasurement(
             mode=GatePoseMeasurementMode.LABELED_PLANAR_PNP,
+            measurement_basis=GateMeasurementBasis.INNER_OPENING,
             center_camera=CameraPoseEstimate(
                 x_right_m=0.5,
                 y_down_m=0.0,
@@ -569,6 +608,7 @@ def test_gate_pose_measurement_rejects_wrong_planar_pose_type() -> None:
     with pytest.raises(ValueError, match="PlanarGatePoseEstimate"):
         GatePoseMeasurement(
             mode=GatePoseMeasurementMode.LABELED_PLANAR_PNP,
+            measurement_basis=GateMeasurementBasis.INNER_OPENING,
             center_camera=CameraPoseEstimate(x_right_m=0.0, y_down_m=0.0, z_forward_m=3.0),
             confidence=None,
             sim_time_ns=None,

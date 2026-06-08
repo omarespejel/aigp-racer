@@ -12,8 +12,10 @@ from mavlink.telemetry import Attitude, HighresImu, LinearVelocity
 from perception.detector import GateObservation
 from perception.geometry import (
     CameraPoseEstimate,
+    GateMeasurementBasis,
     LabeledGateImageCorners,
     PlanarGatePoseEstimate,
+    coerce_gate_measurement_basis,
     estimate_frontoparallel_gate_pose,
     estimate_planar_gate_pose,
 )
@@ -36,6 +38,7 @@ class GatePoseMeasurement:
     """
 
     mode: GatePoseMeasurementMode
+    measurement_basis: GateMeasurementBasis
     center_camera: CameraPoseEstimate
     confidence: float | None
     sim_time_ns: int | None
@@ -56,6 +59,11 @@ class GatePoseMeasurement:
                 "GatePoseMeasurement mode must be a GatePoseMeasurementMode value"
             ) from exc
         object.__setattr__(self, "mode", mode)
+        object.__setattr__(
+            self,
+            "measurement_basis",
+            coerce_gate_measurement_basis(self.measurement_basis),
+        )
 
         if self.corner_uncertainty_px is not None:
             try:
@@ -170,9 +178,14 @@ def gate_measurement_from_observation(
     if corner_uncertainty_px is None:
         raise ValueError("GateObservation SCREEN_SPACE_CENTER_DEPTH requires corner_uncertainty_px")
 
-    center_pose = estimate_frontoparallel_gate_pose(observation.corners)
+    measurement_basis = observation.measurement_basis
+    center_pose = estimate_frontoparallel_gate_pose(
+        observation.corners,
+        measurement_basis=measurement_basis,
+    )
     return GatePoseMeasurement(
         mode=GatePoseMeasurementMode.SCREEN_SPACE_CENTER_DEPTH,
+        measurement_basis=measurement_basis,
         center_camera=center_pose,
         confidence=observation.confidence,
         sim_time_ns=observation.sim_time_ns,
@@ -196,6 +209,7 @@ def gate_measurement_from_labeled_corners(
     planar_pose = estimate_planar_gate_pose(corners)
     return GatePoseMeasurement(
         mode=GatePoseMeasurementMode.LABELED_PLANAR_PNP,
+        measurement_basis=GateMeasurementBasis.INNER_OPENING,
         center_camera=planar_pose.center,
         confidence=confidence,
         sim_time_ns=sim_time_ns,

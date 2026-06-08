@@ -16,18 +16,19 @@ Last updated: 2026-06-08.
 - PR #10 merged issue #9. Detector observations now bridge into estimator measurements through an explicit `GatePoseMeasurement` boundary without overclaiming full planar PnP from screen-space bbox corners.
 - PR #20 merged issue #19. Conservative valid-run commands now gate tracking on confidence, range, status, and center offset.
 - PR #25 merged issue #21. Integrated dry-run RaceEpisode and DecisionTrace evidence now exercises the detector -> estimator -> controller -> command-intent module chain without claiming simulator compatibility or latency.
-- Active branch `codex/aigp-command-rate-simtime-2026-06-08` works issue #22: split simulator-time replay command gating from wall-clock send-layer gating.
+- PR #26 merged issue #22. Simulator-time replay command gating is split from wall-clock send-layer gating.
+- Active branch `codex/aigp-gate-depth-basis-2026-06-08` works issue #23: make screen-space gate depth basis explicit and first-frame calibratable.
 
 ## Active Objective
 
-Make command-rate decisions replay-deterministic by providing a simulator-time limiter for offline evidence and AutoRaceEvolve-style evaluation while keeping wall-clock transport deadlines separate.
+Make screen-space gate depth conversion explicit by declaring whether bbox width uses the 1.5 m inner opening or 2.7 m outer frame, while preserving the first-frame calibration caveat.
 
 Immediate next code objectives:
 
-1. Land issue #22 simulator-time command-rate limiter.
+1. Land issue #23 gate depth measurement-basis hardening.
 2. Recheck issue #4 once team-portal credentials or an official package link are available.
 3. Capture real official simulator packet examples once access exists.
-4. Resolve depth measurement basis/calibration in issue #23.
+4. Calibrate Round 1 highlight basis from the first official simulator frame.
 5. Assemble and measure a minimal hot loop in issue #24.
 
 ## Current Known Unknowns

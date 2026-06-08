@@ -52,6 +52,7 @@
               "v_px": "260.000000"
             }
           ],
+          "measurement_basis": "OUTER_FRAME",
           "sim_time_ns": 33333333,
           "source": "round1_color_bbox",
           "source_frame_id": 1
@@ -68,12 +69,13 @@
         "degraded_reason": null,
         "diagnostic_count": 0,
         "gate_confidence": "1.000000",
+        "gate_measurement_basis": "OUTER_FRAME",
         "gate_measurement_has_full_planar_pose": false,
         "gate_measurement_mode": "SCREEN_SPACE_CENTER_DEPTH",
         "gate_pose_camera_m": {
           "x_right_m": "0.000000",
           "y_down_m": "0.000000",
-          "z_forward_m": "3.000000"
+          "z_forward_m": "5.400000"
         },
         "sim_time_ns": 33333333,
         "source_frame_id": 1,
@@ -88,7 +90,7 @@
       "event_type": "control_command",
       "payload": {
         "down_m_s": "0.000000",
-        "forward_m_s": "0.750000",
+        "forward_m_s": "1.000000",
         "kind": "BODY_VELOCITY",
         "reason": "tracking visible gate",
         "right_m_s": "0.000000",
@@ -118,7 +120,7 @@
         "source_command_kind": "BODY_VELOCITY",
         "source_frame_id": 1,
         "velocity_body_ned_m_s": [
-          "0.750000",
+          "1.000000",
           "0.000000",
           "0.000000"
         ],

@@ -10,11 +10,13 @@ from perception.geometry import (
     CameraIntrinsics,
     CameraPoseEstimate,
     GateGeometry,
+    GateMeasurementBasis,
     ImagePoint,
     LabeledGateImageCorners,
     camera_ray_to_body_ned,
     estimate_frontoparallel_gate_pose,
     estimate_planar_gate_pose,
+    gate_width_m_for_basis,
     normalized_camera_ray,
     project_frontoparallel_gate,
     project_planar_gate,
@@ -48,6 +50,38 @@ def test_frontoparallel_projection_and_pose_estimate_round_trip() -> None:
     assert estimate.x_right_m == pytest.approx(0.25)
     assert estimate.y_down_m == pytest.approx(-0.1)
     assert estimate.z_forward_m == pytest.approx(4.0)
+
+
+def test_frontoparallel_pose_estimate_uses_declared_measurement_basis() -> None:
+    corners = (
+        ImagePoint(212.0, 72.0),
+        ImagePoint(428.0, 72.0),
+        ImagePoint(428.0, 288.0),
+        ImagePoint(212.0, 288.0),
+    )
+
+    inner_estimate = estimate_frontoparallel_gate_pose(
+        corners,
+        measurement_basis=GateMeasurementBasis.INNER_OPENING,
+    )
+    outer_estimate = estimate_frontoparallel_gate_pose(
+        corners,
+        measurement_basis=GateMeasurementBasis.OUTER_FRAME,
+    )
+
+    assert gate_width_m_for_basis(measurement_basis=GateMeasurementBasis.INNER_OPENING) == 1.5
+    assert gate_width_m_for_basis(measurement_basis=GateMeasurementBasis.OUTER_FRAME) == 2.7
+    assert inner_estimate.z_forward_m == pytest.approx(320.0 * 1.5 / 216.0)
+    assert outer_estimate.z_forward_m == pytest.approx(4.0)
+    assert outer_estimate.z_forward_m / inner_estimate.z_forward_m == pytest.approx(1.8)
+
+
+def test_frontoparallel_pose_estimate_rejects_unknown_measurement_basis() -> None:
+    with pytest.raises(ValueError, match="gate measurement basis"):
+        estimate_frontoparallel_gate_pose(
+            project_frontoparallel_gate(CameraPoseEstimate(0.0, 0.0, 3.0)),
+            measurement_basis="UNKNOWN",  # type: ignore[arg-type]
+        )
 
 
 def test_planar_pnp_recovers_perspective_skewed_gate_pose() -> None:
